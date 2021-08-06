@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model clients {
+  clientId                  String               @id @db.Uuid
+  name                      String               @db.VarChar(250)
+  businessAddress           String?              @db.VarChar(250)
+  cellphoneNumber           String?              @db.VarChar(11)
+  faxNumber                 String?              @db.VarChar(15)
+  exactLocation             String?              @db.VarChar(250)
+  secDtiRegistrationNumber  String?              @db.VarChar(250)
+  businessMayorPermitNumber String?              @db.VarChar(250)
+  id                        Int                  @unique @default(autoincrement())
+  radio_transceivers        radio_transceivers[]
+}
+
+model radio_transceivers {
+  id                                    Int                           @id @default(autoincrement())
+  client_id                             Int?
+  class_type                            String?                       @db.VarChar(250)
+  nature_of_service                     String?                       @db.VarChar(250)
+  working_hours                         String?                       @db.VarChar(250)
+  form_type                             String?                       @db.VarChar(250)
+  call_sign                             String?                       @db.VarChar(250)
+  pp_number                             String?                       @db.VarChar(250)
+  cp_number                             String?                       @db.VarChar(250)
+  license_number                        String?                       @db.VarChar(250)
+  points_of_communication               String?                       @db.VarChar(250)
+  freq_assigned_freq                    String?                       @db.VarChar(250)
+  freq_crystal_freq                     String?                       @db.VarChar(250)
+  freq_measured_freq                    String?                       @db.VarChar(250)
+  freq_if_receiver                      String?                       @db.VarChar(250)
+  freq_type_of_emission                 String?                       @db.VarChar(250)
+  freq_antenna_system_type              String?                       @db.VarChar(250)
+  freq_elevation_from_gmd               String?                       @db.VarChar(250)
+  freq_gain                             String?                       @db.VarChar(250)
+  freq_directivity                      String?                       @db.VarChar(250)
+  freq_power_supply                     String?                       @db.VarChar(250)
+  freq_battery                          String?                       @db.VarChar(250)
+  freq_voltage_and_type                 String?                       @db.VarChar(250)
+  freq_capacity                         String?                       @db.VarChar(250)
+  freq_ah                               String?                       @db.VarChar(250)
+  illegal_construction_without_permit   Boolean?
+  illegal_transfer                      Boolean?
+  operation_without_rsl                 Boolean?
+  operation_without_lro                 Boolean?
+  operation_without_logbook             Boolean?
+  operation_operating_unauthorized_freq Boolean?
+  illegal_possession                    Boolean?
+  others                                String?                       @db.VarChar(250)
+  radio_requlation_inspector            String?                       @db.VarChar(250)
+  authorized_representative             String?                       @db.VarChar(250)
+  regional_director                     String?                       @db.VarChar(250)
+  date_issued                           DateTime?                     @db.Timestamptz(6)
+  pp_date_issued                        DateTime?                     @db.Timestamptz(6)
+  cp_date_issued                        DateTime?                     @db.Timestamptz(6)
+  license_date_issued                   DateTime?                     @db.Timestamptz(6)
+  clients                               clients?                      @relation(fields: [client_id], references: [id])
+  radio_transceiver_items               radio_transceiver_items[]
+  radio_transceiver_operators           radio_transceiver_operators[]
+}
+
+model radio_transceiver_items {
+  radio_transceiver_id Int?
+  model                String?             @db.VarChar(250)
+  serial_number        String?             @db.VarChar(250)
+  freq_range           String?             @db.VarChar(250)
+  power_output         String?             @db.VarChar(250)
+  freq_control         String?             @db.VarChar(250)
+  id                   Int                 @id @unique @default(autoincrement())
+  radio_transceivers   radio_transceivers? @relation(fields: [radio_transceiver_id], references: [id])
+}
+
+model radio_transceiver_operators {
+  radio_transceiver_id  Int?
+  name                  String?             @db.VarChar(250)
+  particular_of_license String?             @db.VarChar(250)
+  expiration_date       DateTime?           @db.Date
+  id                    Int                 @id @default(autoincrement())
+  radio_transceivers    radio_transceivers? @relation(fields: [radio_transceiver_id], references: [id])
+}
