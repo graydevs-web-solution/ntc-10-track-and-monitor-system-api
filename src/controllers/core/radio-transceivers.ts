@@ -7,6 +7,7 @@ import { dateWithPadding } from '../../shared/utility';
 import { RadioTransceiver } from '../../models/core/radio-transceivers/radio-transceiver.model';
 import { radioTransceiverSchema } from '../../models/core/radio-transceivers/radio-transceiver.joi';
 import log from '../../logger/index';
+import { DATABASE_SCHEMA } from '../../config/database/database';
 
 const prisma = new PrismaClient()
 
@@ -142,7 +143,7 @@ export const updateData: RequestHandler = async (req, res, next) => {
     // const setValuesOperators = cleanedValues.operators.map((val) => (`(${val.id}, '${val.name}', '${val.particularOfLicense}', Timestamp '${(val.expirationDate as Date).toISOString()}')`))
     // const setValuesRTItems = cleanedValues.radioTransceivers.map((val) =>
     //     (`(${val.id}, '${val.model}', '${val.serialNumber}', '${val.freqRange}', '${val.powerOutput}', '${val.freqControl}')`))
-    // const updateOperators = prisma.$executeRaw(`UPDATE clients.radio_transceiver_operators as o set
+    // const updateOperators = prisma.$executeRaw(`UPDATE ${DATABASE_SCHEMA}.radio_transceiver_operators as o set
     //     name = c.name,
     //     particular_of_license = c.particular_of_license,
     //     expiration_date = c.expiration_date
@@ -150,7 +151,7 @@ export const updateData: RequestHandler = async (req, res, next) => {
     //     ${setValuesOperators.join(', ')}
     //     ) as c(id, name, particular_of_license, expiration_date)
     //     where c.id = o.id;`);
-    // const updateRTI = prisma.$executeRaw(`UPDATE clients.radio_transceiver_items as rti set
+    // const updateRTI = prisma.$executeRaw(`UPDATE ${DATABASE_SCHEMA}.radio_transceiver_items as rti set
     //     model = c.model,
     //     serial_number = c.serial_number,
     //     freq_range = c.freq_range,
@@ -161,8 +162,8 @@ export const updateData: RequestHandler = async (req, res, next) => {
     //     ) as c(id, model, serial_number, freq_range, power_output, freq_control)
     //     where c.id = rti.id;`);
 
-    const deleteOperators = prisma.$executeRaw(`DELETE FROM clients.radio_transceiver_operators WHERE radio_transceiver_id = ${FORM_ID}`);
-    const deleteRTItems = prisma.$executeRaw(`DELETE FROM clients.radio_transceiver_items WHERE radio_transceiver_id = ${FORM_ID}`);
+    const deleteOperators = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_operators WHERE radio_transceiver_id = ${FORM_ID}`);
+    const deleteRTItems = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_items WHERE radio_transceiver_id = ${FORM_ID}`);
     const insertOperators = prisma.radio_transceiver_operators.createMany({
         data: cleanedValues.operators.map((val) => ({
             name: val.name,
@@ -223,8 +224,8 @@ export const deleteData: RequestHandler = async (req, res, next) => {
             id: +(id as string)
         }
     });
-     const deleteOperators = prisma.$executeRaw(`DELETE FROM clients.radio_transceiver_operators WHERE radio_transceiver_id = ${id}`);
-    const deleteRTItems = prisma.$executeRaw(`DELETE FROM clients.radio_transceiver_items WHERE radio_transceiver_id = ${id}`);
+     const deleteOperators = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_operators WHERE radio_transceiver_id = ${id}`);
+    const deleteRTItems = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_items WHERE radio_transceiver_id = ${id}`);
 
     // NOTE: This code block couldn't delete specified row. I'm dumb as heck
     // 
@@ -264,9 +265,9 @@ export const deleteData: RequestHandler = async (req, res, next) => {
 //       const { search } = req.query;
 
 //     const docs = await prisma.$queryRaw<Client[]>(`
-//         SELECT name, id FROM clients.clients WHERE to_tsvector(name) @@ to_tsquery('${search}')
+//         SELECT name, id FROM ${DATABASE_SCHEMA}.clients WHERE to_tsvector(name) @@ to_tsquery('${search}')
 //         `);
-//     // const docCount = await prisma.clients.count();
+//     // const docCount = await prisma.${DATABASE_SCHEMA}.count();
 
 
 //     res.status(200).json({ data: docs });
