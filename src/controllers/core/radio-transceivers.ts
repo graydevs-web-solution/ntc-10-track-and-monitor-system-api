@@ -262,12 +262,12 @@ export const deleteData: RequestHandler = async (req, res, next) => {
 // export const searchClient: RequestHandler = async (req, res, next) => {
 //   try {
 //       const { search } = req.query;
-//       console.log(search)
+
 //     const docs = await prisma.$queryRaw<Client[]>(`
 //         SELECT name, id FROM clients.clients WHERE to_tsvector(name) @@ to_tsquery('${search}')
 //         `);
 //     // const docCount = await prisma.clients.count();
-//     console.log(docs)
+
 
 //     res.status(200).json({ data: docs });
 //   } catch (error) {

@@ -5,12 +5,12 @@ import { v4 as uuid } from 'uuid';
 import { Client } from '../../models/core/clients/client.model';
 import { clientSchema } from '../../models/core/clients/client.joi';
 import log from '../../logger/index';
+import { DATABASE_SCHEMA } from '../../config/database/database';
 
 const prisma = new PrismaClient()
 
 export const saveClient: RequestHandler = async (req, res, next) => {
   try {
-      console.log(req.body)
     const { value, error } = clientSchema.validate(req.body);
     if (error) { log.error(error); return res.status(400).json({ message: `Validation error on client.` }); }
     let clientId = '';
@@ -58,12 +58,10 @@ export const getClient: RequestHandler = async (req, res, next) => {
 export const searchClient: RequestHandler = async (req, res, next) => {
   try {
       const { search } = req.query;
-      console.log(search)
     const docs = await prisma.$queryRaw<Client[]>(`
-        SELECT name, id FROM public.clients WHERE to_tsvector(name) @@ to_tsquery('${search}')
+        SELECT name, id FROM ${DATABASE_SCHEMA}.clients WHERE to_tsvector(name) @@ to_tsquery('${search}')
         `);
     // const docCount = await prisma.clients.count();
-    console.log(docs)
 
     res.status(200).json({ data: docs });
   } catch (error) {

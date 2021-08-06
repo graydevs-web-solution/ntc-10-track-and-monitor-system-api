@@ -20,6 +20,26 @@ model clients {
   radio_transceivers        radio_transceivers[]
 }
 
+model radio_transceiver_items {
+  radio_transceiver_id Int?
+  model                String?             @db.VarChar(250)
+  serial_number        String?             @db.VarChar(250)
+  freq_range           String?             @db.VarChar(250)
+  power_output         String?             @db.VarChar(250)
+  freq_control         String?             @db.VarChar(250)
+  id                   Int                 @id @unique @default(autoincrement())
+  radio_transceivers   radio_transceivers? @relation(fields: [radio_transceiver_id], references: [id])
+}
+
+model radio_transceiver_operators {
+  radio_transceiver_id  Int?
+  name                  String?             @db.VarChar(250)
+  particular_of_license String?             @db.VarChar(250)
+  expiration_date       DateTime?           @db.Date
+  id                    Int                 @id @default(autoincrement())
+  radio_transceivers    radio_transceivers? @relation(fields: [radio_transceiver_id], references: [id])
+}
+
 model radio_transceivers {
   id                                    Int                           @id @default(autoincrement())
   client_id                             Int?
@@ -64,24 +84,4 @@ model radio_transceivers {
   clients                               clients?                      @relation(fields: [client_id], references: [id])
   radio_transceiver_items               radio_transceiver_items[]
   radio_transceiver_operators           radio_transceiver_operators[]
-}
-
-model radio_transceiver_items {
-  radio_transceiver_id Int?
-  model                String?             @db.VarChar(250)
-  serial_number        String?             @db.VarChar(250)
-  freq_range           String?             @db.VarChar(250)
-  power_output         String?             @db.VarChar(250)
-  freq_control         String?             @db.VarChar(250)
-  id                   Int                 @id @unique @default(autoincrement())
-  radio_transceivers   radio_transceivers? @relation(fields: [radio_transceiver_id], references: [id])
-}
-
-model radio_transceiver_operators {
-  radio_transceiver_id  Int?
-  name                  String?             @db.VarChar(250)
-  particular_of_license String?             @db.VarChar(250)
-  expiration_date       DateTime?           @db.Date
-  id                    Int                 @id @default(autoincrement())
-  radio_transceivers    radio_transceivers? @relation(fields: [radio_transceiver_id], references: [id])
 }
