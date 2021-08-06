@@ -60,7 +60,7 @@ export const searchClient: RequestHandler = async (req, res, next) => {
       const { search } = req.query;
       console.log(search)
     const docs = await prisma.$queryRaw<Client[]>(`
-        SELECT name, id FROM clients.clients WHERE to_tsvector(name) @@ to_tsquery('${search}')
+        SELECT name, id FROM public.clients WHERE to_tsvector(name) @@ to_tsquery('${search}')
         `);
     // const docCount = await prisma.clients.count();
     console.log(docs)
