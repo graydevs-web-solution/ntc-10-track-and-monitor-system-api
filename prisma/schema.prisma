@@ -48,9 +48,17 @@ model radio_transceivers {
   working_hours                         String?                       @db.VarChar(250)
   form_type                             String?                       @db.VarChar(250)
   call_sign                             String?                       @db.VarChar(250)
+    motor_number                         String?                       @db.VarChar(250)
+  plate_number                             String?                       @db.VarChar(250)
+  gross_tonnage                             String?                       @db.VarChar(250)
   pp_number                             String?                       @db.VarChar(250)
+  pp_date_issued                        DateTime?                     @db.Timestamptz(6)
+  tp_number                             String?                       @db.VarChar(250)
+  tp_expiration_date                    DateTime?                     @db.Timestamptz(6)
   cp_number                             String?                       @db.VarChar(250)
+  cp_expiration_date                    DateTime?                     @db.Timestamptz(6)
   license_number                        String?                       @db.VarChar(250)
+  license_expiration_date               DateTime?                     @db.Timestamptz(6)
   points_of_communication               String?                       @db.VarChar(250)
   freq_assigned_freq                    String?                       @db.VarChar(250)
   freq_crystal_freq                     String?                       @db.VarChar(250)
@@ -71,16 +79,21 @@ model radio_transceivers {
   operation_without_rsl                 Boolean?
   operation_without_lro                 Boolean?
   operation_without_logbook             Boolean?
+  operation_on_lower_sideband           Boolean?
+  operation_on_unauthorized_hours       Boolean?
   operation_operating_unauthorized_freq Boolean?
+  off_frequency                         Boolean?
+  still_in_the_old_frequency_grouping   Boolean?
   illegal_possession                    Boolean?
   others                                String?                       @db.VarChar(250)
+  sundray_info_radio_operator_logbook   String?                       @db.VarChar(250)
+  sundray_info_station_product_unwanted_signal String?                       @db.VarChar(250)
+  sundray_info_radio_equipment_operative          String?                       @db.VarChar(250)
+  recommendations                       String?                       @db.VarChar(250)
   radio_requlation_inspector            String?                       @db.VarChar(250)
   authorized_representative             String?                       @db.VarChar(250)
   regional_director                     String?                       @db.VarChar(250)
   date_issued                           DateTime?                     @db.Timestamptz(6)
-  pp_date_issued                        DateTime?                     @db.Timestamptz(6)
-  cp_date_issued                        DateTime?                     @db.Timestamptz(6)
-  license_date_issued                   DateTime?                     @db.Timestamptz(6)
   clients                               clients?                      @relation(fields: [client_id], references: [id])
   radio_transceiver_items               radio_transceiver_items[]
   radio_transceiver_operators           radio_transceiver_operators[]

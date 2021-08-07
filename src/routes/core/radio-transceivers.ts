@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import * as controllers from '../../controllers/core/radio-transceivers';
+import * as controllers from '../../controllers/radio-transceivers';
 
 export const router = Router();
 
@@ -10,6 +10,8 @@ router.get('/', controllers.getList);
 router.patch('/', controllers.updateData);
 
 router.delete('/', controllers.deleteData);
+
+router.get('/pdf', controllers.generatePdf);
 
 // router.get('/one', getClient);
 

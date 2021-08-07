@@ -1,5 +1,5 @@
 import { Express } from 'express';
-import { clientRouter } from './core/clients';
+import { router as clientRouter } from './core/clients';
 import { router as radioTransceiver } from './core/radio-transceivers';
 
 

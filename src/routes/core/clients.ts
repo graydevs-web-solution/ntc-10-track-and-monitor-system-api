@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { getClients, saveClient, getClient, searchClient } from '../../controllers/core/clients';
+import { getClients, saveClient, getClient, searchClient } from '../../controllers/clients';
 
-export const clientRouter = Router();
+export const router = Router();
 
-clientRouter.post('/', saveClient);
+router.post('/', saveClient);
 
-clientRouter.get('/', getClients);
+router.get('/', getClients);
 
-clientRouter.get('/one', getClient);
+router.get('/one', getClient);
 
-clientRouter.get('/search', searchClient);
+router.get('/search', searchClient);

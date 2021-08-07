@@ -3,6 +3,11 @@ interface PPInfo {
   dateIssued: Date | string;
 }
 
+interface TPInfo {
+  tpNumber: string;
+  expirationDate: Date | string;
+}
+
 interface CPInfo {
   cpNumber: string;
   expirationDate: Date | string;
@@ -14,7 +19,7 @@ interface LicInfo {
 }
 
 interface Operator {
-    id?: number;
+  id?: number;
   name: string;
   particularOfLicense: string;
   expirationDate: Date | string;
@@ -55,7 +60,17 @@ interface IllegalOperationInfo {
   operationWithoutRadioStationLicensePermit: boolean;
   operationWithoutLicenseRadioOperator: boolean;
   operationWithoutLogbook: boolean;
+  operationOnLowerSideband: boolean;
+  operationOnUnauthorizedHours: boolean;
   operatingOnUnauthorizedFrequency: boolean;
+  offFrequency: boolean;
+  stillInTheOldFrequencyGrouping: boolean;
+}
+
+interface SundrayInformationAboutRS {
+  isRadioOperatorEntryLogbooK: string;
+  isStationProduceUnwantedSignals: string;
+  isRadioEquipmentOperativeOnInspection: string;
 }
 
 export interface RadioTransceiver {
@@ -67,7 +82,11 @@ export interface RadioTransceiver {
   workingHours: string;
   formType: string;
   callSign: string;
+  motorNumber: string;
+  plateNumber: string;
+  grossTonnage: string;
   ppInfo: PPInfo;
+  tpInfo: TPInfo;
   cpInfo: CPInfo;
   licInfo: LicInfo;
   pointsOfCommunication: string;
@@ -78,6 +97,8 @@ export interface RadioTransceiver {
   illegalOperationInfo: IllegalOperationInfo;
   illegalPossession: boolean;
   others: string;
+  sundrayInformationAboutRS: SundrayInformationAboutRS;
+  recommendations: string;
   radioRegulationInspector: string;
   authorizedRepresentative: string;
   regionalDirector: string;
