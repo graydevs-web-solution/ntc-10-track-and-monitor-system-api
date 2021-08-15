@@ -7,6 +7,8 @@ import log from '../logger/index';
 import { DATABASE_SCHEMA } from '../config/database';
 import { modifyPdf } from '../shared/pdf-generate';
 import { PDFTemplate } from '../shared/pdf-generate.enum';
+import { getPDFValues } from './radio-transceiver-plots';
+import { RadioTransceiverAPI } from 'src/models/radio-transceivers/radio-transceiver-api.model';
 
 const prisma = new PrismaClient()
 
@@ -42,6 +44,7 @@ export const saveRadioTransceivers: RequestHandler = async (req, res, next) => {
             freq_type_of_emission: cleanedValues.frequenciesInfo.typeOfEmission,
             freq_antenna_system_type: cleanedValues.frequenciesInfo.antennaSystemType,
             freq_elevation_from_gmd: cleanedValues.frequenciesInfo.elevationFromGmd,
+            freq_length_of_radiator: cleanedValues.frequenciesInfo.lengthOfRadiator,
             freq_gain: cleanedValues.frequenciesInfo.gain,
             freq_directivity: cleanedValues.frequenciesInfo.directivity,
             freq_power_supply: cleanedValues.frequenciesInfo.powerSupply,
@@ -64,9 +67,10 @@ export const saveRadioTransceivers: RequestHandler = async (req, res, next) => {
             sundray_info_radio_operator_logbook: cleanedValues.sundrayInformationAboutRS.isRadioOperatorEntryLogbooK,
             sundray_info_station_product_unwanted_signal: cleanedValues.sundrayInformationAboutRS.isStationProduceUnwantedSignals,
             sundray_info_radio_equipment_operative: cleanedValues.sundrayInformationAboutRS.isRadioEquipmentOperativeOnInspection,
-            recommendations: cleanedValues.recommendations,
-            radio_requlation_inspector: cleanedValues.radioRegulationInspector,
             authorized_representative: cleanedValues.authorizedRepresentative,
+            radio_requlation_inspector: cleanedValues.radioRegulationInspector,
+            recommendations: cleanedValues.recommendations,
+            noted_by: cleanedValues.notedBy,
             regional_director: cleanedValues.regionalDirector,
             date_issued: cleanedValues.dateIssued ? (cleanedValues.dateIssued as Date).toISOString() : null,
             radio_transceiver_items: {
@@ -130,6 +134,7 @@ export const updateData: RequestHandler = async (req, res, next) => {
             freq_if_receiver: cleanedValues.frequenciesInfo.ifReceiver,
             freq_type_of_emission: cleanedValues.frequenciesInfo.typeOfEmission,
             freq_antenna_system_type: cleanedValues.frequenciesInfo.antennaSystemType,
+            freq_length_of_radiator: cleanedValues.frequenciesInfo.lengthOfRadiator,
             freq_elevation_from_gmd: cleanedValues.frequenciesInfo.elevationFromGmd,
             freq_gain: cleanedValues.frequenciesInfo.gain,
             freq_directivity: cleanedValues.frequenciesInfo.directivity,
@@ -153,9 +158,10 @@ export const updateData: RequestHandler = async (req, res, next) => {
             sundray_info_radio_operator_logbook: cleanedValues.sundrayInformationAboutRS.isRadioOperatorEntryLogbooK,
             sundray_info_station_product_unwanted_signal: cleanedValues.sundrayInformationAboutRS.isStationProduceUnwantedSignals,
             sundray_info_radio_equipment_operative: cleanedValues.sundrayInformationAboutRS.isRadioEquipmentOperativeOnInspection,
-            recommendations: cleanedValues.recommendations,
-            radio_requlation_inspector: cleanedValues.radioRegulationInspector,
             authorized_representative: cleanedValues.authorizedRepresentative,
+            radio_requlation_inspector: cleanedValues.radioRegulationInspector,
+            recommendations: cleanedValues.recommendations,
+            noted_by: cleanedValues.notedBy,
             regional_director: cleanedValues.regionalDirector,
             date_issued: cleanedValues.dateIssued ? cleanedValues.dateIssued as Date : null,
         }
@@ -247,7 +253,7 @@ export const deleteData: RequestHandler = async (req, res, next) => {
     const deleteMain = prisma.radio_transceivers.delete({
         where: {
             id: +(id as string)
-        }
+        },
     });
      const deleteOperators = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_operators WHERE radio_transceiver_id = ${id}`);
     const deleteRTItems = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_items WHERE radio_transceiver_id = ${id}`);
@@ -277,7 +283,25 @@ export const deleteData: RequestHandler = async (req, res, next) => {
 
 export const generatePdf: RequestHandler = async (req, res, next) => {
   try {
-    const pdf = await modifyPdf([], PDFTemplate.radioTransceiver);
+    const { id } = req.query;
+    const doc = await prisma.radio_transceivers.findUnique({
+        where: {
+            id: +(id as string)
+        },
+        include: {
+            clients: {
+                select: {
+                    name: true,
+                    businessAddress: true,
+                    exactLocation: true
+                }
+            },
+            radio_transceiver_items: true,
+            radio_transceiver_operators: true
+        }
+    });
+    console.log()
+    const pdf = await modifyPdf(getPDFValues(doc), PDFTemplate.radioTransceiver);
 
     res.writeHead(200, {
         'Content-Type': 'application/pdf',

@@ -5,10 +5,10 @@ import { PDFEntryValue } from 'src/models/pdf-generate.model';
 import { PDFTemplate } from './pdf-generate.enum';
 
 
-const drawText = (page: PDFPage, data: PDFEntryValue): void => {
-    page.drawText(data.text, {
+const drawText = (page: PDFPage, data: PDFEntryValue, height: number): void => {
+    page.drawText(`${data.text}`, {
             x: data.x,
-            y: data.y,
+            y: height - data.y,
             size: data.size,
         });
 };
@@ -30,7 +30,9 @@ export const modifyPdf = (values: Array<any>, pdfTemplate: PDFTemplate): Promise
             const { width, height } = firstPage.getSize();
 
             const sampleEntry: PDFEntryValue = { text: 'This text was added with JavaScript!', size: 50, x: 5, y: height / 2 + 300 }
-            drawText(firstPage, sampleEntry);
+            values.forEach((val) => {
+                drawText(firstPage, val, height);
+            });
 
             const qwe = await pdfDoc.saveAsBase64({ dataUri: true })
             resolve(qwe);

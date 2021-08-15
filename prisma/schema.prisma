@@ -42,6 +42,7 @@ model radio_transceiver_operators {
 
 model radio_transceivers {
   id                                    Int                           @id @default(autoincrement())
+  date_issued                           DateTime?                     @db.Timestamptz(6)
   client_id                             Int?
   class_type                            String?                       @db.VarChar(250)
   nature_of_service                     String?                       @db.VarChar(250)
@@ -67,6 +68,7 @@ model radio_transceivers {
   freq_type_of_emission                 String?                       @db.VarChar(250)
   freq_antenna_system_type              String?                       @db.VarChar(250)
   freq_elevation_from_gmd               String?                       @db.VarChar(250)
+  freq_length_of_radiator               String?                       @db.VarChar(250)
   freq_gain                             String?                       @db.VarChar(250)
   freq_directivity                      String?                       @db.VarChar(250)
   freq_power_supply                     String?                       @db.VarChar(250)
@@ -90,10 +92,10 @@ model radio_transceivers {
   sundray_info_station_product_unwanted_signal String?                       @db.VarChar(250)
   sundray_info_radio_equipment_operative          String?                       @db.VarChar(250)
   recommendations                       String?                       @db.VarChar(250)
-  radio_requlation_inspector            String?                       @db.VarChar(250)
   authorized_representative             String?                       @db.VarChar(250)
+  radio_requlation_inspector            String?                       @db.VarChar(250)
+  noted_by                              String?                       @db.VarChar(250)
   regional_director                     String?                       @db.VarChar(250)
-  date_issued                           DateTime?                     @db.Timestamptz(6)
   clients                               clients?                      @relation(fields: [client_id], references: [id])
   radio_transceiver_items               radio_transceiver_items[]
   radio_transceiver_operators           radio_transceiver_operators[]

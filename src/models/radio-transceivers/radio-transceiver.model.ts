@@ -42,6 +42,7 @@ interface FrequenciesInfo {
   typeOfEmission: string;
   antennaSystemType: string;
   elevationFromGmd: string;
+  lengthOfRadiator: string;
   gain: string;
   directivity: string;
   powerSupply: string;
@@ -98,8 +99,9 @@ export interface RadioTransceiver {
   illegalPossession: boolean;
   others: string;
   sundrayInformationAboutRS: SundrayInformationAboutRS;
-  recommendations: string;
-  radioRegulationInspector: string;
   authorizedRepresentative: string;
+  radioRegulationInspector: string;
+  recommendations: string;
+  notedBy: string;
   regionalDirector: string;
 }
