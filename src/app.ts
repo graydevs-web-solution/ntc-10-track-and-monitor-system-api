@@ -1,5 +1,5 @@
 import express from 'express'
-import cors from './config/cors/cors';
+import cors from './config/cors';
 import { config as envConfig } from 'dotenv';
 import routes from './routes/index';
 

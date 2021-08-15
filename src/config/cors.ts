@@ -1,5 +1,5 @@
 import cors from 'cors';
-import log from '../../logger/index';
+import log from '../logger/index';
 
 export default function() {
     const whitelist = [process.env.DOMAIN_URL];

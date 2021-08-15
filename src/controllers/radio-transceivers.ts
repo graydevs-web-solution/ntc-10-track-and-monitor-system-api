@@ -1,13 +1,14 @@
-import { RequestHandler } from 'express';
+import { RequestHandler, response } from 'express';
 import { PrismaClient } from '@prisma/client'
 import { v4 as uuid } from 'uuid';
-import { DateTime } from 'luxon';
-
-import { dateWithPadding } from '../../shared/utility';
-import { RadioTransceiver } from '../../models/core/radio-transceivers/radio-transceiver.model';
-import { radioTransceiverSchema } from '../../models/core/radio-transceivers/radio-transceiver.joi';
-import log from '../../logger/index';
-import { DATABASE_SCHEMA } from '../../config/database/database';
+import { RadioTransceiver } from '../models/radio-transceivers/radio-transceiver.model';
+import { radioTransceiverSchema } from '../models/radio-transceivers/radio-transceiver.joi';
+import log from '../logger/index';
+import { DATABASE_SCHEMA } from '../config/database';
+import { modifyPdf } from '../shared/pdf-generate';
+import { PDFTemplate } from '../shared/pdf-generate.enum';
+import { getPDFValues } from './radio-transceiver-plots';
+import { RadioTransceiverAPI } from 'src/models/radio-transceivers/radio-transceiver-api.model';
 
 const prisma = new PrismaClient()
 
@@ -24,12 +25,17 @@ export const saveRadioTransceivers: RequestHandler = async (req, res, next) => {
             working_hours: cleanedValues.workingHours,
             form_type: cleanedValues.formType,
             call_sign: cleanedValues.callSign,
+            motor_number: cleanedValues.motorNumber,
+            plate_number: cleanedValues.plateNumber,
+            gross_tonnage: cleanedValues.grossTonnage,
             pp_number: cleanedValues.ppInfo.ppNumber,
             pp_date_issued: cleanedValues.ppInfo?.dateIssued ? (cleanedValues.ppInfo.dateIssued as Date).toISOString() : null,
+            tp_number: cleanedValues.tpInfo.tpNumber,
+            tp_expiration_date: cleanedValues.tpInfo?.expirationDate ? (cleanedValues.tpInfo.expirationDate as Date).toISOString() : null,
             cp_number: cleanedValues.cpInfo.cpNumber,
-            cp_date_issued: cleanedValues.cpInfo?.expirationDate ? (cleanedValues.cpInfo.expirationDate as Date).toISOString() : null,
+            cp_expiration_date: cleanedValues.cpInfo?.expirationDate ? (cleanedValues.cpInfo.expirationDate as Date).toISOString() : null,
             license_number: cleanedValues.licInfo.licNumber,
-            license_date_issued: cleanedValues.licInfo?.expirationDate ? (cleanedValues.licInfo.expirationDate as Date).toISOString() : null,
+            license_expiration_date: cleanedValues.licInfo?.expirationDate ? (cleanedValues.licInfo.expirationDate as Date).toISOString() : null,
             points_of_communication: cleanedValues.pointsOfCommunication,
             freq_assigned_freq: cleanedValues.frequenciesInfo.assignedFreq,
             freq_crystal_freq: cleanedValues.frequenciesInfo.crystalFreq,
@@ -38,6 +44,7 @@ export const saveRadioTransceivers: RequestHandler = async (req, res, next) => {
             freq_type_of_emission: cleanedValues.frequenciesInfo.typeOfEmission,
             freq_antenna_system_type: cleanedValues.frequenciesInfo.antennaSystemType,
             freq_elevation_from_gmd: cleanedValues.frequenciesInfo.elevationFromGmd,
+            freq_length_of_radiator: cleanedValues.frequenciesInfo.lengthOfRadiator,
             freq_gain: cleanedValues.frequenciesInfo.gain,
             freq_directivity: cleanedValues.frequenciesInfo.directivity,
             freq_power_supply: cleanedValues.frequenciesInfo.powerSupply,
@@ -50,11 +57,20 @@ export const saveRadioTransceivers: RequestHandler = async (req, res, next) => {
             operation_without_rsl: cleanedValues.illegalOperationInfo.operationWithoutRadioStationLicensePermit,
             operation_without_lro: cleanedValues.illegalOperationInfo.operationWithoutLicenseRadioOperator,
             operation_without_logbook: cleanedValues.illegalOperationInfo.operationWithoutLogbook,
+            operation_on_lower_sideband: cleanedValues.illegalOperationInfo.operationOnLowerSideband,
+            operation_on_unauthorized_hours: cleanedValues.illegalOperationInfo.operationOnUnauthorizedHours,
             operation_operating_unauthorized_freq: cleanedValues.illegalOperationInfo.operatingOnUnauthorizedFrequency,
+            off_frequency: cleanedValues.illegalOperationInfo.offFrequency,
+            still_in_the_old_frequency_grouping: cleanedValues.illegalOperationInfo.stillInTheOldFrequencyGrouping,
             illegal_possession: cleanedValues.illegalPossession,
             others: cleanedValues.others,
-            radio_requlation_inspector: cleanedValues.radioRegulationInspector,
+            sundray_info_radio_operator_logbook: cleanedValues.sundrayInformationAboutRS.isRadioOperatorEntryLogbooK,
+            sundray_info_station_product_unwanted_signal: cleanedValues.sundrayInformationAboutRS.isStationProduceUnwantedSignals,
+            sundray_info_radio_equipment_operative: cleanedValues.sundrayInformationAboutRS.isRadioEquipmentOperativeOnInspection,
             authorized_representative: cleanedValues.authorizedRepresentative,
+            radio_requlation_inspector: cleanedValues.radioRegulationInspector,
+            recommendations: cleanedValues.recommendations,
+            noted_by: cleanedValues.notedBy,
             regional_director: cleanedValues.regionalDirector,
             date_issued: cleanedValues.dateIssued ? (cleanedValues.dateIssued as Date).toISOString() : null,
             radio_transceiver_items: {
@@ -100,12 +116,17 @@ export const updateData: RequestHandler = async (req, res, next) => {
             working_hours: cleanedValues.workingHours,
             form_type: cleanedValues.formType,
             call_sign: cleanedValues.callSign,
+            motor_number: cleanedValues.motorNumber,
+            plate_number: cleanedValues.plateNumber,
+            gross_tonnage: cleanedValues.grossTonnage,
             pp_number: cleanedValues.ppInfo.ppNumber,
             pp_date_issued: cleanedValues.ppInfo?.dateIssued ? cleanedValues.ppInfo.dateIssued as Date: null,
+            tp_number: cleanedValues.tpInfo.tpNumber,
+            tp_expiration_date: cleanedValues.tpInfo?.expirationDate ? (cleanedValues.tpInfo.expirationDate as Date).toISOString() : null,
             cp_number: cleanedValues.cpInfo.cpNumber,
-            cp_date_issued: cleanedValues.cpInfo?.expirationDate ? cleanedValues.cpInfo.expirationDate as Date : null,
+            cp_expiration_date: cleanedValues.cpInfo?.expirationDate ? cleanedValues.cpInfo.expirationDate as Date : null,
             license_number: cleanedValues.licInfo.licNumber,
-            license_date_issued: cleanedValues.licInfo?.expirationDate ? cleanedValues.licInfo.expirationDate as Date : null,
+            license_expiration_date: cleanedValues.licInfo?.expirationDate ? cleanedValues.licInfo.expirationDate as Date : null,
             points_of_communication: cleanedValues.pointsOfCommunication,
             freq_assigned_freq: cleanedValues.frequenciesInfo.assignedFreq,
             freq_crystal_freq: cleanedValues.frequenciesInfo.crystalFreq,
@@ -113,6 +134,7 @@ export const updateData: RequestHandler = async (req, res, next) => {
             freq_if_receiver: cleanedValues.frequenciesInfo.ifReceiver,
             freq_type_of_emission: cleanedValues.frequenciesInfo.typeOfEmission,
             freq_antenna_system_type: cleanedValues.frequenciesInfo.antennaSystemType,
+            freq_length_of_radiator: cleanedValues.frequenciesInfo.lengthOfRadiator,
             freq_elevation_from_gmd: cleanedValues.frequenciesInfo.elevationFromGmd,
             freq_gain: cleanedValues.frequenciesInfo.gain,
             freq_directivity: cleanedValues.frequenciesInfo.directivity,
@@ -126,11 +148,20 @@ export const updateData: RequestHandler = async (req, res, next) => {
             operation_without_rsl: cleanedValues.illegalOperationInfo.operationWithoutRadioStationLicensePermit,
             operation_without_lro: cleanedValues.illegalOperationInfo.operationWithoutLicenseRadioOperator,
             operation_without_logbook: cleanedValues.illegalOperationInfo.operationWithoutLogbook,
+            operation_on_lower_sideband: cleanedValues.illegalOperationInfo.operationOnLowerSideband,
+            operation_on_unauthorized_hours: cleanedValues.illegalOperationInfo.operationOnUnauthorizedHours,
             operation_operating_unauthorized_freq: cleanedValues.illegalOperationInfo.operatingOnUnauthorizedFrequency,
+            off_frequency: cleanedValues.illegalOperationInfo.offFrequency,
+            still_in_the_old_frequency_grouping: cleanedValues.illegalOperationInfo.stillInTheOldFrequencyGrouping,
             illegal_possession: cleanedValues.illegalPossession,
             others: cleanedValues.others,
-            radio_requlation_inspector: cleanedValues.radioRegulationInspector,
+            sundray_info_radio_operator_logbook: cleanedValues.sundrayInformationAboutRS.isRadioOperatorEntryLogbooK,
+            sundray_info_station_product_unwanted_signal: cleanedValues.sundrayInformationAboutRS.isStationProduceUnwantedSignals,
+            sundray_info_radio_equipment_operative: cleanedValues.sundrayInformationAboutRS.isRadioEquipmentOperativeOnInspection,
             authorized_representative: cleanedValues.authorizedRepresentative,
+            radio_requlation_inspector: cleanedValues.radioRegulationInspector,
+            recommendations: cleanedValues.recommendations,
+            noted_by: cleanedValues.notedBy,
             regional_director: cleanedValues.regionalDirector,
             date_issued: cleanedValues.dateIssued ? cleanedValues.dateIssued as Date : null,
         }
@@ -222,7 +253,7 @@ export const deleteData: RequestHandler = async (req, res, next) => {
     const deleteMain = prisma.radio_transceivers.delete({
         where: {
             id: +(id as string)
-        }
+        },
     });
      const deleteOperators = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_operators WHERE radio_transceiver_id = ${id}`);
     const deleteRTItems = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_items WHERE radio_transceiver_id = ${id}`);
@@ -242,9 +273,44 @@ export const deleteData: RequestHandler = async (req, res, next) => {
     // }); 
 
     await prisma.$transaction([deleteMain, deleteOperators, deleteRTItems])
+
     res.status(200).json({ message: 'Ok' });
   } catch (error) {
       log.error(error);
+    res.status(500).json({ message: `Couldn't get clients at this time.` });
+  }
+}
+
+export const generatePdf: RequestHandler = async (req, res, next) => {
+  try {
+    const { id } = req.query;
+    const doc = await prisma.radio_transceivers.findUnique({
+        where: {
+            id: +(id as string)
+        },
+        include: {
+            clients: {
+                select: {
+                    name: true,
+                    businessAddress: true,
+                    exactLocation: true
+                }
+            },
+            radio_transceiver_items: true,
+            radio_transceiver_operators: true
+        }
+    });
+    console.log()
+    const pdf = await modifyPdf(getPDFValues(doc), PDFTemplate.radioTransceiver);
+
+    res.writeHead(200, {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${PDFTemplate.radioTransceiver}.pdf"`
+    });
+
+    res.end(pdf);
+  } catch (error) {
+    log.error(error);
     res.status(500).json({ message: `Couldn't get clients at this time.` });
   }
 }

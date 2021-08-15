@@ -2,10 +2,10 @@ import { RequestHandler } from 'express';
 import { PrismaClient } from '@prisma/client'
 import { v4 as uuid } from 'uuid';
 
-import { Client } from '../../models/core/clients/client.model';
-import { clientSchema } from '../../models/core/clients/client.joi';
-import log from '../../logger/index';
-import { DATABASE_SCHEMA } from '../../config/database/database';
+import { Client } from '../models/clients/client.model';
+import { clientSchema } from '../models/clients/client.joi';
+import log from '../logger/index';
+import { DATABASE_SCHEMA } from '../config/database';
 
 const prisma = new PrismaClient()
 
