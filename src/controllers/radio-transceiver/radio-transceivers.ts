@@ -1,12 +1,12 @@
 import { RequestHandler, response } from 'express';
 import { PrismaClient } from '@prisma/client'
 import { v4 as uuid } from 'uuid';
-import { RadioTransceiver } from '../models/radio-transceivers/radio-transceiver.model';
-import { radioTransceiverSchema } from '../models/radio-transceivers/radio-transceiver.joi';
-import log from '../logger/index';
-import { DATABASE_SCHEMA } from '../config/database';
-import { modifyPdf } from '../shared/pdf-generate';
-import { PDFTemplate } from '../shared/pdf-generate.enum';
+import { RadioTransceiver } from '../../models/radio-transceivers/radio-transceiver.model';
+import { radioTransceiverSchema } from '../../models/radio-transceivers/radio-transceiver.joi';
+import log from '../../logger/index';
+import { DATABASE_SCHEMA } from '../../config/database';
+import { modifyPdf } from '../../shared/pdf-generate';
+import { PDFTemplate } from '../../shared/pdf-generate.enum';
 import { getPDFValues } from './radio-transceiver-plots';
 import { RadioTransceiverAPI } from 'src/models/radio-transceivers/radio-transceiver-api.model';
 
@@ -300,7 +300,6 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
             radio_transceiver_operators: true
         }
     });
-    console.log()
     const pdf = await modifyPdf(getPDFValues(doc), PDFTemplate.radioTransceiver);
 
     res.writeHead(200, {
