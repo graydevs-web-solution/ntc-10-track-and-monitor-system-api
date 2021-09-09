@@ -8,16 +8,19 @@ datasource db {
 }
 
 model clients {
-  clientId                  String               @id @db.Uuid
-  name                      String               @db.VarChar(250)
-  businessAddress           String?              @db.VarChar(250)
-  cellphoneNumber           String?              @db.VarChar(11)
-  faxNumber                 String?              @db.VarChar(15)
-  exactLocation             String?              @db.VarChar(250)
-  secDtiRegistrationNumber  String?              @db.VarChar(250)
-  businessMayorPermitNumber String?              @db.VarChar(250)
-  id                        Int                  @unique @default(autoincrement())
+  clientId                  String                  @id @db.Uuid
+  name                      String                  @db.VarChar(250)
+  businessAddress           String?                 @db.VarChar(250)
+  cellphoneNumber           String?                 @db.VarChar(11)
+  faxNumber                 String?                 @db.VarChar(15)
+  exactLocation             String?                 @db.VarChar(250)
+  secDtiRegistrationNumber  String?                 @db.VarChar(250)
+  businessMayorPermitNumber String?                 @db.VarChar(250)
+  id                        Int                     @unique @default(autoincrement())
   radio_transceivers        radio_transceivers[]
+  mobile_phone_dealers      mobile_phone_dealers[]
+  service_center_report     service_center_report[]
+  radio_dealers             radio_dealers[]
 }
 
 model radio_transceiver_items {
@@ -41,62 +44,186 @@ model radio_transceiver_operators {
 }
 
 model radio_transceivers {
-  id                                    Int                           @id @default(autoincrement())
-  date_issued                           DateTime?                     @db.Timestamptz(6)
-  client_id                             Int?
-  class_type                            String?                       @db.VarChar(250)
-  nature_of_service                     String?                       @db.VarChar(250)
-  working_hours                         String?                       @db.VarChar(250)
-  form_type                             String?                       @db.VarChar(250)
-  call_sign                             String?                       @db.VarChar(250)
-    motor_number                         String?                       @db.VarChar(250)
-  plate_number                             String?                       @db.VarChar(250)
-  gross_tonnage                             String?                       @db.VarChar(250)
-  pp_number                             String?                       @db.VarChar(250)
-  pp_date_issued                        DateTime?                     @db.Timestamptz(6)
-  tp_number                             String?                       @db.VarChar(250)
-  tp_expiration_date                    DateTime?                     @db.Timestamptz(6)
-  cp_number                             String?                       @db.VarChar(250)
-  cp_expiration_date                    DateTime?                     @db.Timestamptz(6)
-  license_number                        String?                       @db.VarChar(250)
-  license_expiration_date               DateTime?                     @db.Timestamptz(6)
-  points_of_communication               String?                       @db.VarChar(250)
-  freq_assigned_freq                    String?                       @db.VarChar(250)
-  freq_crystal_freq                     String?                       @db.VarChar(250)
-  freq_measured_freq                    String?                       @db.VarChar(250)
-  freq_if_receiver                      String?                       @db.VarChar(250)
-  freq_type_of_emission                 String?                       @db.VarChar(250)
-  freq_antenna_system_type              String?                       @db.VarChar(250)
-  freq_elevation_from_gmd               String?                       @db.VarChar(250)
-  freq_length_of_radiator               String?                       @db.VarChar(250)
-  freq_gain                             String?                       @db.VarChar(250)
-  freq_directivity                      String?                       @db.VarChar(250)
-  freq_power_supply                     String?                       @db.VarChar(250)
-  freq_battery                          String?                       @db.VarChar(250)
-  freq_voltage_and_type                 String?                       @db.VarChar(250)
-  freq_capacity                         String?                       @db.VarChar(250)
-  freq_ah                               String?                       @db.VarChar(250)
-  illegal_construction_without_permit   Boolean?
-  illegal_transfer                      Boolean?
-  operation_without_rsl                 Boolean?
-  operation_without_lro                 Boolean?
-  operation_without_logbook             Boolean?
-  operation_on_lower_sideband           Boolean?
-  operation_on_unauthorized_hours       Boolean?
-  operation_operating_unauthorized_freq Boolean?
-  off_frequency                         Boolean?
-  still_in_the_old_frequency_grouping   Boolean?
-  illegal_possession                    Boolean?
-  others                                String?                       @db.VarChar(250)
-  sundray_info_radio_operator_logbook   String?                       @db.VarChar(250)
+  id                                           Int                           @id @default(autoincrement())
+  date_issued                                  DateTime?                     @db.Timestamptz(6)
+  client_id                                    Int?
+  class_type                                   String?                       @db.VarChar(250)
+  nature_of_service                            String?                       @db.VarChar(250)
+  working_hours                                String?                       @db.VarChar(250)
+  form_type                                    String?                       @db.VarChar(250)
+  call_sign                                    String?                       @db.VarChar(250)
+  motor_number                                 String?                       @db.VarChar(250)
+  plate_number                                 String?                       @db.VarChar(250)
+  gross_tonnage                                String?                       @db.VarChar(250)
+  pp_number                                    String?                       @db.VarChar(250)
+  pp_date_issued                               DateTime?                     @db.Timestamptz(6)
+  tp_number                                    String?                       @db.VarChar(250)
+  tp_expiration_date                           DateTime?                     @db.Timestamptz(6)
+  cp_number                                    String?                       @db.VarChar(250)
+  cp_expiration_date                           DateTime?                     @db.Timestamptz(6)
+  license_number                               String?                       @db.VarChar(250)
+  license_expiration_date                      DateTime?                     @db.Timestamptz(6)
+  points_of_communication                      String?                       @db.VarChar(250)
+  freq_assigned_freq                           String?                       @db.VarChar(250)
+  freq_crystal_freq                            String?                       @db.VarChar(250)
+  freq_measured_freq                           String?                       @db.VarChar(250)
+  freq_if_receiver                             String?                       @db.VarChar(250)
+  freq_type_of_emission                        String?                       @db.VarChar(250)
+  freq_antenna_system_type                     String?                       @db.VarChar(250)
+  freq_elevation_from_gmd                      String?                       @db.VarChar(250)
+  freq_length_of_radiator                      String?                       @db.VarChar(250)
+  freq_gain                                    String?                       @db.VarChar(250)
+  freq_directivity                             String?                       @db.VarChar(250)
+  freq_power_supply                            String?                       @db.VarChar(250)
+  freq_battery                                 String?                       @db.VarChar(250)
+  freq_voltage_and_type                        String?                       @db.VarChar(250)
+  freq_capacity                                String?                       @db.VarChar(250)
+  freq_ah                                      String?                       @db.VarChar(250)
+  illegal_construction_without_permit          Boolean?
+  illegal_transfer                             Boolean?
+  operation_without_rsl                        Boolean?
+  operation_without_lro                        Boolean?
+  operation_without_logbook                    Boolean?
+  operation_on_lower_sideband                  Boolean?
+  operation_on_unauthorized_hours              Boolean?
+  operation_operating_unauthorized_freq        Boolean?
+  off_frequency                                Boolean?
+  still_in_the_old_frequency_grouping          Boolean?
+  illegal_possession                           Boolean?
+  others                                       String?                       @db.VarChar(250)
+  sundray_info_radio_operator_logbook          String?                       @db.VarChar(250)
   sundray_info_station_product_unwanted_signal String?                       @db.VarChar(250)
-  sundray_info_radio_equipment_operative          String?                       @db.VarChar(250)
-  recommendations                       String?                       @db.VarChar(250)
-  authorized_representative             String?                       @db.VarChar(250)
-  radio_requlation_inspector            String?                       @db.VarChar(250)
-  noted_by                              String?                       @db.VarChar(250)
-  regional_director                     String?                       @db.VarChar(250)
-  clients                               clients?                      @relation(fields: [client_id], references: [id])
-  radio_transceiver_items               radio_transceiver_items[]
-  radio_transceiver_operators           radio_transceiver_operators[]
+  sundray_info_radio_equipment_operative       String?                       @db.VarChar(250)
+  recommendations                              String?                       @db.VarChar(250)
+  authorized_representative                    String?                       @db.VarChar(250)
+  radio_requlation_inspector                   String?                       @db.VarChar(250)
+  noted_by                                     String?                       @db.VarChar(250)
+  regional_director                            String?                       @db.VarChar(250)
+  clients                                      clients?                      @relation(fields: [client_id], references: [id])
+  radio_transceiver_items                      radio_transceiver_items[]
+  radio_transceiver_operators                  radio_transceiver_operators[]
+}
+
+model spares_and_accessories {
+  mobile_phone_dealer_id Int?
+  particular             String?               @db.VarChar(250)
+  number_of_units        Int?
+  id                     Int                   @id @unique @default(autoincrement())
+  mobile_phone_dealers   mobile_phone_dealers? @relation(fields: [mobile_phone_dealer_id], references: [id])
+}
+
+model mobile_phones {
+  mobile_phone_dealer_id Int?
+  model                  String?               @db.VarChar(250)
+  imei_number            String?               @db.VarChar(250)
+  source                 String?               @db.VarChar(250)
+  id                     Int                   @id @unique @default(autoincrement())
+  mobile_phone_dealers   mobile_phone_dealers? @relation(fields: [mobile_phone_dealer_id], references: [id])
+}
+
+model sim {
+  mobile_phone_dealer_id Int?
+  sim_number             String?               @db.VarChar(250)
+  mobile_phone_company   String?               @db.VarChar(250)
+  id                     Int                   @id @unique @default(autoincrement())
+  mobile_phone_dealers   mobile_phone_dealers? @relation(fields: [mobile_phone_dealer_id], references: [id])
+}
+
+model mobile_phone_dealers {
+  id                                       Int                      @id @default(autoincrement())
+  date_inspected                           DateTime?                @db.Timestamptz(6)
+  client_id                                Int?
+  sundry_one                               String?                  @db.VarChar(250)
+  sundry_two                               String?                  @db.VarChar(250)
+  remarks_deficiencies_discrepancies_noted String?                  @db.VarChar(250)
+  inspected_by                             String?                  @db.VarChar(250)
+  owner_name                               String?                  @db.VarChar(250)
+  owner_position                           String?                  @db.VarChar(250)
+  recommendations                          String?                  @db.VarChar(250)
+  noted_by                                 String?                  @db.VarChar(250)
+  regional_director                        String?                  @db.VarChar(250)
+  is_approved                              Boolean?
+  clients                                  clients?                 @relation(fields: [client_id], references: [id])
+  spares_and_accessories                   spares_and_accessories[]
+  mobile_phones                            mobile_phones[]
+  sim                                      sim[]
+}
+
+model list_of_service_or_test_equipments {
+  service_center_report_id Int?
+  particular               String?                @db.VarChar(250)
+  number_of_units          Int?
+  id                       Int                    @id @unique @default(autoincrement())
+  service_center_report    service_center_report? @relation(fields: [service_center_report_id], references: [id])
+}
+
+model employed_electronics_technicians {
+  service_center_report_id Int?
+  name                     String?                @db.VarChar(250)
+  qualifications           String?                @db.VarChar(250)
+  id                       Int                    @id @unique @default(autoincrement())
+  service_center_report    service_center_report? @relation(fields: [service_center_report_id], references: [id])
+}
+
+model service_center_report {
+  id                                       Int                                  @id @default(autoincrement())
+  date_inspected                           DateTime?                            @db.Timestamptz(6)
+  client_id                                Int?
+  sundry_one                               String?                              @db.VarChar(250)
+  sundry_two                               String?                              @db.VarChar(250)
+  sundry_three                             String?                              @db.VarChar(250)
+  remarks_deficiencies_discrepancies_noted String?                              @db.VarChar(250)
+  inspected_by                             String?                              @db.VarChar(250)
+  owner_name                               String?                              @db.VarChar(250)
+  owner_position                           String?                              @db.VarChar(250)
+  recommendations                          String?                              @db.VarChar(250)
+  noted_by                                 String?                              @db.VarChar(250)
+  regional_director                        String?                              @db.VarChar(250)
+  is_approved                              Boolean?
+  clients                                  clients?                             @relation(fields: [client_id], references: [id])
+  list_of_service_or_test_equipments       list_of_service_or_test_equipments[]
+  employed_electronics_technicians         employed_electronics_technicians[]
+}
+
+model supervising_ece {
+  radio_dealer_id Int?
+  name            String?        @db.VarChar(250)
+  license_number  String?        @db.VarChar(250)
+  expiry_date     DateTime?
+  ptr_number      String?        @db.VarChar(250)
+  date_issued     DateTime?
+  id              Int            @id @unique @default(autoincrement())
+  radio_dealers   radio_dealers? @relation(fields: [radio_dealer_id], references: [id])
+}
+
+model radio_technicians {
+  radio_dealer_id        Int?
+  name                   String?        @db.VarChar(250)
+  particulars_of_license String?        @db.VarChar(250)
+  expiry_date            DateTime?
+  id                     Int            @id @unique @default(autoincrement())
+  radio_dealers          radio_dealers? @relation(fields: [radio_dealer_id], references: [id])
+}
+
+model radio_dealers {
+  id                            Int                 @id @default(autoincrement())
+  date_inspected                DateTime?           @db.Timestamptz(6)
+  client_id                     Int?
+  dtemi_reflectometer           Boolean?
+  dtemi_frequency_counter       Boolean?
+  dtemi_power_meter             Boolean?
+  dtemi_vtvm_digital_multimeter Boolean?
+  dtemi_signal_generator        Boolean?
+  dtemi_oscilloscope            Boolean?
+  dtemi_vom_digital_multimeter  Boolean?
+  dtemi_dummy_load_antenna      Boolean?
+  is_laboratory_room_shielded   Boolean?
+  remarks                       String?             @db.VarChar(250)
+  radio_regulation_inspector    String?             @db.VarChar(250)
+  owner_name                    String?             @db.VarChar(250)
+  recommendations               String?             @db.VarChar(250)
+  regional_director             String?             @db.VarChar(250)
+  clients                       clients?            @relation(fields: [client_id], references: [id])
+  supervising_ece               supervising_ece[]
+  radio_technicians             radio_technicians[]
 }

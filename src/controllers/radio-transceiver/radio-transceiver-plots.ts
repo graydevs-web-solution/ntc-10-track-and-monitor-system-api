@@ -1,5 +1,5 @@
-import { PDFEntryValue } from '../models/pdf-generate.model';
-import { FormType, RadioTransceiverAPI } from '../models/radio-transceivers/radio-transceiver-api.model';
+import { PDFEntryValue } from '../../models/pdf-generate.model';
+import { FormType, RadioTransceiverAPI } from '../../models/radio-transceivers/radio-transceiver-api.model';
 import { DateTime } from 'luxon';
 
 const defaultSize = 8;
@@ -69,7 +69,6 @@ export const plots: PDFEntryValue[] = [
 export const getPDFValues = (value: any): PDFEntryValue[] => {
     const pdfPlots = [...plots];
     const data: RadioTransceiverAPI = value;
-    console.log(data)
     pdfPlots[0].text = data.date_issued ?  DateTime.fromISO((data.date_issued as Date).toISOString()).toLocaleString(DateTime.DATE_MED) : '';
     pdfPlots[1].text = data.clients.name
     pdfPlots[2].text = data.clients.businessAddress;
