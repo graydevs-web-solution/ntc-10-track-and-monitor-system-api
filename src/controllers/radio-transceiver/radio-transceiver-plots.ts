@@ -151,7 +151,7 @@ export const getPDFValues = (value: any): PDFEntryValue[] => {
     }
 
     for (const iterator of Array.from(data.radio_transceiver_items)) {
-                if (ITERATION_TRANSMITTER < LIMIT_TRANSMITER_RECEIVER) {
+        if (ITERATION_TRANSMITTER < LIMIT_TRANSMITER_RECEIVER) {
             pdfPlots.push({ text: iterator.model, x: 76, y: PLOT_TRANSMITTER.y, size: defaultSize });
             pdfPlots.push({ text: iterator.serial_number, x: 209, y: PLOT_TRANSMITTER.y, size: defaultSize });
             pdfPlots.push({ text: iterator.freq_range, x: 272, y: PLOT_TRANSMITTER.y, size: defaultSize });

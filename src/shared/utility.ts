@@ -8,3 +8,10 @@ export const dateWithPadding = (data: string): string => {
 export const dateToString = (data: Date): string => {
     return data ?  DateTime.fromISO((data).toISOString()).toLocaleString(DateTime.DATE_MED) : '';
 }
+
+export const cleanDate = (date: Date) : Date | null => {
+    if (!date) {
+        return null
+    }
+    return date;
+}

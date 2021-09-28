@@ -7,6 +7,8 @@ export const radioDealerSchema = object({
     }),
     clientId: number().required(),
     clientName: string().allow(''),
+    permitNumber: string().allow(''),
+    permitExpiryDate: date().allow(null),
     supervisingECE: array().items(
         object({
             name: string(),

@@ -232,6 +232,8 @@ model radio_technicians {
 model radio_dealers {
   id                            Int                 @id @default(autoincrement())
   date_inspected                DateTime?           @db.Timestamptz(6)
+  permit_number                 String?             @db.VarChar(250)
+  permit_expiry_date            DateTime?           @db.Timestamptz(6)
   client_id                     Int?
   dtemi_reflectometer           Boolean?
   dtemi_frequency_counter       Boolean?
