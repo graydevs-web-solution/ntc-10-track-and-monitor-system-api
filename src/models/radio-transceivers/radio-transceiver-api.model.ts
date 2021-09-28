@@ -3,7 +3,7 @@ import { Client } from '../clients/client.model';
 
 export enum FormType {
     new = 'new',
-    renewal = 'renawal',
+    renewal = 'renewal',
     modification = 'modification'
 }
 
@@ -17,6 +17,15 @@ interface Operator {
 interface RadioTransceiverItem {
   ['id']?: number;
   ['model']: string;
+  ['serial_number']: string;
+  ['freq_range']: string;
+  ['power_output']: string;
+  ['freq_control']: string;
+}
+
+interface RadioTransceiverReceiverOrOthers {
+  ['id']?: number;
+  ['name']: string;
   ['serial_number']: string;
   ['freq_range']: string;
   ['power_output']: string;
@@ -47,21 +56,23 @@ export interface RadioTransceiverAPI {
   ['points_of_communication']: string;
   ['radio_transceiver_operators']: Operator[];
   ['radio_transceiver_items']: RadioTransceiverItem[];
+  ['radio_transceiver_receivers']: RadioTransceiverReceiverOrOthers[];
+  ['radio_transceiver_others']: RadioTransceiverReceiverOrOthers[];
   ['freq_assigned_freq']: string;
   ['freq_crystal_freq']: string;
   ['freq_measured_freq']: string;
   ['freq_if_receiver']: string;
   ['freq_type_of_emission']: string;
-  ['freq_antenna_system_type']: string;
-  ['freq_elevation_from_gmd']: string;
-  ['freq_length_of_radiator']: string;
-  ['freq_gain']: string;
-  ['freq_directivity']: string;
-  ['freq_power_supply']: string;
-  ['freq_battery']: string;
-  ['freq_voltage_and_type']: string;
-  ['freq_capacity']: string;
-  ['freq_ah']: string;
+  ['as_type']: string;
+  ['as_elevation_from_gmd']: string;
+  ['as_length_of_radiator']: string;
+  ['as_gain']: string;
+  ['as_directivity']: string;
+  ['as_power_supply']: string;
+  ['as_battery']: string;
+  ['as_voltage_and_type']: string;
+  ['as_capacity']: string;
+  ['as_ah']: string;
   ['illegal_construction_without_permit']: boolean;
   ['illegal_transfer']: boolean;
   ['operation_without_rsl']: boolean;

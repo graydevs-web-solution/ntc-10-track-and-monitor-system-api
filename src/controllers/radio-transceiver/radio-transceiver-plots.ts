@@ -1,6 +1,6 @@
 import { PDFEntryValue } from '../../models/pdf-generate.model';
 import { FormType, RadioTransceiverAPI } from '../../models/radio-transceivers/radio-transceiver-api.model';
-import { DateTime } from 'luxon';
+import { dateToString } from '../../shared/utility';
 
 const defaultSize = 8;
 
@@ -68,8 +68,21 @@ export const plots: PDFEntryValue[] = [
 
 export const getPDFValues = (value: any): PDFEntryValue[] => {
     const pdfPlots = [...plots];
+    const LIMIT_TRANSMITER_RECEIVER = 6;
+    const LIMIT_OPERATORS = 2;
+    const LIMIT_RECEIVERS = 2;
+    const LIMIT_OTHERS = 2;
+    const PLOT_OPERATORS = { x: 76, y: 242, size: defaultSize };
+    const PLOT_TRANSMITTER = { x: 79, y: 288, size: defaultSize };
+    const PLOT_RECEIVERS = { x: 76, y: 375, size: defaultSize };
+    const PLOT_OTHERS = { x: 76, y: 423, size: defaultSize };
+    const SPACING = 12;
     const data: RadioTransceiverAPI = value;
-    pdfPlots[0].text = data.date_issued ?  DateTime.fromISO((data.date_issued as Date).toISOString()).toLocaleString(DateTime.DATE_MED) : '';
+    let ITERATION_OPERATORS = 0;
+    let ITERATION_TRANSMITTER = 0;
+    let ITERATION_RECEIVERS = 0;
+    let ITERATION_OTHERS = 0;
+    pdfPlots[0].text = dateToString(data.date_issued as Date);
     pdfPlots[1].text = data.clients.name
     pdfPlots[2].text = data.clients.businessAddress;
     pdfPlots[3].text = data.clients.exactLocation
@@ -80,13 +93,13 @@ export const getPDFValues = (value: any): PDFEntryValue[] => {
     pdfPlots[8].text = data.form_type === FormType.renewal ? 'X' : '';
     pdfPlots[9].text = data.form_type === FormType.modification ? 'X' : '';
     pdfPlots[10].text = data.pp_number;
-    pdfPlots[11].text = data.pp_date_issued ? DateTime.fromISO(data.pp_date_issued.toISOString()).toLocaleString(DateTime.DATE_MED) : '';
+    pdfPlots[11].text = dateToString(data.pp_date_issued);
     pdfPlots[12].text = data.cp_number;
-    pdfPlots[13].text = data.cp_expiration_date ? DateTime.fromISO((data.cp_expiration_date as Date).toISOString()).toLocaleString(DateTime.DATE_MED) : '';
+    pdfPlots[13].text = dateToString(data.cp_expiration_date as Date);
     pdfPlots[14].text = data.tp_number;
-    pdfPlots[15].text = data.tp_expiration_date ? DateTime.fromISO((data.tp_expiration_date as Date).toISOString()).toLocaleString(DateTime.DATE_MED) : '';
+    pdfPlots[15].text = dateToString(data.tp_expiration_date as Date);
     pdfPlots[16].text = data.license_number;
-    pdfPlots[17].text = data.license_expiration_date ? DateTime.fromISO((data.license_expiration_date as Date).toISOString()).toLocaleString(DateTime.DATE_MED) : '';
+    pdfPlots[17].text = dateToString(data.license_expiration_date as Date);
     pdfPlots[18].text = data.plate_number;
     pdfPlots[19].text = data.gross_tonnage;
     pdfPlots[20].text = data.points_of_communication;
@@ -95,16 +108,16 @@ export const getPDFValues = (value: any): PDFEntryValue[] => {
     pdfPlots[23].text = data.freq_measured_freq;
     pdfPlots[24].text = data.freq_if_receiver;
     pdfPlots[25].text = data.freq_type_of_emission;
-    pdfPlots[26].text = data.freq_antenna_system_type;
-    pdfPlots[27].text = data.freq_elevation_from_gmd;
-    pdfPlots[28].text = data.freq_length_of_radiator;
-    pdfPlots[29].text = data.freq_gain
-    pdfPlots[30].text = data.freq_directivity;
-    pdfPlots[31].text = data.freq_power_supply;
-    pdfPlots[32].text = data.freq_battery;
-    pdfPlots[33].text = data.freq_voltage_and_type;
-    pdfPlots[34].text = data.freq_capacity;
-    pdfPlots[35].text = data.freq_ah;
+    pdfPlots[26].text = data.as_type;
+    pdfPlots[27].text = data.as_elevation_from_gmd;
+    pdfPlots[28].text = data.as_length_of_radiator;
+    pdfPlots[29].text = data.as_gain
+    pdfPlots[30].text = data.as_directivity;
+    pdfPlots[31].text = data.as_power_supply;
+    pdfPlots[32].text = data.as_battery;
+    pdfPlots[33].text = data.as_voltage_and_type;
+    pdfPlots[34].text = data.as_capacity;
+    pdfPlots[35].text = data.as_ah;
     pdfPlots[36].text = data.illegal_construction_without_permit ? 'X' : '';
     pdfPlots[37].text = data.illegal_transfer? 'X' : '';
     pdfPlots[38].text = data.operation_without_rsl? 'X' : '';
@@ -126,6 +139,52 @@ export const getPDFValues = (value: any): PDFEntryValue[] => {
     pdfPlots[54].text = data.regional_director;
     pdfPlots[55].text = data.call_sign;
     pdfPlots[56].text = data.motor_number;
+
+    for (const iterator of Array.from(data.radio_transceiver_operators)) {
+                if (ITERATION_OPERATORS < LIMIT_OPERATORS) {
+            pdfPlots.push({ text: iterator.name, x: 73, y: PLOT_OPERATORS.y, size: defaultSize });
+            pdfPlots.push({ text: iterator.particular_of_license, x: 214, y: PLOT_OPERATORS.y, size: defaultSize });
+            pdfPlots.push({ text: dateToString(iterator.expiration_date as Date), x: 409, y: PLOT_OPERATORS.y, size: defaultSize });
+            ITERATION_OPERATORS += 1;
+            PLOT_OPERATORS.y += SPACING;
+        }
+    }
+
+    for (const iterator of Array.from(data.radio_transceiver_items)) {
+                if (ITERATION_TRANSMITTER < LIMIT_TRANSMITER_RECEIVER) {
+            pdfPlots.push({ text: iterator.model, x: 76, y: PLOT_TRANSMITTER.y, size: defaultSize });
+            pdfPlots.push({ text: iterator.serial_number, x: 209, y: PLOT_TRANSMITTER.y, size: defaultSize });
+            pdfPlots.push({ text: iterator.freq_range, x: 272, y: PLOT_TRANSMITTER.y, size: defaultSize });
+            pdfPlots.push({ text: iterator.power_output, x: 372, y: PLOT_TRANSMITTER.y, size: defaultSize });
+            pdfPlots.push({ text: iterator.freq_control, x: 463, y: PLOT_TRANSMITTER.y, size: defaultSize });
+            ITERATION_TRANSMITTER += 1;
+            PLOT_TRANSMITTER.y += SPACING;
+        }
+    }
+
+    for (const iterator of Array.from(data.radio_transceiver_receivers || [])) {
+                if (ITERATION_RECEIVERS < LIMIT_RECEIVERS) {
+            pdfPlots.push({ text: iterator.name, x: 79, y: PLOT_RECEIVERS.y, size: defaultSize });
+            pdfPlots.push({ text: iterator.serial_number, x: 215, y: PLOT_RECEIVERS.y, size: defaultSize });
+            pdfPlots.push({ text: iterator.freq_range, x: 272, y: PLOT_RECEIVERS.y, size: defaultSize });
+            // pdfPlots.push({ text: iterator.power_output, x: PLOT_RECEIVERS.x, y: PLOT_RECEIVERS.y, size: defaultSize });
+            pdfPlots.push({ text: iterator.freq_control, x: 459, y: PLOT_RECEIVERS.y, size: defaultSize });
+            ITERATION_RECEIVERS += 1;
+            PLOT_RECEIVERS.y += SPACING;
+        }
+    }
+
+    for (const iterator of Array.from(data.radio_transceiver_others || [])) {
+        if (ITERATION_OTHERS < LIMIT_OTHERS) {
+            pdfPlots.push({ text: iterator.name, x: 79, y: PLOT_OTHERS.y, size: defaultSize });
+            pdfPlots.push({ text: iterator.serial_number, x: 215, y: PLOT_OTHERS.y, size: defaultSize });
+            pdfPlots.push({ text: iterator.freq_range, x: 273, y: PLOT_OTHERS.y, size: defaultSize });
+            pdfPlots.push({ text: iterator.power_output, x: 371, y: PLOT_OTHERS.y, size: defaultSize });
+            pdfPlots.push({ text: iterator.freq_control, x: 459, y: PLOT_OTHERS.y, size: defaultSize });
+            ITERATION_OTHERS += 1;
+            PLOT_OTHERS.y += SPACING;
+        }
+    }
 
     return pdfPlots;
 };

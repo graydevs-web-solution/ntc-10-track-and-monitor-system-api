@@ -34,6 +34,28 @@ model radio_transceiver_items {
   radio_transceivers   radio_transceivers? @relation(fields: [radio_transceiver_id], references: [id])
 }
 
+model radio_transceiver_receivers {
+  radio_transceiver_id Int?
+  name                 String?             @db.VarChar(250)
+  serial_number        String?             @db.VarChar(250)
+  freq_range           String?             @db.VarChar(250)
+  power_output         String?             @db.VarChar(250)
+  freq_control         String?             @db.VarChar(250)
+  id                   Int                 @id @unique @default(autoincrement())
+  radio_transceivers   radio_transceivers? @relation(fields: [radio_transceiver_id], references: [id])
+}
+
+model radio_transceiver_others {
+  radio_transceiver_id Int?
+  name                 String?             @db.VarChar(250)
+  serial_number        String?             @db.VarChar(250)
+  freq_range           String?             @db.VarChar(250)
+  power_output         String?             @db.VarChar(250)
+  freq_control         String?             @db.VarChar(250)
+  id                   Int                 @id @unique @default(autoincrement())
+  radio_transceivers   radio_transceivers? @relation(fields: [radio_transceiver_id], references: [id])
+}
+
 model radio_transceiver_operators {
   radio_transceiver_id  Int?
   name                  String?             @db.VarChar(250)
@@ -69,16 +91,16 @@ model radio_transceivers {
   freq_measured_freq                           String?                       @db.VarChar(250)
   freq_if_receiver                             String?                       @db.VarChar(250)
   freq_type_of_emission                        String?                       @db.VarChar(250)
-  freq_antenna_system_type                     String?                       @db.VarChar(250)
-  freq_elevation_from_gmd                      String?                       @db.VarChar(250)
-  freq_length_of_radiator                      String?                       @db.VarChar(250)
-  freq_gain                                    String?                       @db.VarChar(250)
-  freq_directivity                             String?                       @db.VarChar(250)
-  freq_power_supply                            String?                       @db.VarChar(250)
-  freq_battery                                 String?                       @db.VarChar(250)
-  freq_voltage_and_type                        String?                       @db.VarChar(250)
-  freq_capacity                                String?                       @db.VarChar(250)
-  freq_ah                                      String?                       @db.VarChar(250)
+  as_type                                      String?                       @db.VarChar(250)
+  as_elevation_from_gmd                        String?                       @db.VarChar(250)
+  as_length_of_radiator                        String?                       @db.VarChar(250)
+  as_gain                                      String?                       @db.VarChar(250)
+  as_directivity                               String?                       @db.VarChar(250)
+  as_power_supply                              String?                       @db.VarChar(250)
+  as_battery                                   String?                       @db.VarChar(250)
+  as_voltage_and_type                          String?                       @db.VarChar(250)
+  as_capacity                                  String?                       @db.VarChar(250)
+  as_ah                                        String?                       @db.VarChar(250)
   illegal_construction_without_permit          Boolean?
   illegal_transfer                             Boolean?
   operation_without_rsl                        Boolean?
@@ -102,6 +124,8 @@ model radio_transceivers {
   clients                                      clients?                      @relation(fields: [client_id], references: [id])
   radio_transceiver_items                      radio_transceiver_items[]
   radio_transceiver_operators                  radio_transceiver_operators[]
+  radio_transceiver_receivers                  radio_transceiver_receivers[]
+  radio_transceiver_others                     radio_transceiver_others[]
 }
 
 model spares_and_accessories {
