@@ -2,5 +2,6 @@ export enum PDFTemplate {
     radioTransceiver = 'radio_transceiver',
     mobilePhoneDealer = 'mobile_phone_dealer',
     serviceCenter = 'service_center',
-    radioDealer = 'radio_dealer'
+    radioDealer = 'radio_dealer',
+    deficiencyNotice = 'deficiencyNotice'
 }

@@ -21,6 +21,7 @@ model clients {
   mobile_phone_dealers      mobile_phone_dealers[]
   service_center_report     service_center_report[]
   radio_dealers             radio_dealers[]
+  deficiency_notice         deficiency_notice[]
 }
 
 model radio_transceiver_items {
@@ -256,4 +257,29 @@ model radio_dealers {
   clients                       clients?            @relation(fields: [client_id], references: [id])
   supervising_ece               supervising_ece[]
   radio_technicians             radio_technicians[]
+}
+
+model deficiency_notice_transmitter {
+  deficiency_notice_id Int?
+  transmitter          String?            @db.VarChar(250)
+  serial_number        String?            @db.VarChar(250)
+  id                   Int                @id @unique @default(autoincrement())
+  deficiency_notice    deficiency_notice? @relation(fields: [deficiency_notice_id], references: [id])
+}
+
+model deficiency_notice {
+  id                                   Int                             @id @default(autoincrement())
+  date                                 DateTime?                       @db.Timestamptz(6)
+  client_id                            Int?
+  docket_number                        String?                         @db.VarChar(250)
+  vi_operation_without_rsl             Boolean?
+  vi_operation_without_lro             Boolean?
+  vi_operation_unauthorized_frequency  Boolean?
+  vi_possession_transmitter_without_pp Boolean?
+  vi_no_ntc_pertinent_papers           Boolean?
+  date_of_deficiency_hearing           DateTime?                       @db.Timestamptz(6)
+  is_done                              Boolean?
+  regional_director                    String?                         @db.VarChar(250)
+  clients                              clients?                        @relation(fields: [client_id], references: [id])
+  deficiency_notice_transmitter        deficiency_notice_transmitter[]
 }
