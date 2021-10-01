@@ -1,14 +1,15 @@
 import { RequestHandler, response } from 'express';
 import { PrismaClient } from '@prisma/client'
 import { v4 as uuid } from 'uuid';
-import { MobilePhoneDealer } from '../models/mobile-phone-dealer/mobile-phone-dealer.model';
-import { mobilePhoneDealerSchema } from '../models/mobile-phone-dealer/mobile-phone-dealer.joi';
-import log from '../logger/index';
-import { DATABASE_SCHEMA } from '../config/database';
-import { modifyPdf } from '../shared/pdf-generate';
-import { PDFTemplate } from '../shared/pdf-generate.enum';
-import { getPDFValues } from './radio-transceiver/radio-transceiver-plots';
-import { RadioTransceiverAPI } from 'src/models/radio-transceivers/radio-transceiver-api.model';
+import { MobilePhoneDealer } from '../../models/mobile-phone-dealer/mobile-phone-dealer.model';
+import { mobilePhoneDealerSchema } from '../../models/mobile-phone-dealer/mobile-phone-dealer.joi';
+import log from '../../logger/index';
+import { DATABASE_SCHEMA } from '../../config/database';
+import { modifyPdf, ModifyPDFOptions } from '../../shared/pdf-generate';
+import { PDFTemplate } from '../../shared/pdf-generate.enum';
+import { getPDFValues } from '../mobile-phone-dealer/mobile-phone-dealer-plot';
+import { RadioTransceiverAPI } from '../../models/radio-transceivers/radio-transceiver-api.model';
+import { cleanDate } from '../../shared/utility';
 
 const prisma = new PrismaClient()
 
@@ -21,6 +22,8 @@ export const saveMobilePhoneDealer: RequestHandler = async (req, res, next) => {
         data: {
             date_inspected: cleanedValues.dateInspected ? (cleanedValues.dateInspected as Date).toISOString() : null,
             client_id: cleanedValues.clientId as number,
+            permit_number: cleanedValues.permitNumber,
+            permit_expiry_date: cleanDate(cleanedValues.permitExpiryDate as Date),
             spares_and_accessories: {
                 create: cleanedValues.listOfStocksOfSparesAndAccessories.map((val) => ({
                    particular: val.particular,
@@ -73,6 +76,8 @@ export const updateData: RequestHandler = async (req, res, next) => {
         data: {
             date_inspected: cleanedValues.dateInspected ? (cleanedValues.dateInspected as Date).toISOString() : null,
             client_id: cleanedValues.clientId as number,
+            permit_number: cleanedValues.permitNumber,
+            permit_expiry_date: cleanDate(cleanedValues.permitExpiryDate as Date),
             spares_and_accessories: {
                 create: cleanedValues.listOfStocksOfSparesAndAccessories.map((val) => ({
                    particular: val.particular,
@@ -225,38 +230,48 @@ export const deleteData: RequestHandler = async (req, res, next) => {
   }
 }
 
-// export const generatePdf: RequestHandler = async (req, res, next) => {
-//   try {
-//     const { id } = req.query;
-//     const doc = await prisma.radio_transceivers.findUnique({
-//         where: {
-//             id: +(id as string)
-//         },
-//         include: {
-//             clients: {
-//                 select: {
-//                     name: true,
-//                     businessAddress: true,
-//                     exactLocation: true
-//                 }
-//             },
-//             radio_transceiver_items: true,
-//             radio_transceiver_operators: true
-//         }
-//     });
-//     const pdf = await modifyPdf(getPDFValues(doc), PDFTemplate.radioTransceiver);
+export const generatePdf: RequestHandler = async (req, res, next) => {
+  try {
+    const { id } = req.query;
+    const doc = await prisma.mobile_phone_dealers.findUnique({
+        where: {
+            id: +(id as string)
+        },
+        include: {
+            clients: {
+                select: {
+                    name: true,
+                    businessAddress: true,
+                    exactLocation: true
+                }
+            },
+            spares_and_accessories: true,
+            mobile_phones: true,
+            sim: true
+        }
+    });
+    const pdfValues = getPDFValues(doc);
+    const options: ModifyPDFOptions = {
+        isMultiplePage: true,
+        startEndValuesPerPage: [
+            { start: 0, end: 11, page: 1 },
+            { start: 12, end: 18, page: 2 },
+            { start: 20, page: 1 },
+        ]
+    };
+    const pdf = await modifyPdf(pdfValues, PDFTemplate.mobilePhoneDealer, options);
 
-//     res.writeHead(200, {
-//         'Content-Type': 'application/pdf',
-//         'Content-Disposition': `attachment; filename="${PDFTemplate.radioTransceiver}.pdf"`
-//     });
+    res.writeHead(200, {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${PDFTemplate.radioTransceiver}.pdf"`
+    });
 
-//     res.end(pdf);
-//   } catch (error) {
-//     log.error(error);
-//     res.status(500).json({ message: `Couldn't get clients at this time.` });
-//   }
-// }
+    res.end(pdf);
+  } catch (error) {
+    log.error(error);
+    res.status(500).json({ message: `Couldn't get clients at this time.` });
+  }
+}
 
 // // export const getClient: RequestHandler = async (req, res, next) => {
 // //   try {

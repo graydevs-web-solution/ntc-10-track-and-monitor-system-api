@@ -30,6 +30,8 @@ export interface MobilePhoneDealer {
   dateInspected: Date | string;
   clientId: number | Client;
   clientName?: string;
+  permitNumber: string;
+  permitExpiryDate: Date | string;
   listOfStocksOfSparesAndAccessories: StocksOfSparesAndAccessories[];
   listOfStocksOfMobilePhone: MobilePhone[];
   listOfStocksOfSubscriberIdentificationModule: SIM[];

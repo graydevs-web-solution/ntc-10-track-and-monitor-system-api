@@ -157,6 +157,8 @@ model mobile_phone_dealers {
   id                                       Int                      @id @default(autoincrement())
   date_inspected                           DateTime?                @db.Timestamptz(6)
   client_id                                Int?
+  permit_number                            String?                  @db.VarChar(250)
+  permit_expiry_date                       DateTime?                @db.Timestamptz(6)
   sundry_one                               String?                  @db.VarChar(250)
   sundry_two                               String?                  @db.VarChar(250)
   remarks_deficiencies_discrepancies_noted String?                  @db.VarChar(250)
@@ -193,6 +195,8 @@ model service_center_report {
   id                                       Int                                  @id @default(autoincrement())
   date_inspected                           DateTime?                            @db.Timestamptz(6)
   client_id                                Int?
+  permit_number                            String?                              @db.VarChar(250)
+  permit_expiry_date                       DateTime?                            @db.Timestamptz(6)
   sundry_one                               String?                              @db.VarChar(250)
   sundry_two                               String?                              @db.VarChar(250)
   sundry_three                             String?                              @db.VarChar(250)

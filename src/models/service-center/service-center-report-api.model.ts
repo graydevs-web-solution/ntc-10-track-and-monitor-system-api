@@ -21,6 +21,8 @@ export interface ServiceCenterReportAPI {
   ['client_id']: number | Client;
   ['clients']: ClientAPI;
   ['date_inspected']: Date | string;
+  ['permit_number']: string;
+  ['permit_expiry_date']: Date | string;
   ['list_of_service_or_test_equipments']: ServiceOrTestEquipments[];
   ['employed_electronics_technicians']: EmployedElectronicsTechnicians[];
   ['sundry_one']: string;

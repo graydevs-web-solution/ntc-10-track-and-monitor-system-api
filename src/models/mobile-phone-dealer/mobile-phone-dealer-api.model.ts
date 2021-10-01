@@ -17,11 +17,13 @@ interface SIM {
   ['mobile_phone_company']: string;
 }
 
-export interface MobilePhoneDealerSummary {
+export interface MobilePhoneDealerAPI {
   id?: number;
   ['date_inspected']: Date | string;
   ['client_id']: number | Client;
   ['clients']: ClientAPI;
+  ['permit_number']: string;
+  ['permit_expiry_date']: Date | string;
   ['spares_and_accessories']: StocksOfSparesAndAccessories[];
   ['mobile_phones']: MobilePhone[];
   ['sim']: SIM[];
@@ -29,7 +31,7 @@ export interface MobilePhoneDealerSummary {
   ['sundry_two']: string;
   ['remarks_deficiencies_discrepancies_noted']: string;
   ['inspected_by']: string;
-  ['owner_name']: string;
+  ['owner_name']: string; 
   ['owner_position']: string;
   ['recommendations']: string;
   ['noted_by']: string;

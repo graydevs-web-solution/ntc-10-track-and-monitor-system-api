@@ -7,6 +7,8 @@ export const mobilePhoneDealerSchema = object({
     }),
     clientId: number().required(),
     clientName: string().allow(''),
+    permitNumber: string().allow(''),
+    permitExpiryDate: date().allow(null),
     listOfStocksOfSparesAndAccessories: array().items(
         object({
             particular: string(),
@@ -27,14 +29,14 @@ export const mobilePhoneDealerSchema = object({
         })
     ),
     sundryOfInformation: object({
-        one: string(),
-        two: string()
+        one: string().allow(''),
+        two: string().allow('')
     }),
     remarksDeficienciesDiscrepanciesNoted: string().allow(''),
     inspectedBy: string().allow(''),
     ownerInfo: object({
-        name: string(),
-        position: string()
+        name: string().allow(''),
+        position: string().allow('')
     }),
     recommendations: string().allow(''),
     notedBy: string().allow(''),
