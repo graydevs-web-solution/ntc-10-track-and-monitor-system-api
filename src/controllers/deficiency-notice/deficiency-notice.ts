@@ -7,7 +7,7 @@ import log from '../../logger/index';
 import { DATABASE_SCHEMA } from '../../config/database';
 import { modifyPdf, ModifyPDFOptions } from '../../shared/pdf-generate';
 import { PDFTemplate } from '../../shared/pdf-generate.enum';
-import { getPDFValues } from '../mobile-phone-dealer/mobile-phone-dealer-plot';
+import { getPDFValues } from '../deficiency-notice/deficiency-notice-plot';
 import { cleanDate } from '../../shared/utility';
 
 const prisma = new PrismaClient()
@@ -21,6 +21,8 @@ export const saveOne: RequestHandler = async (req, res, next) => {
         data: {
             date: cleanedValues.date ? (cleanedValues.date as Date).toISOString() : null,
             client_id: cleanedValues.clientId as number,
+            respondent_name: cleanedValues.respondentName,
+            date_of_inspection: cleanDate(cleanedValues.dateOfInspection as Date),
             docket_number: cleanedValues.docketNumber,
             deficiency_notice_transmitter: {
                 create: cleanedValues.transmitters.map((val) => ({
@@ -59,13 +61,9 @@ export const updateData: RequestHandler = async (req, res, next) => {
         data: {
             date: cleanedValues.date ? (cleanedValues.date as Date).toISOString() : null,
             client_id: cleanedValues.clientId as number,
+            respondent_name: cleanedValues.respondentName,
+            date_of_inspection: cleanDate(cleanedValues.dateOfInspection as Date),
             docket_number: cleanedValues.docketNumber,
-            deficiency_notice_transmitter: {
-                create: cleanedValues.transmitters.map((val) => ({
-                    transmitter: val.transmitter,
-                    serial_number: val.serialNumber
-                }))
-            },
             vi_operation_without_rsl: cleanedValues.violationInfo.operationWithoutRSL,
             vi_operation_without_lro: cleanedValues.violationInfo.operationWithoutLRO,
             vi_operation_unauthorized_frequency: cleanedValues.violationInfo.operationUnauthorizedFrequency,
@@ -106,7 +104,8 @@ export const updateData: RequestHandler = async (req, res, next) => {
     const insertTransmitter = prisma.deficiency_notice_transmitter.createMany({
         data: cleanedValues.transmitters.map((val) => ({
                     transmitter: val.transmitter,
-                    serial_number: val.serialNumber
+                    serial_number: val.serialNumber,
+                    deficiency_notice_id: FORM_ID
                 }))
     });
     await prisma.$transaction([updateMain, deleteTransmitter, insertTransmitter])
@@ -127,7 +126,11 @@ export const getList: RequestHandler = async (req, res, next) => {
         include: {
             clients: {
                 select: {
-                    name: true
+                    business_name: true,
+                    owner_name: true,
+                    owner_position: true,
+                    business_address: true,
+                    exactLocation: true,
                 }
             },
             deficiency_notice_transmitter: true,
@@ -185,14 +188,17 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
         include: {
             clients: {
                 select: {
-                    name: true,
-                    businessAddress: true,
-                    exactLocation: true
+                    business_name: true,
+                    owner_name: true,
+                    owner_position: true,
+                    business_address: true,
+                    exactLocation: true,
                 }
             },
             deficiency_notice_transmitter: true,
         }
     });
+    console.log(doc)
     const pdfValues = getPDFValues(doc);
     // const options: ModifyPDFOptions = {
     //     isMultiplePage: true,

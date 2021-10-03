@@ -2,85 +2,68 @@ import { PDFEntryValue } from '../../models/pdf-generate.model';
 import { dateToString } from '../../shared/utility';
 import { DeficiencyNoticeAPI } from '../../models/deficiency-notice/deficiency-notice-api.model';
 import { DeficiencyNotice } from 'src/models/deficiency-notice/deficiency-notice';
+import { ViolationsType } from 'src/models/deficiency-notice/violations.model';
+import { violations as viol } from './deficiency-notice-shared';
 
 const defaultSize = 8;
 
 export const plots: PDFEntryValue[] = [
-    { text: '', x: 462, y: 164, size: defaultSize }, // 00 date inspected
-    { text: '', x: 177, y: 210, size: defaultSize }, // 01 name of dealer
-    { text: '', x: 177, y: 227, size: defaultSize }, // 02 business address
-    { text: '', x: 251, y: 243, size: defaultSize }, // 03 cellphone number
-    { text: '', x: 458, y: 242, size: defaultSize }, // 04 fax number
-    { text: '', x: 253, y: 272, size: defaultSize }, // 05 exact location
-    { text: '', x: 236, y: 303, size: defaultSize }, // 06 mobile phone dealer permit
-    { text: '', x: 461, y: 303, size: defaultSize }, // 07 mobile phone dealer expiry date
-    { text: '', x: 179, y: 332, size: defaultSize }, // 08 sec/dti registration number
-    { text: '', x: 458, y: 332, size: defaultSize }, // 09 mayor permit number
-    { text: '', x: 112, y: 770, size: defaultSize }, // 10 sundry 1
-    { text: '', x: 112, y: 844, size: defaultSize }, // 11 sundry 2
-
-    { text: '', x: 127, y: 82, size: defaultSize }, // 12 remarks
-    { text: '', x: 81, y: 170, size: defaultSize }, // 13 inspector
-    { text: '', x: 253, y: 274, size: defaultSize }, // 14 owner name
-    { text: '', x: 253, y: 317, size: defaultSize }, // 15 owner position
-    { text: '', x: 79, y: 390, size: defaultSize }, // 16 recomendations
-    { text: '', x: 318, y: 454, size: defaultSize }, // 17 approve/disapprove
-    { text: '', x: 72, y: 480, size: defaultSize }, // 18 noted by
-    { text: '', x: 358, y: 480, size: defaultSize }, // 19 regional director
+    { text: '', x: 415, y: 109, size: defaultSize }, // 00 docket number
+    { text: '', x: 72, y: 148, size: defaultSize }, // 01 date
+    { text: '', x: 72, y: 176, size: defaultSize }, // 02 name of client
+    { text: '', x: 72, y: 190, size: defaultSize }, // 03 name of business
+    { text: '', x: 72, y: 203, size: defaultSize }, // 04 business address
+    { text: '', x: 72, y: 215, size: defaultSize }, // 05 exact location
+    { text: '', x: 398, y: 322, size: defaultSize }, // 06 date of inspection
+    { text: '', x: 72, y: 336, size: defaultSize }, // 07 client name with address
+    { text: '', x: 96, y: 630, size: defaultSize }, // 08 date of deficiency hearing
+    { text: '', x: 72, y: 813, size: defaultSize }, // 09 regional director
 ];
 
 export const getPDFValues = (val: any) => {
-    // const pdfPlots = [...plots];
-    // const PLOT_SPARES = { x: 46, y: 407, size: defaultSize };
-    // const PLOT_MOBILE_PHONE = { x: 44, y: 528, size: defaultSize };
-    // const PLOT_SIM = { x: 50, y: 650, size: defaultSize };
-    // const LIMIT_SPARES = 4;
-    // const LIMIT_MOBILE_PHONE = 4;
-    // const LIMIT_SIM = 4;
-    // const SPACING = 12;
-    // const value: DeficiencyNotice = val;
-    // let ITERATION_SPARES = 0;
-    // let ITERATION_MOBILE_PHONE = 0;
-    // let ITERATION_SIM = 0;
-    // pdfPlots[0].text = dateToString(value.date_inspected as Date);
-    // pdfPlots[1].text = value.clients.name;
-    // pdfPlots[2].text = value.clients.businessAddress;
-    // pdfPlots[3].text = value.clients.cellphoneNumber;
-    // pdfPlots[4].text = value.clients.faxNumber;
-    // pdfPlots[5].text = value.clients.exactLocation;
-    // pdfPlots[6].text = value.permit_number
-    // pdfPlots[7].text = dateToString(value.permit_expiry_date as Date);
-    // pdfPlots[8].text = value.clients.secDtiRegistrationNumber;
-    // pdfPlots[9].text = value.clients.businessMayorPermitNumber;
-    // pdfPlots[10].text = value.sundry_one;
-    // pdfPlots[11].text = value.sundry_two;
-    // pdfPlots[12].text = value.remarks_deficiencies_discrepancies_noted
-    // pdfPlots[13].text = value.inspected_by;
-    // pdfPlots[14].text = value.owner_name;
-    // pdfPlots[15].text = value.owner_position;
-    // pdfPlots[16].text = value.recommendations
-    // pdfPlots[17].text = value.is_approved ? 'APPROVED' : 'DISAPPROVED';
-    // pdfPlots[18].text = value.noted_by;
-    // pdfPlots[19].text = value.regional_director;
+    const pdfPlots = [...plots];
+    const PLOT_VIOLATION = { x: 125, y: 374, size: defaultSize };
+    const PLOT_TRANSMITTERS = { x: 122, y: 477, size: defaultSize };
+    const LIMIT_VIOLATION = 5;
+    const LIMIT_TRANSMITTERS = 20;
+    const SPACING = 12;
+    const value: DeficiencyNoticeAPI = val;
+    let ITERATION_VIOLATION = 0;
+    let ITERATION_TRANSMITTERS = 0;
+    pdfPlots[0].text = value.docket_number;
+    pdfPlots[1].text = dateToString(value.date as Date);
+    pdfPlots[2].text = value.respondent_name;
+    pdfPlots[3].text = value.clients.business_name;
+    pdfPlots[4].text = value.clients.business_address;
+    pdfPlots[5].text = value.clients.exactLocation;
+    pdfPlots[6].text = dateToString(value.date_of_inspection as Date);
+    pdfPlots[7].text = `${value.respondent_name}, ${value.clients.business_address}, ${value.clients.exactLocation}`;
+    pdfPlots[8].text = dateToString(value.date_of_deficiency_hearing as Date);
+    pdfPlots[9].text = value.regional_director;
 
-    // for (const iterator of Array.from(value.spares_and_accessories)) {
-    //     if (ITERATION_SPARES < LIMIT_SPARES) {
-    //         pdfPlots.push({ text: iterator.particular, x: 112, y: PLOT_SPARES.y, size: defaultSize });
-    //         pdfPlots.push({ text: `${iterator.number_of_units}`, x: 263, y: PLOT_SPARES.y, size: defaultSize });
-    //         ITERATION_SPARES += 1;
-    //         PLOT_SPARES.y += SPACING; 
-    //     }
-    // }
+    const violations: string[] = [];
+    if (value['vi_operation_without_rsl']) { violations.push(viol[0].name) };
+    if (value['vi_operation_without_lro']) { violations.push(viol[1].name) };
+    if (value['vi_operation_unauthorized_frequency']) { violations.push(viol[2].name) };
+    if (value['vi_possession_transmitter_without_pp']) { violations.push(viol[3].name) };
+    if (value['vi_no_ntc_pertinent_papers']){ violations.push(viol[4].name) };
 
-    // for (const iterator of Array.from(value.mobile_phones)) {
-    //     if (ITERATION_MOBILE_PHONE < LIMIT_MOBILE_PHONE) {
-    //         pdfPlots.push({ text: iterator.model, x: 112, y: PLOT_MOBILE_PHONE.y, size: defaultSize });
-    //         pdfPlots.push({ text: iterator.imei_number, x: 328, y: PLOT_MOBILE_PHONE.y, size: defaultSize });
-    //         pdfPlots.push({ text: iterator.source, x: 475, y: PLOT_MOBILE_PHONE.y, size: defaultSize });
-    //         ITERATION_MOBILE_PHONE += 1;
-    //         PLOT_MOBILE_PHONE.y += SPACING; 
-    //     }
-    // }
+    for (const value of violations) {
+        if (ITERATION_VIOLATION < LIMIT_VIOLATION) {
+            pdfPlots.push({ text: `${ITERATION_VIOLATION + 1}. ${value}`, x: 125, y: PLOT_VIOLATION.y, size: defaultSize });
+            ITERATION_VIOLATION += 1;
+            PLOT_VIOLATION.y += SPACING; 
+        }
+    }
 
-    // return pdfPlots;
+    for (const iterator of Array.from(value.deficiency_notice_transmitter)) {
+        if (ITERATION_TRANSMITTERS < LIMIT_TRANSMITTERS) {
+            pdfPlots.push({ text: iterator.transmitter, x: 122, y: PLOT_TRANSMITTERS.y, size: defaultSize });
+            pdfPlots.push({ text: iterator.serial_number, x: 415, y: PLOT_TRANSMITTERS.y, size: defaultSize });
+            ITERATION_TRANSMITTERS += 1;
+            PLOT_TRANSMITTERS.y += 8; 
+        }
+    }
+
+    return pdfPlots;
 };

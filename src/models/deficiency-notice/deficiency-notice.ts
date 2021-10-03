@@ -16,9 +16,11 @@ export interface DeficiencyNotice {
   id?: number;
   date: Date | string;
   clientId: number | Client;
+  respondentName: string;
   docketNumber: string;
   clientName?: string;
   violationInfo: ViolationInfo;
+  dateOfInspection: Date | string;
   transmitters: TransmittersInfo[];
   dateOfDeficiencyHearing: Date | string;
   isDone: boolean;

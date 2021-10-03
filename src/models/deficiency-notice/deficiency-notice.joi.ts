@@ -8,6 +8,10 @@ export const deficiencyNoticeSchema = object<DeficiencyNotice>({
     }),
     clientId: number().required(),
     clientName: string().allow(''),
+    respondentName: string().allow(''),
+    dateOfInspection: date().required().messages({
+        'date.base': `dateOfInspection should be a type of date`,
+    }),
     docketNumber: string().allow(''),
     transmitters: array().items(
         object({

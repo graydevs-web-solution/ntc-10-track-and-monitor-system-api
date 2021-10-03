@@ -39,8 +39,8 @@ export const getPDFValues = (val: any) => {
     let ITERATION_ECE = 0;
     let ITERATION_TECHNICIANS = 0;
     pdfPlots[0].text = dateToString(value.date_inspected as Date);
-    pdfPlots[1].text = value.clients.name;
-    pdfPlots[2].text = value.clients.businessAddress;
+    pdfPlots[1].text = value.clients.business_name;
+    pdfPlots[2].text = value.clients.business_address;
     pdfPlots[3].text = value.clients.cellphoneNumber;
     pdfPlots[4].text = value.clients.faxNumber;
     pdfPlots[5].text = value.permit_number;

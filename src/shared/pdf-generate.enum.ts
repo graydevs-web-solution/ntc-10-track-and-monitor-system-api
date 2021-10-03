@@ -3,5 +3,5 @@ export enum PDFTemplate {
     mobilePhoneDealer = 'mobile_phone_dealer',
     serviceCenter = 'service_center',
     radioDealer = 'radio_dealer',
-    deficiencyNotice = 'deficiencyNotice'
+    deficiencyNotice = 'deficiency_notice'
 }

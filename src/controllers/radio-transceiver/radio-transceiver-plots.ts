@@ -83,8 +83,8 @@ export const getPDFValues = (value: any): PDFEntryValue[] => {
     let ITERATION_RECEIVERS = 0;
     let ITERATION_OTHERS = 0;
     pdfPlots[0].text = dateToString(data.date_issued as Date);
-    pdfPlots[1].text = data.clients.name
-    pdfPlots[2].text = data.clients.businessAddress;
+    pdfPlots[1].text = data.clients.business_name
+    pdfPlots[2].text = data.clients.business_address;
     pdfPlots[3].text = data.clients.exactLocation
     pdfPlots[4].text = data.class_type;
     pdfPlots[5].text = data.nature_of_service;

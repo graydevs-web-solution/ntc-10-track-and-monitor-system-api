@@ -9,8 +9,10 @@ datasource db {
 
 model clients {
   clientId                  String                  @id @db.Uuid
-  name                      String                  @db.VarChar(250)
-  businessAddress           String?                 @db.VarChar(250)
+  owner_name                String                  @db.VarChar(250)
+  owner_position            String                  @db.VarChar(250)
+  business_name             String                  @db.VarChar(250)
+  business_address          String?                 @db.VarChar(250)
   cellphoneNumber           String?                 @db.VarChar(11)
   faxNumber                 String?                 @db.VarChar(15)
   exactLocation             String?                 @db.VarChar(250)
@@ -271,6 +273,8 @@ model deficiency_notice {
   id                                   Int                             @id @default(autoincrement())
   date                                 DateTime?                       @db.Timestamptz(6)
   client_id                            Int?
+  respondent_name                      String?                         @db.VarChar(250)
+  date_of_inspection                   DateTime?                       @db.Timestamptz(6)
   docket_number                        String?                         @db.VarChar(250)
   vi_operation_without_rsl             Boolean?
   vi_operation_without_lro             Boolean?

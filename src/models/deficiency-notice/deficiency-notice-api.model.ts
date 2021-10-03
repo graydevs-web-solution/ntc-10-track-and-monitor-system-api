@@ -13,13 +13,24 @@ interface ViolationInfo {
   ['no_ntc_pertinent_papers']: boolean;
 }
 
+type tplotOptions = {
+    [key: string]: boolean
+}
+
+const plotOptions: tplotOptions = {
+    true: true,
+    false: true,
+}
+
 export interface DeficiencyNoticeAPI {
   ['id']?: number;
   ['date']: Date | string;
   ['client_id']: number | Client;
-['clients']: ClientAPI;
+  ['clients']: ClientAPI;
+  ['respondent_name']: string;
+  ['date_of_inspection']: Date | string;
   ['docket_number']: string;
-  ['vi_operation_without_rsl']: boolean;
+  ['vi_operation_without_rsl']: keyof typeof plotOptions;
   ['vi_operation_without_lro']: boolean;
   ['vi_operation_unauthorized_frequency']: boolean;
   ['vi_possession_transmitter_without_pp']: boolean;

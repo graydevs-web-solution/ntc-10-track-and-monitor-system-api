@@ -281,7 +281,11 @@ export const getList: RequestHandler = async (req, res, next) => {
         include: {
             clients: {
                 select: {
-                    name: true
+                    business_name: true,
+                    owner_name: true,
+                    owner_position: true,
+                    business_address: true,
+                    exactLocation: true,
                 }
             },
             radio_transceiver_items: true,
@@ -344,8 +348,10 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
         include: {
             clients: {
                 select: {
-                    name: true,
-                    businessAddress: true,
+                    business_name: true,
+                    owner_name: true,
+                    owner_position: true,
+                    business_address: true,
                     exactLocation: true
                 }
             },
