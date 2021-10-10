@@ -24,6 +24,7 @@ model clients {
   service_center_report     service_center_report[]
   radio_dealers             radio_dealers[]
   deficiency_notice         deficiency_notice[]
+  complaint                 complaint[]
 }
 
 model radio_transceiver_items {
@@ -286,4 +287,34 @@ model deficiency_notice {
   regional_director                    String?                         @db.VarChar(250)
   clients                              clients?                        @relation(fields: [client_id], references: [id])
   deficiency_notice_transmitter        deficiency_notice_transmitter[]
+}
+
+model complaint_transmitter {
+  complaint_id  Int?
+  transmitter   String?    @db.VarChar(250)
+  serial_number String?    @db.VarChar(250)
+  id            Int        @id @unique @default(autoincrement())
+  complaint     complaint? @relation(fields: [complaint_id], references: [id])
+}
+
+model complaint {
+  id                                   Int                     @id @default(autoincrement())
+  date                                 DateTime?               @db.Timestamptz(6)
+  client_id                            Int?
+  complainant_name                     String?                 @db.VarChar(250)
+  respondent_name                      String?                 @db.VarChar(250)
+  docket_number                        String?                 @db.VarChar(250)
+  date_of_inspection                   DateTime?               @db.Timestamptz(6)
+  location                             String?                 @db.VarChar(250)
+  reason                               String?                 @db.VarChar(250)
+  vi_operation_without_rsl             Boolean?
+  vi_operation_without_lro             Boolean?
+  vi_operation_unauthorized_frequency  Boolean?
+  vi_possession_transmitter_without_pp Boolean?
+  vi_no_ntc_pertinent_papers           Boolean?
+  date_time_of_hearing                 DateTime?               @db.Timestamptz(6)
+  is_done                              Boolean?
+  regional_director                    String?                 @db.VarChar(250)
+  clients                              clients?                @relation(fields: [client_id], references: [id])
+  complaint_transmitter                complaint_transmitter[]
 }
