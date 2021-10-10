@@ -31,6 +31,8 @@ export interface RadioDealerAPI {
   ['client_id']: number | Client;
   ['clients']: ClientAPI;
   ['date_inspected']: Date | string;
+  ['permit_number']: string;
+  ['permit_expiry_date']: Date | string;
   ['supervising_ece']: SupervisingECE[];
   ['radio_technicians']: Technician[];
   ['dtemi_reflectometer']: boolean;

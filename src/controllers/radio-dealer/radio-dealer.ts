@@ -1,14 +1,14 @@
-import { RequestHandler, response } from 'express';
+import { RequestHandler } from 'express';
 import { PrismaClient } from '@prisma/client'
 import { v4 as uuid } from 'uuid';
-import log from '../logger/index';
-import { DATABASE_SCHEMA } from '../config/database';
-import { modifyPdf } from '../shared/pdf-generate';
-import { PDFTemplate } from '../shared/pdf-generate.enum';
-import { getPDFValues } from './radio-transceiver/radio-transceiver-plots';
-import { RadioTransceiverAPI } from 'src/models/radio-transceivers/radio-transceiver-api.model';
-import { radioDealerSchema } from '../models/radio-dealer/radio-dealer.joi';
-import { RadioDealer } from '../models/radio-dealer/radio-dealer.model';
+import log from '../../logger/index';
+import { DATABASE_SCHEMA } from '../../config/database';
+import { modifyPdf } from '../../shared/pdf-generate';
+import { PDFTemplate } from '../../shared/pdf-generate.enum';
+import { getPDFValues } from '.././radio-dealer/radio-dealer-plot';
+import { radioDealerSchema } from '../../models/radio-dealer/radio-dealer.joi';
+import { RadioDealer } from '../../models/radio-dealer/radio-dealer.model';
+import { cleanDate, dateToString } from '../../shared/utility';
 
 const prisma = new PrismaClient()
 
@@ -19,22 +19,24 @@ export const saveRadioDealer: RequestHandler = async (req, res, next) => {
     const cleanedValues: RadioDealer = value;
     const result = await prisma.radio_dealers.create({
         data: {
-            date_inspected: cleanedValues.dateInspected ? (cleanedValues.dateInspected as Date).toISOString() : null,
+            date_inspected: cleanDate(cleanedValues.dateInspected as Date),
             client_id: cleanedValues.clientId as number,
+            permit_number: cleanedValues.permitNumber,
+            permit_expiry_date: cleanDate(cleanedValues.permitExpiryDate as Date),
             supervising_ece: {
                 create: cleanedValues.supervisingECE.map((val) => ({
                    name: val.name,
                    license_number: val.licenseNumber,
-                   expiry_date: val.expiryDate ? (val.expiryDate as Date).toISOString() : null,
+                   expiry_date: cleanDate(val.expiryDate as Date),
                    ptr_number: val.ptrNumber,
-                   date_issued: val.dateIssued ? (val.dateIssued as Date).toISOString() : null,
+                   date_issued: cleanDate(val.dateIssued as Date),
                 }))
             },
             radio_technicians: {
                 create: cleanedValues.radioTechnicians.map((val) => ({
                    name: val.name,
                    particulars_of_license: val.particularsOfLicense,
-                   expiry_date: val.expiryDate ? (val.expiryDate as Date).toISOString() : null,
+                   expiry_date: cleanDate(val.expiryDate as Date),
                 }))
             },
             dtemi_reflectometer: cleanedValues.diagnosticTestEquipmentAndMeasuringInstrumentInfo.reflectometer,
@@ -72,22 +74,24 @@ export const updateData: RequestHandler = async (req, res, next) => {
             id: FORM_ID
         },
         data: {
-            date_inspected: cleanedValues.dateInspected ? (cleanedValues.dateInspected as Date).toISOString() : null,
+            date_inspected: cleanDate(cleanedValues.dateInspected as Date),
             client_id: cleanedValues.clientId as number,
+            permit_number: cleanedValues.permitNumber,
+            permit_expiry_date: cleanDate(cleanedValues.permitExpiryDate as Date),
             supervising_ece: {
                 create: cleanedValues.supervisingECE.map((val) => ({
                    name: val.name,
                    license_number: val.licenseNumber,
-                   expiry_date: val.expiryDate ? (val.expiryDate as Date).toISOString() : null,
+                   expiry_date: cleanDate(val.expiryDate as Date),
                    ptr_number: val.ptrNumber,
-                   date_issued: val.dateIssued ? (val.dateIssued as Date).toISOString() : null,
+                   date_issued: cleanDate(val.dateIssued as Date),
                 }))
             },
             radio_technicians: {
                 create: cleanedValues.radioTechnicians.map((val) => ({
                    name: val.name,
                    particulars_of_license: val.particularsOfLicense,
-                   expiry_date: val.expiryDate ? (val.expiryDate as Date).toISOString() : null,
+                   expiry_date: cleanDate(val.expiryDate as Date),
                 }))
             },
             dtemi_reflectometer: cleanedValues.diagnosticTestEquipmentAndMeasuringInstrumentInfo.reflectometer,
@@ -138,16 +142,16 @@ export const updateData: RequestHandler = async (req, res, next) => {
         data: cleanedValues.supervisingECE.map((val) => ({
                    name: val.name,
                    license_number: val.licenseNumber,
-                   expiry_date: val.expiryDate ? (val.expiryDate as Date).toISOString() : null,
+                   expiry_date: cleanDate(val.expiryDate as Date),
                    ptr_number: val.ptrNumber,
-                   date_issued: val.dateIssued ? (val.dateIssued as Date).toISOString() : null,
+                   date_issued: cleanDate(val.dateIssued as Date),
                 }))
     });
     const insertTechinicians = prisma.radio_technicians.createMany({
         data: cleanedValues.radioTechnicians.map((val) => ({
                    name: val.name,
                    particulars_of_license: val.particularsOfLicense,
-                   expiry_date: val.expiryDate ? (val.expiryDate as Date).toISOString() : null,
+                   expiry_date: cleanDate(val.expiryDate as Date),
                 }))
     });
     await prisma.$transaction([updateMain, deleteECE, deleteTechnicians, insertECE, insertTechinicians])
@@ -168,7 +172,11 @@ export const getList: RequestHandler = async (req, res, next) => {
         include: {
             clients: {
                 select: {
-                    name: true
+                    business_name: true,
+                    owner_name: true,
+                    owner_position: true,
+                    business_address: true,
+                    exactLocation: true,
                 }
             },
             radio_technicians: true,
@@ -218,38 +226,42 @@ export const deleteData: RequestHandler = async (req, res, next) => {
   }
 }
 
-// export const generatePdf: RequestHandler = async (req, res, next) => {
-//   try {
-//     const { id } = req.query;
-//     const doc = await prisma.radio_transceivers.findUnique({
-//         where: {
-//             id: +(id as string)
-//         },
-//         include: {
-//             clients: {
-//                 select: {
-//                     name: true,
-//                     businessAddress: true,
-//                     exactLocation: true
-//                 }
-//             },
-//             radio_transceiver_items: true,
-//             radio_transceiver_operators: true
-//         }
-//     });
-//     const pdf = await modifyPdf(getPDFValues(doc), PDFTemplate.radioTransceiver);
+export const generatePdf: RequestHandler = async (req, res, next) => {
+  try {
+    const { id } = req.query;
+    const doc = await prisma.radio_dealers.findUnique({
+        where: {
+            id: +(id as string)
+        },
+        include: {
+            clients: {
+                select: {
+                    business_name: true,
+                    owner_name: true,
+                    owner_position: true,
+                    business_address: true,
+                    exactLocation: true,
+                    cellphoneNumber: true,
+                    faxNumber: true,
+                }
+            },
+            radio_technicians: true,
+            supervising_ece: true
+        }
+    });
+    const pdf = await modifyPdf(getPDFValues(doc), PDFTemplate.radioDealer);
 
-//     res.writeHead(200, {
-//         'Content-Type': 'application/pdf',
-//         'Content-Disposition': `attachment; filename="${PDFTemplate.radioTransceiver}.pdf"`
-//     });
+    res.writeHead(200, {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${PDFTemplate.radioDealer}.pdf"`
+    });
 
-//     res.end(pdf);
-//   } catch (error) {
-//     log.error(error);
-//     res.status(500).json({ message: `Couldn't get clients at this time.` });
-//   }
-// }
+    res.end(pdf);
+  } catch (error) {
+    log.error(error);
+    res.status(500).json({ message: `Couldn't get clients at this time.` });
+  }
+}
 
 // // export const getClient: RequestHandler = async (req, res, next) => {
 // //   try {

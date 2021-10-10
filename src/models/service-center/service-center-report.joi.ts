@@ -7,6 +7,8 @@ export const serviceCenterReportSchema = object({
     }),
     clientId: number().required(),
     clientName: string().allow(''),
+    permitNumber: string().allow(''),
+    permitExpiryDate: date().allow(null),
     listOfServiceOrTestEquipments: array().items(
         object({
             particular: string(),

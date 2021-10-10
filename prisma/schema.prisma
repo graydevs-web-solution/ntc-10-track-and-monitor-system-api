@@ -9,8 +9,10 @@ datasource db {
 
 model clients {
   clientId                  String                  @id @db.Uuid
-  name                      String                  @db.VarChar(250)
-  businessAddress           String?                 @db.VarChar(250)
+  owner_name                String                  @db.VarChar(250)
+  owner_position            String                  @db.VarChar(250)
+  business_name             String                  @db.VarChar(250)
+  business_address          String?                 @db.VarChar(250)
   cellphoneNumber           String?                 @db.VarChar(11)
   faxNumber                 String?                 @db.VarChar(15)
   exactLocation             String?                 @db.VarChar(250)
@@ -21,11 +23,35 @@ model clients {
   mobile_phone_dealers      mobile_phone_dealers[]
   service_center_report     service_center_report[]
   radio_dealers             radio_dealers[]
+  deficiency_notice         deficiency_notice[]
+  complaint                 complaint[]
 }
 
 model radio_transceiver_items {
   radio_transceiver_id Int?
   model                String?             @db.VarChar(250)
+  serial_number        String?             @db.VarChar(250)
+  freq_range           String?             @db.VarChar(250)
+  power_output         String?             @db.VarChar(250)
+  freq_control         String?             @db.VarChar(250)
+  id                   Int                 @id @unique @default(autoincrement())
+  radio_transceivers   radio_transceivers? @relation(fields: [radio_transceiver_id], references: [id])
+}
+
+model radio_transceiver_receivers {
+  radio_transceiver_id Int?
+  name                 String?             @db.VarChar(250)
+  serial_number        String?             @db.VarChar(250)
+  freq_range           String?             @db.VarChar(250)
+  power_output         String?             @db.VarChar(250)
+  freq_control         String?             @db.VarChar(250)
+  id                   Int                 @id @unique @default(autoincrement())
+  radio_transceivers   radio_transceivers? @relation(fields: [radio_transceiver_id], references: [id])
+}
+
+model radio_transceiver_others {
+  radio_transceiver_id Int?
+  name                 String?             @db.VarChar(250)
   serial_number        String?             @db.VarChar(250)
   freq_range           String?             @db.VarChar(250)
   power_output         String?             @db.VarChar(250)
@@ -69,16 +95,16 @@ model radio_transceivers {
   freq_measured_freq                           String?                       @db.VarChar(250)
   freq_if_receiver                             String?                       @db.VarChar(250)
   freq_type_of_emission                        String?                       @db.VarChar(250)
-  freq_antenna_system_type                     String?                       @db.VarChar(250)
-  freq_elevation_from_gmd                      String?                       @db.VarChar(250)
-  freq_length_of_radiator                      String?                       @db.VarChar(250)
-  freq_gain                                    String?                       @db.VarChar(250)
-  freq_directivity                             String?                       @db.VarChar(250)
-  freq_power_supply                            String?                       @db.VarChar(250)
-  freq_battery                                 String?                       @db.VarChar(250)
-  freq_voltage_and_type                        String?                       @db.VarChar(250)
-  freq_capacity                                String?                       @db.VarChar(250)
-  freq_ah                                      String?                       @db.VarChar(250)
+  as_type                                      String?                       @db.VarChar(250)
+  as_elevation_from_gmd                        String?                       @db.VarChar(250)
+  as_length_of_radiator                        String?                       @db.VarChar(250)
+  as_gain                                      String?                       @db.VarChar(250)
+  as_directivity                               String?                       @db.VarChar(250)
+  as_power_supply                              String?                       @db.VarChar(250)
+  as_battery                                   String?                       @db.VarChar(250)
+  as_voltage_and_type                          String?                       @db.VarChar(250)
+  as_capacity                                  String?                       @db.VarChar(250)
+  as_ah                                        String?                       @db.VarChar(250)
   illegal_construction_without_permit          Boolean?
   illegal_transfer                             Boolean?
   operation_without_rsl                        Boolean?
@@ -102,6 +128,8 @@ model radio_transceivers {
   clients                                      clients?                      @relation(fields: [client_id], references: [id])
   radio_transceiver_items                      radio_transceiver_items[]
   radio_transceiver_operators                  radio_transceiver_operators[]
+  radio_transceiver_receivers                  radio_transceiver_receivers[]
+  radio_transceiver_others                     radio_transceiver_others[]
 }
 
 model spares_and_accessories {
@@ -133,6 +161,8 @@ model mobile_phone_dealers {
   id                                       Int                      @id @default(autoincrement())
   date_inspected                           DateTime?                @db.Timestamptz(6)
   client_id                                Int?
+  permit_number                            String?                  @db.VarChar(250)
+  permit_expiry_date                       DateTime?                @db.Timestamptz(6)
   sundry_one                               String?                  @db.VarChar(250)
   sundry_two                               String?                  @db.VarChar(250)
   remarks_deficiencies_discrepancies_noted String?                  @db.VarChar(250)
@@ -169,6 +199,8 @@ model service_center_report {
   id                                       Int                                  @id @default(autoincrement())
   date_inspected                           DateTime?                            @db.Timestamptz(6)
   client_id                                Int?
+  permit_number                            String?                              @db.VarChar(250)
+  permit_expiry_date                       DateTime?                            @db.Timestamptz(6)
   sundry_one                               String?                              @db.VarChar(250)
   sundry_two                               String?                              @db.VarChar(250)
   sundry_three                             String?                              @db.VarChar(250)
@@ -208,6 +240,8 @@ model radio_technicians {
 model radio_dealers {
   id                            Int                 @id @default(autoincrement())
   date_inspected                DateTime?           @db.Timestamptz(6)
+  permit_number                 String?             @db.VarChar(250)
+  permit_expiry_date            DateTime?           @db.Timestamptz(6)
   client_id                     Int?
   dtemi_reflectometer           Boolean?
   dtemi_frequency_counter       Boolean?
@@ -226,4 +260,61 @@ model radio_dealers {
   clients                       clients?            @relation(fields: [client_id], references: [id])
   supervising_ece               supervising_ece[]
   radio_technicians             radio_technicians[]
+}
+
+model deficiency_notice_transmitter {
+  deficiency_notice_id Int?
+  transmitter          String?            @db.VarChar(250)
+  serial_number        String?            @db.VarChar(250)
+  id                   Int                @id @unique @default(autoincrement())
+  deficiency_notice    deficiency_notice? @relation(fields: [deficiency_notice_id], references: [id])
+}
+
+model deficiency_notice {
+  id                                   Int                             @id @default(autoincrement())
+  date                                 DateTime?                       @db.Timestamptz(6)
+  client_id                            Int?
+  respondent_name                      String?                         @db.VarChar(250)
+  date_of_inspection                   DateTime?                       @db.Timestamptz(6)
+  docket_number                        String?                         @db.VarChar(250)
+  vi_operation_without_rsl             Boolean?
+  vi_operation_without_lro             Boolean?
+  vi_operation_unauthorized_frequency  Boolean?
+  vi_possession_transmitter_without_pp Boolean?
+  vi_no_ntc_pertinent_papers           Boolean?
+  date_of_deficiency_hearing           DateTime?                       @db.Timestamptz(6)
+  is_done                              Boolean?
+  regional_director                    String?                         @db.VarChar(250)
+  clients                              clients?                        @relation(fields: [client_id], references: [id])
+  deficiency_notice_transmitter        deficiency_notice_transmitter[]
+}
+
+model complaint_transmitter {
+  complaint_id  Int?
+  transmitter   String?    @db.VarChar(250)
+  serial_number String?    @db.VarChar(250)
+  id            Int        @id @unique @default(autoincrement())
+  complaint     complaint? @relation(fields: [complaint_id], references: [id])
+}
+
+model complaint {
+  id                                   Int                     @id @default(autoincrement())
+  date                                 DateTime?               @db.Timestamptz(6)
+  client_id                            Int?
+  complainant_name                     String?                 @db.VarChar(250)
+  respondent_name                      String?                 @db.VarChar(250)
+  docket_number                        String?                 @db.VarChar(250)
+  date_of_inspection                   DateTime?               @db.Timestamptz(6)
+  location                             String?                 @db.VarChar(250)
+  reason                               String?                 @db.VarChar(250)
+  vi_operation_without_rsl             Boolean?
+  vi_operation_without_lro             Boolean?
+  vi_operation_unauthorized_frequency  Boolean?
+  vi_possession_transmitter_without_pp Boolean?
+  vi_no_ntc_pertinent_papers           Boolean?
+  date_time_of_hearing                 DateTime?               @db.Timestamptz(6)
+  is_done                              Boolean?
+  regional_director                    String?                 @db.VarChar(250)
+  clients                              clients?                @relation(fields: [client_id], references: [id])
+  complaint_transmitter                complaint_transmitter[]
 }

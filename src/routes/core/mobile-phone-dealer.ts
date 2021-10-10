@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import * as controllers from '../../controllers/mobile-phone-dealer';
+import * as controllers from '../../controllers/mobile-phone-dealer/mobile-phone-dealer';
 
 export const router = Router();
 
@@ -11,7 +11,7 @@ router.patch('/', controllers.updateData);
 
 router.delete('/', controllers.deleteData);
 
-// router.get('/pdf', controllers.generatePdf);
+router.get('/pdf', controllers.generatePdf);
 
 // router.get('/one', getClient);
 

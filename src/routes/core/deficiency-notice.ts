@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import * as controllers from '../../controllers/radio-dealer/radio-dealer';
+import * as controllers from '../../controllers/deficiency-notice/deficiency-notice';
 
 export const router = Router();
 
-router.post('/', controllers.saveRadioDealer);
+router.post('/', controllers.saveOne);
 
 router.get('/', controllers.getList);
 

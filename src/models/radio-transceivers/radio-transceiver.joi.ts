@@ -49,13 +49,35 @@ export const radioTransceiverSchema = object({
             freqControl: string().allow(''),
         })
     ),
+    receivers: array().items(
+        object({
+            id: number().allow(null),
+            name: string().allow(''),
+            serialNumber: string().allow(''),
+            freqRange: string().allow(''),
+            powerOutput: string().allow(''),
+            freqControl: string().allow(''),
+        })
+    ),
+    otherEquipments: array().items(
+        object({
+            id: number().allow(null),
+            name: string().allow(''),
+            serialNumber: string().allow(''),
+            freqRange: string().allow(''),
+            powerOutput: string().allow(''),
+            freqControl: string().allow(''),
+        })
+    ),
     frequenciesInfo: object({
         assignedFreq: string().allow(''),
         crystalFreq: string().allow(''),
         measuredFreq: string().allow(''),
         ifReceiver: string().allow(''),
         typeOfEmission: string().allow(''),
-        antennaSystemType: string().allow(''),
+    }),
+    antennaSystemInfo: object({
+                type: string().allow(''),
         elevationFromGmd: string().allow(''),
         lengthOfRadiator: string().allow(''),
         gain: string().allow(''),

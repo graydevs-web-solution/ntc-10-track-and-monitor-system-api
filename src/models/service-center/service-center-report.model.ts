@@ -26,6 +26,8 @@ export interface ServiceCenterReport {
   dateInspected: Date | string;
   clientId: number | Client;
   clientName?: string;
+  permitNumber: string;
+  permitExpiryDate: Date | string;
   listOfServiceOrTestEquipments: ServiceOrTestEquipments[];
   employedElectronicsTechnicians: EmployedElectronicsTechnicians[];
   sundryOfInformation: SundryOfInformation;

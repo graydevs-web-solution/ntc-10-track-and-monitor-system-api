@@ -13,11 +13,15 @@ export const saveClient: RequestHandler = async (req, res, next) => {
   try {
     const { value, error } = clientSchema.validate(req.body);
     if (error) { log.error(error); return res.status(400).json({ message: `Validation error on client.` }); }
-    let clientId = '';
-
+    const clientData: Client = value;
+    const { ownerName, businessName, ownerPosition, businessAddress, ...rest } = clientData;
     const result = await prisma.clients.create({
         data: {
-            ...value,
+            owner_name: ownerName,
+            business_name: businessName,
+            owner_position: ownerPosition,
+            business_address: businessAddress,
+            ...rest,
             clientId: uuid()
         }
     })
@@ -59,7 +63,7 @@ export const searchClient: RequestHandler = async (req, res, next) => {
   try {
       const { search } = req.query;
     const docs = await prisma.$queryRaw<Client[]>(`
-        SELECT name, id FROM ${DATABASE_SCHEMA}.clients WHERE to_tsvector(name) @@ to_tsquery('${search}')
+        SELECT * FROM ${DATABASE_SCHEMA}.clients WHERE to_tsvector(business_name) @@ to_tsquery('${search}')
         `);
     // const docCount = await prisma.clients.count();
 

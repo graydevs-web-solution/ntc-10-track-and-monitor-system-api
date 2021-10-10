@@ -8,7 +8,7 @@ import { DATABASE_SCHEMA } from '../../config/database';
 import { modifyPdf } from '../../shared/pdf-generate';
 import { PDFTemplate } from '../../shared/pdf-generate.enum';
 import { getPDFValues } from './radio-transceiver-plots';
-import { RadioTransceiverAPI } from 'src/models/radio-transceivers/radio-transceiver-api.model';
+import { RadioTransceiverAPI } from '../../models/radio-transceivers/radio-transceiver-api.model';
 
 const prisma = new PrismaClient()
 
@@ -42,16 +42,16 @@ export const saveRadioTransceivers: RequestHandler = async (req, res, next) => {
             freq_measured_freq: cleanedValues.frequenciesInfo.measuredFreq,
             freq_if_receiver: cleanedValues.frequenciesInfo.ifReceiver,
             freq_type_of_emission: cleanedValues.frequenciesInfo.typeOfEmission,
-            freq_antenna_system_type: cleanedValues.frequenciesInfo.antennaSystemType,
-            freq_elevation_from_gmd: cleanedValues.frequenciesInfo.elevationFromGmd,
-            freq_length_of_radiator: cleanedValues.frequenciesInfo.lengthOfRadiator,
-            freq_gain: cleanedValues.frequenciesInfo.gain,
-            freq_directivity: cleanedValues.frequenciesInfo.directivity,
-            freq_power_supply: cleanedValues.frequenciesInfo.powerSupply,
-            freq_battery: cleanedValues.frequenciesInfo.battery,
-            freq_voltage_and_type: cleanedValues.frequenciesInfo.voltageAndType,
-            freq_capacity: cleanedValues.frequenciesInfo.capacity,
-            freq_ah: cleanedValues.frequenciesInfo.ah,
+            as_type: cleanedValues.antennaSystemInfo.type,
+            as_elevation_from_gmd: cleanedValues.antennaSystemInfo.elevationFromGmd,
+            as_length_of_radiator: cleanedValues.antennaSystemInfo.lengthOfRadiator,
+            as_gain: cleanedValues.antennaSystemInfo.gain,
+            as_directivity: cleanedValues.antennaSystemInfo.directivity,
+            as_power_supply: cleanedValues.antennaSystemInfo.powerSupply,
+            as_battery: cleanedValues.antennaSystemInfo.battery,
+            as_voltage_and_type: cleanedValues.antennaSystemInfo.voltageAndType,
+            as_capacity: cleanedValues.antennaSystemInfo.capacity,
+            as_ah: cleanedValues.antennaSystemInfo.ah,
             illegal_construction_without_permit: cleanedValues.illegalConstructionInfo.constructionsOfRadioStationsWithoutConstructionPermit,
             illegal_transfer: cleanedValues.illegalConstructionInfo.illegalTransfer,
             operation_without_rsl: cleanedValues.illegalOperationInfo.operationWithoutRadioStationLicensePermit,
@@ -88,6 +88,24 @@ export const saveRadioTransceivers: RequestHandler = async (req, res, next) => {
                 particular_of_license: val.particularOfLicense,
                 expiration_date: val.expirationDate
             }))
+            },
+            radio_transceiver_others: {
+                create: cleanedValues.otherEquipments.map((val) => ({
+                   name: val.name,
+                   serial_number: val.serialNumber,
+                   freq_range: val.freqRange,
+                   power_output: val.powerOutput,
+                   freq_control: val.freqControl 
+                }))
+            },
+            radio_transceiver_receivers: {
+                create: cleanedValues.receivers.map((val) => ({
+                   name: val.name,
+                   serial_number: val.serialNumber,
+                   freq_range: val.freqRange,
+                   power_output: val.powerOutput,
+                   freq_control: val.freqControl 
+                }))
             }
         }
     })
@@ -133,16 +151,16 @@ export const updateData: RequestHandler = async (req, res, next) => {
             freq_measured_freq: cleanedValues.frequenciesInfo.measuredFreq,
             freq_if_receiver: cleanedValues.frequenciesInfo.ifReceiver,
             freq_type_of_emission: cleanedValues.frequenciesInfo.typeOfEmission,
-            freq_antenna_system_type: cleanedValues.frequenciesInfo.antennaSystemType,
-            freq_length_of_radiator: cleanedValues.frequenciesInfo.lengthOfRadiator,
-            freq_elevation_from_gmd: cleanedValues.frequenciesInfo.elevationFromGmd,
-            freq_gain: cleanedValues.frequenciesInfo.gain,
-            freq_directivity: cleanedValues.frequenciesInfo.directivity,
-            freq_power_supply: cleanedValues.frequenciesInfo.powerSupply,
-            freq_battery: cleanedValues.frequenciesInfo.battery,
-            freq_voltage_and_type: cleanedValues.frequenciesInfo.voltageAndType,
-            freq_capacity: cleanedValues.frequenciesInfo.capacity,
-            freq_ah: cleanedValues.frequenciesInfo.ah,
+            as_type: cleanedValues.antennaSystemInfo.type,
+            as_length_of_radiator: cleanedValues.antennaSystemInfo.lengthOfRadiator,
+            as_elevation_from_gmd: cleanedValues.antennaSystemInfo.elevationFromGmd,
+            as_gain: cleanedValues.antennaSystemInfo.gain,
+            as_directivity: cleanedValues.antennaSystemInfo.directivity,
+            as_power_supply: cleanedValues.antennaSystemInfo.powerSupply,
+            as_battery: cleanedValues.antennaSystemInfo.battery,
+            as_voltage_and_type: cleanedValues.antennaSystemInfo.voltageAndType,
+            as_capacity: cleanedValues.antennaSystemInfo.capacity,
+            as_ah: cleanedValues.antennaSystemInfo.ah,
             illegal_construction_without_permit: cleanedValues.illegalConstructionInfo.constructionsOfRadioStationsWithoutConstructionPermit,
             illegal_transfer: cleanedValues.illegalConstructionInfo.illegalTransfer,
             operation_without_rsl: cleanedValues.illegalOperationInfo.operationWithoutRadioStationLicensePermit,
@@ -195,6 +213,8 @@ export const updateData: RequestHandler = async (req, res, next) => {
 
     const deleteOperators = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_operators WHERE radio_transceiver_id = ${FORM_ID}`);
     const deleteRTItems = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_items WHERE radio_transceiver_id = ${FORM_ID}`);
+    const deleteReceivers = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_receivers WHERE radio_transceiver_id = ${FORM_ID}`);
+    const deleteRTOthers = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_others WHERE radio_transceiver_id = ${FORM_ID}`);
     const insertOperators = prisma.radio_transceiver_operators.createMany({
         data: cleanedValues.operators.map((val) => ({
             name: val.name,
@@ -213,7 +233,37 @@ export const updateData: RequestHandler = async (req, res, next) => {
             radio_transceiver_id: FORM_ID
         }))
     });
-    await prisma.$transaction([updateMain, deleteOperators, deleteRTItems, insertOperators, insertRTItems])
+    const insertRTReceivers = prisma.radio_transceiver_receivers.createMany({
+        data: cleanedValues.receivers.map((val) => ({
+            name: val.name,
+            serial_number: val.serialNumber,
+            freq_range: val.freqRange,
+            power_output: val.powerOutput,
+            freq_control: val.freqControl,
+            radio_transceiver_id: FORM_ID
+        }))
+    });
+    const insertRTOthers = prisma.radio_transceiver_others.createMany({
+        data: cleanedValues.otherEquipments.map((val) => ({
+            name: val.name,
+            serial_number: val.serialNumber,
+            freq_range: val.freqRange,
+            power_output: val.powerOutput,
+            freq_control: val.freqControl,
+            radio_transceiver_id: FORM_ID
+        }))
+    });
+    await prisma.$transaction([
+        updateMain, 
+        deleteOperators, 
+        deleteRTItems, 
+        deleteReceivers, 
+        deleteRTOthers, 
+        insertOperators, 
+        insertRTItems, 
+        insertRTReceivers, 
+        insertRTOthers
+    ])
 
     res.status(200).json({ message: 'Ok' });
   } catch (error) {
@@ -231,15 +281,20 @@ export const getList: RequestHandler = async (req, res, next) => {
         include: {
             clients: {
                 select: {
-                    name: true
+                    business_name: true,
+                    owner_name: true,
+                    owner_position: true,
+                    business_address: true,
+                    exactLocation: true,
                 }
             },
             radio_transceiver_items: true,
-            radio_transceiver_operators: true
+            radio_transceiver_operators: true,
+            radio_transceiver_receivers: true,
+            radio_transceiver_others: true
         }
     });
     const docCount = await prisma.radio_transceivers.count();
-
     res.status(200).json({ data: docs, collectionSize: docCount });
   } catch (error) {
       log.error(error);
@@ -255,8 +310,10 @@ export const deleteData: RequestHandler = async (req, res, next) => {
             id: +(id as string)
         },
     });
-     const deleteOperators = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_operators WHERE radio_transceiver_id = ${id}`);
+    const deleteOperators = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_operators WHERE radio_transceiver_id = ${id}`);
     const deleteRTItems = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_items WHERE radio_transceiver_id = ${id}`);
+    const deleteReceivers = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_receivers WHERE radio_transceiver_id = ${id}`);
+    const deleteRTOthers = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_others WHERE radio_transceiver_id = ${id}`);
 
     // NOTE: This code block couldn't delete specified row. I'm dumb as heck
     // 
@@ -272,11 +329,11 @@ export const deleteData: RequestHandler = async (req, res, next) => {
     //    }
     // }); 
 
-    await prisma.$transaction([deleteMain, deleteOperators, deleteRTItems])
+    await prisma.$transaction([deleteMain, deleteOperators, deleteRTItems, deleteReceivers, deleteRTOthers])
 
     res.status(200).json({ message: 'Ok' });
   } catch (error) {
-      log.error(error);
+    log.error(error);
     res.status(500).json({ message: `Couldn't get clients at this time.` });
   }
 }
@@ -291,13 +348,17 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
         include: {
             clients: {
                 select: {
-                    name: true,
-                    businessAddress: true,
+                    business_name: true,
+                    owner_name: true,
+                    owner_position: true,
+                    business_address: true,
                     exactLocation: true
                 }
             },
             radio_transceiver_items: true,
-            radio_transceiver_operators: true
+            radio_transceiver_operators: true,
+            radio_transceiver_receivers: true,
+            radio_transceiver_others: true
         }
     });
     const pdf = await modifyPdf(getPDFValues(doc), PDFTemplate.radioTransceiver);

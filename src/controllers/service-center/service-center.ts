@@ -1,13 +1,14 @@
 import { RequestHandler, response } from 'express';
 import { PrismaClient } from '@prisma/client'
 import { v4 as uuid } from 'uuid';
-import log from '../logger/index';
-import { DATABASE_SCHEMA } from '../config/database';
-import { modifyPdf } from '../shared/pdf-generate';
-import { PDFTemplate } from '../shared/pdf-generate.enum';
-import { getPDFValues } from './radio-transceiver/radio-transceiver-plots';
-import { serviceCenterReportSchema } from '../models/service-center/service-center-report.joi';
-import { ServiceCenterReport } from '../models/service-center/service-center-report.model';
+import log from '../../logger/index';
+import { DATABASE_SCHEMA } from '../../config/database';
+import { modifyPdf, ModifyPDFOptions } from '../../shared/pdf-generate';
+import { PDFTemplate } from '../../shared/pdf-generate.enum';
+import { getPDFValues } from '../service-center/service-center-plot';
+import { serviceCenterReportSchema } from '../../models/service-center/service-center-report.joi';
+import { ServiceCenterReport } from '../../models/service-center/service-center-report.model';
+import { cleanDate } from '../../shared/utility';
 
 const prisma = new PrismaClient()
 
@@ -20,6 +21,8 @@ export const saveServiceCenter: RequestHandler = async (req, res, next) => {
         data: {
             date_inspected: cleanedValues.dateInspected ? (cleanedValues.dateInspected as Date).toISOString() : null,
             client_id: cleanedValues.clientId as number,
+            permit_number: cleanedValues.permitNumber,
+            permit_expiry_date: cleanDate(cleanedValues.permitExpiryDate as Date),
             list_of_service_or_test_equipments: {
                 create: cleanedValues.listOfServiceOrTestEquipments.map((val) => ({
                    particular: val.particular,
@@ -66,6 +69,8 @@ export const updateData: RequestHandler = async (req, res, next) => {
         data: {
             date_inspected: cleanedValues.dateInspected ? (cleanedValues.dateInspected as Date).toISOString() : null,
             client_id: cleanedValues.clientId as number,
+            permit_number: cleanedValues.permitNumber,
+            permit_expiry_date: cleanDate(cleanedValues.permitExpiryDate as Date),
             list_of_service_or_test_equipments: {
                 create: cleanedValues.listOfServiceOrTestEquipments.map((val) => ({
                    particular: val.particular,
@@ -151,7 +156,11 @@ export const getList: RequestHandler = async (req, res, next) => {
         include: {
             clients: {
                 select: {
-                    name: true
+                    business_name: true,
+                    owner_name: true,
+                    owner_position: true,
+                    business_address: true,
+                    exactLocation: true,
                 }
             },
             list_of_service_or_test_equipments: true,
@@ -201,38 +210,49 @@ export const deleteData: RequestHandler = async (req, res, next) => {
   }
 }
 
-// export const generatePdf: RequestHandler = async (req, res, next) => {
-//   try {
-//     const { id } = req.query;
-//     const doc = await prisma.radio_transceivers.findUnique({
-//         where: {
-//             id: +(id as string)
-//         },
-//         include: {
-//             clients: {
-//                 select: {
-//                     name: true,
-//                     businessAddress: true,
-//                     exactLocation: true
-//                 }
-//             },
-//             radio_transceiver_items: true,
-//             radio_transceiver_operators: true
-//         }
-//     });
-//     const pdf = await modifyPdf(getPDFValues(doc), PDFTemplate.radioTransceiver);
+export const generatePdf: RequestHandler = async (req, res, next) => {
+  try {
+    const { id } = req.query;
+    const doc = await prisma.service_center_report.findUnique({
+        where: {
+            id: +(id as string)
+        },
+        include: {
+            clients: {
+                select: {
+                    business_name: true,
+                    owner_name: true,
+                    owner_position: true,
+                    business_address: true,
+                    exactLocation: true,
+                }
+            },
+            employed_electronics_technicians: true,
+            list_of_service_or_test_equipments: true
+        }
+    });
+    const pdfValues = getPDFValues(doc);
+    const options: ModifyPDFOptions = {
+        isMultiplePage: true,
+        startEndValuesPerPage: [
+            { start: 0, end: 12, page: 1 },
+            { start: 13, end: 19, page: 2 },
+            { start: 21, page: 1 },
+        ]
+    };
+    const pdf = await modifyPdf(pdfValues, PDFTemplate.serviceCenter, options);
 
-//     res.writeHead(200, {
-//         'Content-Type': 'application/pdf',
-//         'Content-Disposition': `attachment; filename="${PDFTemplate.radioTransceiver}.pdf"`
-//     });
+    res.writeHead(200, {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${PDFTemplate.serviceCenter}.pdf"`
+    });
 
-//     res.end(pdf);
-//   } catch (error) {
-//     log.error(error);
-//     res.status(500).json({ message: `Couldn't get clients at this time.` });
-//   }
-// }
+    res.end(pdf);
+  } catch (error) {
+    log.error(error);
+    res.status(500).json({ message: `Couldn't get clients at this time.` });
+  }
+}
 
 // // export const getClient: RequestHandler = async (req, res, next) => {
 // //   try {

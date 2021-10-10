@@ -4,6 +4,8 @@ import { router as radioTransceiver } from './core/radio-transceivers';
 import { router as mobilePhoneDealer } from './core/mobile-phone-dealer';
 import { router as serviceCenter } from './core/service-center';
 import { router as radioDealer } from './core/radio-dealer';
+import { router as deficiencyNotice } from './core/deficiency-notice';
+import { router as complaint } from './core/complaint';
 
 export default function (app: Express) {
     app.use('/api/main/client', clientRouter);
@@ -15,4 +17,8 @@ export default function (app: Express) {
     app.use('/api/main/service-center', serviceCenter);
 
     app.use('/api/main/radio-dealer', radioDealer);
+
+    app.use('/api/main/deficiency-notice', deficiencyNotice);
+
+    app.use('/api/main/complaint', complaint);
 };

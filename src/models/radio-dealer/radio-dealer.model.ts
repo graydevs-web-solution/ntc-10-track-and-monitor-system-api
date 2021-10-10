@@ -29,6 +29,8 @@ export interface RadioDealer {
   dateInspected: Date | string;
   clientId: number | Client;
   clientName?: string;
+  permitNumber: string;
+  permitExpiryDate: Date | string;
   supervisingECE: SupervisingECE[];
   radioTechnicians: Technician[];
   diagnosticTestEquipmentAndMeasuringInstrumentInfo: DiagnosticTestEquipmentAndMeasuringInstrumentInfo;

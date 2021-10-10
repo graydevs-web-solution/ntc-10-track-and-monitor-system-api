@@ -1,6 +1,8 @@
 export interface Client {
   clientId?: string;
-  name: string;
+  ownerName: string;
+  ownerPosition: string;
+  businessName: string;
   businessAddress: string;
   cellphoneNumber: string;
   faxNumber: string;

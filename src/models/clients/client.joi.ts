@@ -1,8 +1,13 @@
 import { object, number, string } from 'joi';
+import { Client } from './client.model';
 
-export const clientSchema = object({
-    name: string().required().messages({
-        'string.base': `Name should be a type of string`,
+export const clientSchema = object<Client>({
+    ownerName: string().required().messages({
+        'string.base': `ownerName should be a type of string`,
+    }),
+    ownerPosition: string().allow(''),
+    businessName: string().required().messages({
+        'string.base': `businessName should be a type of string`,
     }),
     businessAddress: string().allow(''),
     cellphoneNumber: string(),
