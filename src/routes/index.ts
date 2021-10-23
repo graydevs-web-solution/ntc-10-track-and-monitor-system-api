@@ -6,6 +6,7 @@ import { router as serviceCenter } from './core/service-center';
 import { router as radioDealer } from './core/radio-dealer';
 import { router as deficiencyNotice } from './core/deficiency-notice';
 import { router as complaint } from './core/complaint';
+import { router as auth } from './core/auth';
 
 export default function (app: Express) {
     app.use('/api/main/client', clientRouter);
@@ -21,4 +22,6 @@ export default function (app: Express) {
     app.use('/api/main/deficiency-notice', deficiencyNotice);
 
     app.use('/api/main/complaint', complaint);
+
+    app.use('/api/auth', auth);
 };

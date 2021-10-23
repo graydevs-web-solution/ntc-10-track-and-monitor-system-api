@@ -7,6 +7,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model users {
+  user_id                     String    @id @db.Uuid
+  name_first                  String    @db.VarChar(250)
+  name_middle                 String    @db.VarChar(250)
+  name_last                   String    @db.VarChar(250)
+  user_name                   String    @db.VarChar(20)
+  position                    String    @db.VarChar(250)
+  password                    String    
+  token                       String?
+  reset_token_expiration_date DateTime? @db.Date
+}
+
 model clients {
   clientId                  String                  @id @db.Uuid
   owner_name                String                  @db.VarChar(250)
