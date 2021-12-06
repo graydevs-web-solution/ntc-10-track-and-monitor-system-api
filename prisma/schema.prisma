@@ -7,6 +7,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model system_settings {
+  id      Int    @unique @default(autoincrement())
+  setting String
+  value   String
+}
+
+model users {
+  user_id                     String                  @id @db.Uuid
+  name_first                  String                  @db.VarChar(250)
+  name_middle                 String                  @db.VarChar(250)
+  name_last                   String                  @db.VarChar(250)
+  user_name                   String                  @db.VarChar(20)
+  position                    String                  @db.VarChar(250)
+  password                    String
+  token                       String?
+  reset_token_expiration_date DateTime?               @db.Date
+  regional_director_rt        radio_transceivers[]    @relation("RegDirRT")
+  noted_by_rt                 radio_transceivers[]    @relation("NotedByRT")
+  regional_director_mp        mobile_phone_dealers[]  @relation("RegDirMP")
+  noted_by_mp                 mobile_phone_dealers[]  @relation("NotedByMP")
+  regional_director_sc        service_center_report[] @relation("RegDirSC")
+  noted_by_sc                 service_center_report[] @relation("NotedBySC")
+  regional_director_rd        radio_dealers[]         @relation("RegDirRD")
+  regional_director_com       complaint[]             @relation("RegDirCom")
+  regional_director_def       deficiency_notice[]     @relation("RegDirDef")
+}
+
 model clients {
   clientId                  String                  @id @db.Uuid
   owner_name                String                  @db.VarChar(250)
@@ -123,9 +150,11 @@ model radio_transceivers {
   recommendations                              String?                       @db.VarChar(250)
   authorized_representative                    String?                       @db.VarChar(250)
   radio_requlation_inspector                   String?                       @db.VarChar(250)
-  noted_by                                     String?                       @db.VarChar(250)
-  regional_director                            String?                       @db.VarChar(250)
+  noted_by                                     String                        @db.Uuid
+  regional_director                            String                        @db.Uuid
   clients                                      clients?                      @relation(fields: [client_id], references: [id])
+  regional_director_info                       users?                        @relation("RegDirRT", fields: [regional_director], references: [user_id])
+  noted_by_info                                users?                        @relation("NotedByRT", fields: [noted_by], references: [user_id])
   radio_transceiver_items                      radio_transceiver_items[]
   radio_transceiver_operators                  radio_transceiver_operators[]
   radio_transceiver_receivers                  radio_transceiver_receivers[]
@@ -170,10 +199,12 @@ model mobile_phone_dealers {
   owner_name                               String?                  @db.VarChar(250)
   owner_position                           String?                  @db.VarChar(250)
   recommendations                          String?                  @db.VarChar(250)
-  noted_by                                 String?                  @db.VarChar(250)
-  regional_director                        String?                  @db.VarChar(250)
+  noted_by                                 String?                  @db.Uuid
+  regional_director                        String?                  @db.Uuid
   is_approved                              Boolean?
   clients                                  clients?                 @relation(fields: [client_id], references: [id])
+  regional_director_info                   users?                   @relation("RegDirMP", fields: [regional_director], references: [user_id])
+  noted_by_info                            users?                   @relation("NotedByMP", fields: [noted_by], references: [user_id])
   spares_and_accessories                   spares_and_accessories[]
   mobile_phones                            mobile_phones[]
   sim                                      sim[]
@@ -209,10 +240,12 @@ model service_center_report {
   owner_name                               String?                              @db.VarChar(250)
   owner_position                           String?                              @db.VarChar(250)
   recommendations                          String?                              @db.VarChar(250)
-  noted_by                                 String?                              @db.VarChar(250)
-  regional_director                        String?                              @db.VarChar(250)
+  noted_by                                 String?                              @db.Uuid
+  regional_director                        String?                              @db.Uuid
   is_approved                              Boolean?
   clients                                  clients?                             @relation(fields: [client_id], references: [id])
+  regional_director_info                   users?                               @relation("RegDirSC", fields: [regional_director], references: [user_id])
+  noted_by_info                            users?                               @relation("NotedBySC", fields: [noted_by], references: [user_id])
   list_of_service_or_test_equipments       list_of_service_or_test_equipments[]
   employed_electronics_technicians         employed_electronics_technicians[]
 }
@@ -256,8 +289,9 @@ model radio_dealers {
   radio_regulation_inspector    String?             @db.VarChar(250)
   owner_name                    String?             @db.VarChar(250)
   recommendations               String?             @db.VarChar(250)
-  regional_director             String?             @db.VarChar(250)
+  regional_director             String?             @db.Uuid
   clients                       clients?            @relation(fields: [client_id], references: [id])
+  regional_director_info        users?              @relation("RegDirRD", fields: [regional_director], references: [user_id])
   supervising_ece               supervising_ece[]
   radio_technicians             radio_technicians[]
 }
@@ -284,8 +318,9 @@ model deficiency_notice {
   vi_no_ntc_pertinent_papers           Boolean?
   date_of_deficiency_hearing           DateTime?                       @db.Timestamptz(6)
   is_done                              Boolean?
-  regional_director                    String?                         @db.VarChar(250)
+  regional_director                    String?                         @db.Uuid
   clients                              clients?                        @relation(fields: [client_id], references: [id])
+  regional_director_info               users?                          @relation("RegDirDef", fields: [regional_director], references: [user_id])
   deficiency_notice_transmitter        deficiency_notice_transmitter[]
 }
 
@@ -314,7 +349,8 @@ model complaint {
   vi_no_ntc_pertinent_papers           Boolean?
   date_time_of_hearing                 DateTime?               @db.Timestamptz(6)
   is_done                              Boolean?
-  regional_director                    String?                 @db.VarChar(250)
+  regional_director                    String?                 @db.Uuid
   clients                              clients?                @relation(fields: [client_id], references: [id])
+  regional_director_info               users?                  @relation("RegDirCom", fields: [regional_director], references: [user_id])
   complaint_transmitter                complaint_transmitter[]
 }

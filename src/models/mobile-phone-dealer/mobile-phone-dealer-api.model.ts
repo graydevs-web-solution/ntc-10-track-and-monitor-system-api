@@ -1,5 +1,6 @@
 import { ClientAPI } from '../clients/client-api.model'; 
 import { Client } from '../clients/client.model';
+import { UserAssignedData } from '../system-setting/user_assigned-data';
 
 interface StocksOfSparesAndAccessories {
   ['particular']: string;   
@@ -37,4 +38,6 @@ export interface MobilePhoneDealerAPI {
   ['noted_by']: string;
   ['regional_director']: string;
   ['is_approved']: boolean;
+    ['noted_by_info']: UserAssignedData;
+  ['regional_director_info']: UserAssignedData;
 }

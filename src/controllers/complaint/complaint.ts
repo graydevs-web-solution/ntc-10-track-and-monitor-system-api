@@ -8,7 +8,7 @@ import { DATABASE_SCHEMA } from '../../config/database';
 import { modifyPdf, ModifyPDFOptions } from '../../shared/pdf-generate';
 import { PDFTemplate } from '../../shared/pdf-generate.enum';
 import { getPDFValues } from '../complaint/complaint-plot';
-import { cleanDate } from '../../shared/utility';
+import { cleanDate, formatData2 } from '../../shared/utility';
 import { DateTime } from 'luxon';
 
 const prisma = new PrismaClient();
@@ -119,7 +119,7 @@ export const updateData: RequestHandler = async (req, res, next) => {
     //     ) as c(id, model, serial_number, freq_range, power_output, freq_control)
     //     where c.id = rti.id;`);
 
-    const deleteTransmitter = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.complaint_transmitter WHERE complaint_id = ${FORM_ID}`);
+    const deleteTransmitter = prisma.$queryRaw<void>`DELETE FROM ${DATABASE_SCHEMA}.complaint_transmitter WHERE complaint_id = ${FORM_ID}`;
     const insertTransmitter = prisma.complaint_transmitter.createMany({
         data: cleanedValues.transmitters.map((val) => ({
                     transmitter: val.transmitter,
@@ -152,6 +152,14 @@ export const getList: RequestHandler = async (req, res, next) => {
                     exactLocation: true,
                 }
             },
+                        regional_director_info: {
+                select: {
+                    name_first: true,
+                    name_last: true,
+                    position: true,
+                    user_id: true,
+                }
+            },
             complaint_transmitter: true,
         }
     });
@@ -172,7 +180,7 @@ export const deleteData: RequestHandler = async (req, res, next) => {
             id: +(id as string)
         },
     });
-    const deleteTransmitter = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.complaint_transmitter WHERE complaint_id = ${id}`);
+    const deleteTransmitter = prisma.$queryRaw<void>`DELETE FROM ${DATABASE_SCHEMA}.complaint_transmitter WHERE complaint_id = ${id}`;
 
     // NOTE: This code block couldn't delete specified row. I'm dumb as heck
     // 
@@ -214,6 +222,14 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     exactLocation: true,
                 }
             },
+                        regional_director_info: {
+                select: {
+                    name_first: true,
+                    name_last: true,
+                    position: true,
+                    user_id: true,
+                }
+            },
             complaint_transmitter: true,
         }
     });
@@ -227,7 +243,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
     //         { start: 20, page: 1 },
     //     ]
     // };
-    const pdf = await modifyPdf(pdfValues, PDFTemplate.complaint);
+    const pdf = await modifyPdf(formatData2(pdfValues), PDFTemplate.complaint);
 
     res.writeHead(200, {
         'Content-Type': 'application/pdf',

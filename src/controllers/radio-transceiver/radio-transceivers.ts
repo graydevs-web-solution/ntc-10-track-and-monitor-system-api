@@ -9,6 +9,7 @@ import { modifyPdf } from '../../shared/pdf-generate';
 import { PDFTemplate } from '../../shared/pdf-generate.enum';
 import { getPDFValues } from './radio-transceiver-plots';
 import { RadioTransceiverAPI } from '../../models/radio-transceivers/radio-transceiver-api.model';
+import { formatData } from '../../shared/utility';
 
 const prisma = new PrismaClient()
 
@@ -17,6 +18,7 @@ export const saveRadioTransceivers: RequestHandler = async (req, res, next) => {
     const { value, error } = radioTransceiverSchema.validate(req.body);
     if (error) { log.error(error); return res.status(400).json({ message: `Validation error on radio transceiver.` }); }
     const cleanedValues: RadioTransceiver = value;
+    console.log(cleanedValues)
     const result = await prisma.radio_transceivers.create({
         data: {
             client_id: cleanedValues.clientId,
@@ -211,10 +213,10 @@ export const updateData: RequestHandler = async (req, res, next) => {
     //     ) as c(id, model, serial_number, freq_range, power_output, freq_control)
     //     where c.id = rti.id;`);
 
-    const deleteOperators = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_operators WHERE radio_transceiver_id = ${FORM_ID}`);
-    const deleteRTItems = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_items WHERE radio_transceiver_id = ${FORM_ID}`);
-    const deleteReceivers = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_receivers WHERE radio_transceiver_id = ${FORM_ID}`);
-    const deleteRTOthers = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_others WHERE radio_transceiver_id = ${FORM_ID}`);
+    const deleteOperators = prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_operators WHERE radio_transceiver_id = ${FORM_ID}`);
+    const deleteRTItems = prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_items WHERE radio_transceiver_id = ${FORM_ID}`);
+    const deleteReceivers = prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_receivers WHERE radio_transceiver_id = ${FORM_ID}`);
+    const deleteRTOthers = prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_others WHERE radio_transceiver_id = ${FORM_ID}`);
     const insertOperators = prisma.radio_transceiver_operators.createMany({
         data: cleanedValues.operators.map((val) => ({
             name: val.name,
@@ -277,7 +279,7 @@ export const getList: RequestHandler = async (req, res, next) => {
     const { page, size, search } = req.query;
     let query = { take: +(size as string), skip: +(size as string) * (+(page as string) - 1) };
     if (search) { (query as any).where = { name: { contains: search }}};
-    const docs = await prisma.radio_transceivers.findMany({
+    const docs = (await prisma.radio_transceivers.findMany({
         include: {
             clients: {
                 select: {
@@ -288,12 +290,28 @@ export const getList: RequestHandler = async (req, res, next) => {
                     exactLocation: true,
                 }
             },
+            regional_director_info: {
+                select: {
+                    name_first: true,
+                    name_last: true,
+                    position: true,
+                    user_id: true,
+                }
+            },
+            noted_by_info: {
+                select: {
+                    name_first: true,
+                    name_last: true,
+                    position: true,
+                    user_id: true,
+                }
+            },
             radio_transceiver_items: true,
             radio_transceiver_operators: true,
             radio_transceiver_receivers: true,
             radio_transceiver_others: true
         }
-    });
+    })).map(formatData);
     const docCount = await prisma.radio_transceivers.count();
     res.status(200).json({ data: docs, collectionSize: docCount });
   } catch (error) {
@@ -310,10 +328,11 @@ export const deleteData: RequestHandler = async (req, res, next) => {
             id: +(id as string)
         },
     });
-    const deleteOperators = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_operators WHERE radio_transceiver_id = ${id}`);
-    const deleteRTItems = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_items WHERE radio_transceiver_id = ${id}`);
-    const deleteReceivers = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_receivers WHERE radio_transceiver_id = ${id}`);
-    const deleteRTOthers = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_others WHERE radio_transceiver_id = ${id}`);
+
+    const deleteOperators = prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_operators WHERE radio_transceiver_id = ${id}`);
+    const deleteRTItems = prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_items WHERE radio_transceiver_id = ${id}`);
+    const deleteReceivers = prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_receivers WHERE radio_transceiver_id = ${id}`);
+    const deleteRTOthers = prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.radio_transceiver_others WHERE radio_transceiver_id = ${id}`);
 
     // NOTE: This code block couldn't delete specified row. I'm dumb as heck
     // 
@@ -355,13 +374,30 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     exactLocation: true
                 }
             },
+            regional_director_info: {
+                select: {
+                    name_first: true,
+                    name_last: true,
+                    position: true,
+                    user_id: true,
+                }
+            },
+            noted_by_info: {
+                select: {
+                    name_first: true,
+                    name_last: true,
+                    position: true,
+                    user_id: true,
+                }
+            },
             radio_transceiver_items: true,
             radio_transceiver_operators: true,
             radio_transceiver_receivers: true,
             radio_transceiver_others: true
         }
     });
-    const pdf = await modifyPdf(getPDFValues(doc), PDFTemplate.radioTransceiver);
+
+    const pdf = await modifyPdf(getPDFValues(formatData(doc)), PDFTemplate.radioTransceiver);
 
     res.writeHead(200, {
         'Content-Type': 'application/pdf',
@@ -374,6 +410,8 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
     res.status(500).json({ message: `Couldn't get clients at this time.` });
   }
 }
+
+
 
 // export const getClient: RequestHandler = async (req, res, next) => {
 //   try {

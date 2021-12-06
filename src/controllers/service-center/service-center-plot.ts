@@ -58,8 +58,8 @@ export const getPDFValues = (val: any) => {
     pdfPlots[16].text = value.owner_position;
     pdfPlots[17].text = value.recommendations
     pdfPlots[18].text = value.is_approved ? 'APPROVED' : 'DISAPPROVED';
-    pdfPlots[19].text = value.noted_by;
-    pdfPlots[20].text = value.regional_director;
+    pdfPlots[19].text = value.noted_by_info.name;
+    pdfPlots[20].text = value.regional_director_info.name;
 
     for (const iterator of Array.from(value.list_of_service_or_test_equipments)) {
         if (ITERATION_SERVICE < LIMIT_SERVICE) {

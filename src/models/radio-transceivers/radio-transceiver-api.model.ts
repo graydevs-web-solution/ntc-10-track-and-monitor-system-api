@@ -1,5 +1,6 @@
 import { ClientAPI } from '../clients/client-api.model';
 import { Client } from '../clients/client.model';
+import { UserAssignedData } from '../system-setting/user_assigned-data';
 
 export enum FormType {
     new = 'new',
@@ -93,4 +94,6 @@ export interface RadioTransceiverAPI {
   ['recommendations']: string;
   ['noted_by']: string;
   ['regional_director']: string;
+  ['noted_by_info']: UserAssignedData;
+  ['regional_director_info']: UserAssignedData;
 }

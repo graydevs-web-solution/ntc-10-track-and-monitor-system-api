@@ -8,7 +8,7 @@ import { DATABASE_SCHEMA } from '../../config/database';
 import { modifyPdf, ModifyPDFOptions } from '../../shared/pdf-generate';
 import { PDFTemplate } from '../../shared/pdf-generate.enum';
 import { getPDFValues } from '../deficiency-notice/deficiency-notice-plot';
-import { cleanDate } from '../../shared/utility';
+import { cleanDate, formatData2 } from '../../shared/utility';
 
 const prisma = new PrismaClient()
 
@@ -100,7 +100,7 @@ export const updateData: RequestHandler = async (req, res, next) => {
     //     ) as c(id, model, serial_number, freq_range, power_output, freq_control)
     //     where c.id = rti.id;`);
 
-    const deleteTransmitter = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.deficiency_notice_transmitter WHERE deficiency_notice_id = ${FORM_ID}`);
+    const deleteTransmitter = prisma.$queryRaw<void>`DELETE FROM ${DATABASE_SCHEMA}.deficiency_notice_transmitter WHERE deficiency_notice_id = ${FORM_ID}`;
     const insertTransmitter = prisma.deficiency_notice_transmitter.createMany({
         data: cleanedValues.transmitters.map((val) => ({
                     transmitter: val.transmitter,
@@ -133,6 +133,14 @@ export const getList: RequestHandler = async (req, res, next) => {
                     exactLocation: true,
                 }
             },
+                        regional_director_info: {
+                select: {
+                    name_first: true,
+                    name_last: true,
+                    position: true,
+                    user_id: true,
+                }
+            },
             deficiency_notice_transmitter: true,
         }
     });
@@ -153,7 +161,8 @@ export const deleteData: RequestHandler = async (req, res, next) => {
             id: +(id as string)
         },
     });
-    const deleteTransmitter = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.deficiency_notice_transmitter WHERE deficiency_notice_id = ${id}`);
+  
+    const deleteTransmitter = prisma.$queryRaw<void>`DELETE FROM ${DATABASE_SCHEMA}.deficiency_notice_transmitter WHERE deficiency_notice_id = ${id}`;
 
     // NOTE: This code block couldn't delete specified row. I'm dumb as heck
     // 
@@ -195,6 +204,14 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     exactLocation: true,
                 }
             },
+                        regional_director_info: {
+                select: {
+                    name_first: true,
+                    name_last: true,
+                    position: true,
+                    user_id: true,
+                }
+            },
             deficiency_notice_transmitter: true,
         }
     });
@@ -208,7 +225,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
     //         { start: 20, page: 1 },
     //     ]
     // };
-    const pdf = await modifyPdf(pdfValues, PDFTemplate.deficiencyNotice);
+    const pdf = await modifyPdf(formatData2(pdfValues), PDFTemplate.deficiencyNotice);
 
     res.writeHead(200, {
         'Content-Type': 'application/pdf',

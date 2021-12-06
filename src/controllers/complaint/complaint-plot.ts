@@ -39,7 +39,7 @@ export const getPDFValues = (val: any) => {
     pdfPlots[7].text = value.respondent_name;
     pdfPlots[8].text = dateToString(value.date_time_of_hearing as Date);;
     pdfPlots[9].text = timeToString(value.date_time_of_hearing as Date);
-    pdfPlots[10].text = value.regional_director;
+    pdfPlots[10].text = value.regional_director_info.name;
 
     const violations: string[] = [];
     if (value['vi_operation_without_rsl']) { violations.push(viol[0].name) };
