@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticateUser, createUser, getUsers, updateUser, updateUserPassword } from '../../controllers/auth/auth';
+import { authenticateUser, createUser, getUsers, updateUser, updateUserPassword, searchUser } from '../../controllers/auth/auth';
 
 export const router = Router();
 
@@ -11,4 +11,6 @@ router.patch('/update-user-info', updateUser);
 
 router.get('/update-user-password', updateUserPassword);
 
-router.get('/users', getUsers)
+router.get('/users', getUsers);
+
+router.get('/search', searchUser);

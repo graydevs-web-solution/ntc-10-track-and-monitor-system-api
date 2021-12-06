@@ -1,6 +1,6 @@
 import { PDFEntryValue } from '../../models/pdf-generate.model';
 import { FormType, RadioTransceiverAPI } from '../../models/radio-transceivers/radio-transceiver-api.model';
-import { dateToString } from '../../shared/utility';
+import { dateToString, formatName } from '../../shared/utility';
 
 const defaultSize = 8;
 
@@ -78,6 +78,7 @@ export const getPDFValues = (value: any): PDFEntryValue[] => {
     const PLOT_OTHERS = { x: 76, y: 423, size: defaultSize };
     const SPACING = 12;
     const data: RadioTransceiverAPI = value;
+    console.log(data)
     let ITERATION_OPERATORS = 0;
     let ITERATION_TRANSMITTER = 0;
     let ITERATION_RECEIVERS = 0;
@@ -135,8 +136,8 @@ export const getPDFValues = (value: any): PDFEntryValue[] => {
     pdfPlots[50].text = data.authorized_representative;
     pdfPlots[51].text = data.radio_requlation_inspector;
     pdfPlots[52].text = data.recommendations;
-    pdfPlots[53].text = data.noted_by;
-    pdfPlots[54].text = data.regional_director;
+    pdfPlots[53].text = data.noted_by_info.name;
+    pdfPlots[54].text = data.regional_director_info.name;
     pdfPlots[55].text = data.call_sign;
     pdfPlots[56].text = data.motor_number;
 

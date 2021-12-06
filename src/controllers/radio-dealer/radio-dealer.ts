@@ -8,7 +8,7 @@ import { PDFTemplate } from '../../shared/pdf-generate.enum';
 import { getPDFValues } from '.././radio-dealer/radio-dealer-plot';
 import { radioDealerSchema } from '../../models/radio-dealer/radio-dealer.joi';
 import { RadioDealer } from '../../models/radio-dealer/radio-dealer.model';
-import { cleanDate, dateToString } from '../../shared/utility';
+import { cleanDate, dateToString, formatData, formatData2 } from '../../shared/utility';
 
 const prisma = new PrismaClient()
 
@@ -136,8 +136,8 @@ export const updateData: RequestHandler = async (req, res, next) => {
     //     ) as c(id, model, serial_number, freq_range, power_output, freq_control)
     //     where c.id = rti.id;`);
 
-    const deleteECE = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.supervising_ece WHERE radio_dealer_id = ${FORM_ID}`);
-    const deleteTechnicians = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_technicians WHERE radio_dealer_id = ${FORM_ID}`);
+    const deleteECE = prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.supervising_ece WHERE radio_dealer_id = ${FORM_ID}`);
+    const deleteTechnicians = prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.radio_technicians WHERE radio_dealer_id = ${FORM_ID}`);
     const insertECE = prisma.supervising_ece.createMany({
         data: cleanedValues.supervisingECE.map((val) => ({
                    name: val.name,
@@ -168,7 +168,7 @@ export const getList: RequestHandler = async (req, res, next) => {
     const { page, size, search } = req.query;
     let query = { take: +(size as string), skip: +(size as string) * (+(page as string) - 1) };
     if (search) { (query as any).where = { name: { contains: search }}};
-    const docs = await prisma.radio_dealers.findMany({
+    const docs = (await prisma.radio_dealers.findMany({
         include: {
             clients: {
                 select: {
@@ -179,10 +179,18 @@ export const getList: RequestHandler = async (req, res, next) => {
                     exactLocation: true,
                 }
             },
+            regional_director_info: {
+                select: {
+                    name_first: true,
+                    name_last: true,
+                    position: true,
+                    user_id: true,
+                }
+            },
             radio_technicians: true,
             supervising_ece: true,
         }
-    });
+    })).map(formatData2);
     const docCount = await prisma.radio_dealers.count();
 
     res.status(200).json({ data: docs, collectionSize: docCount });
@@ -200,8 +208,9 @@ export const deleteData: RequestHandler = async (req, res, next) => {
             id: +(id as string)
         },
     });
-    const deleteECE = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.supervising_ece WHERE radio_dealer_id = ${id}`);
-    const deleteTechnicians = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.radio_technicians WHERE radio_dealer_id = ${id}`);
+
+    const deleteECE = prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.supervising_ece WHERE radio_dealer_id = ${id}`);
+    const deleteTechnicians = prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.radio_technicians WHERE radio_dealer_id = ${id}`);
 
     // NOTE: This code block couldn't delete specified row. I'm dumb as heck
     // 
@@ -245,11 +254,19 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     faxNumber: true,
                 }
             },
+                        regional_director_info: {
+                select: {
+                    name_first: true,
+                    name_last: true,
+                    position: true,
+                    user_id: true,
+                }
+            },
             radio_technicians: true,
             supervising_ece: true
         }
     });
-    const pdf = await modifyPdf(getPDFValues(doc), PDFTemplate.radioDealer);
+    const pdf = await modifyPdf(getPDFValues(formatData2(doc)), PDFTemplate.radioDealer);
 
     res.writeHead(200, {
         'Content-Type': 'application/pdf',

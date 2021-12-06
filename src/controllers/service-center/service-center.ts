@@ -8,7 +8,7 @@ import { PDFTemplate } from '../../shared/pdf-generate.enum';
 import { getPDFValues } from '../service-center/service-center-plot';
 import { serviceCenterReportSchema } from '../../models/service-center/service-center-report.joi';
 import { ServiceCenterReport } from '../../models/service-center/service-center-report.model';
-import { cleanDate } from '../../shared/utility';
+import { cleanDate, formatData, formatData2 } from '../../shared/utility';
 
 const prisma = new PrismaClient()
 
@@ -122,8 +122,8 @@ export const updateData: RequestHandler = async (req, res, next) => {
     //     ) as c(id, model, serial_number, freq_range, power_output, freq_control)
     //     where c.id = rti.id;`);
 
-    const deleteServiceOrTestEquipment = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.list_of_service_or_test_equipments WHERE service_center_report_id = ${FORM_ID}`);
-    const deleteTechnicians = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.employed_electronics_technicians WHERE service_center_report_id = ${FORM_ID}`);
+    const deleteServiceOrTestEquipment = prisma.$queryRaw<void>`DELETE FROM ${DATABASE_SCHEMA}.list_of_service_or_test_equipments WHERE service_center_report_id = ${FORM_ID}`;
+    const deleteTechnicians = prisma.$queryRaw<void>`DELETE FROM ${DATABASE_SCHEMA}.employed_electronics_technicians WHERE service_center_report_id = ${FORM_ID}`;
     const insertServiceOrTestEquipment = prisma.list_of_service_or_test_equipments.createMany({
         data: cleanedValues.listOfServiceOrTestEquipments.map((val) => ({
             particular: val.particular,
@@ -152,7 +152,7 @@ export const getList: RequestHandler = async (req, res, next) => {
     const { page, size, search } = req.query;
     let query = { take: +(size as string), skip: +(size as string) * (+(page as string) - 1) };
     if (search) { (query as any).where = { name: { contains: search }}};
-    const docs = await prisma.service_center_report.findMany({
+    const docs = (await prisma.service_center_report.findMany({
         include: {
             clients: {
                 select: {
@@ -163,10 +163,26 @@ export const getList: RequestHandler = async (req, res, next) => {
                     exactLocation: true,
                 }
             },
+                        regional_director_info: {
+                select: {
+                    name_first: true,
+                    name_last: true,
+                    position: true,
+                    user_id: true,
+                }
+            },
+            noted_by_info: {
+                select: {
+                    name_first: true,
+                    name_last: true,
+                    position: true,
+                    user_id: true,
+                }
+            },
             list_of_service_or_test_equipments: true,
             employed_electronics_technicians: true
         }
-    });
+    })).map(formatData);
     const docCount = await prisma.service_center_report.count();
 
     res.status(200).json({ data: docs, collectionSize: docCount });
@@ -184,8 +200,9 @@ export const deleteData: RequestHandler = async (req, res, next) => {
             id: +(id as string)
         },
     });
-    const deleteServiceOrTestEquipment = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.list_of_service_or_test_equipments WHERE service_center_report_id = ${id}`);
-    const deleteTechnicians = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.employed_electronics_technicians WHERE service_center_report_id = ${id}`);
+
+    const deleteServiceOrTestEquipment = prisma.$queryRaw<void>`DELETE FROM ${DATABASE_SCHEMA}.list_of_service_or_test_equipments WHERE service_center_report_id = ${id}`;
+    const deleteTechnicians = prisma.$queryRaw<void>`DELETE FROM ${DATABASE_SCHEMA}.employed_electronics_technicians WHERE service_center_report_id = ${id}`;
 
     // NOTE: This code block couldn't delete specified row. I'm dumb as heck
     // 
@@ -227,11 +244,27 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     exactLocation: true,
                 }
             },
+                        regional_director_info: {
+                select: {
+                    name_first: true,
+                    name_last: true,
+                    position: true,
+                    user_id: true,
+                }
+            },
+            noted_by_info: {
+                select: {
+                    name_first: true,
+                    name_last: true,
+                    position: true,
+                    user_id: true,
+                }
+            },
             employed_electronics_technicians: true,
             list_of_service_or_test_equipments: true
         }
     });
-    const pdfValues = getPDFValues(doc);
+    const pdfValues = getPDFValues(formatData(doc));
     const options: ModifyPDFOptions = {
         isMultiplePage: true,
         startEndValuesPerPage: [

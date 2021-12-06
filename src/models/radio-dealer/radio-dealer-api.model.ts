@@ -1,5 +1,6 @@
 import { ClientAPI } from '../clients/client-api.model';
 import { Client } from '../clients/client.model';
+import { UserAssignedData } from '../system-setting/user_assigned-data';
 
 interface SupervisingECE {
   ['name']: string;
@@ -49,4 +50,5 @@ export interface RadioDealerAPI {
   ['owner_name']: string;
   ['recommendations']: string;
   ['regional_director']: string;
+  ['regional_director_info']: UserAssignedData;
 }

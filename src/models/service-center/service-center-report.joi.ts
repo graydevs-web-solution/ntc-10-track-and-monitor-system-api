@@ -22,15 +22,15 @@ export const serviceCenterReportSchema = object({
         })
     ),
     sundryOfInformation: object({
-        one: string(),
-        two: string(),
-        three: string()
+        one: string().allow(''),
+        two: string().allow(''),
+        three: string().allow(''),
     }),
     remarksDeficienciesDiscrepanciesNoted: string().allow(''),
     inspectedBy: string().allow(''),
     ownerInfo: object({
-        name: string(),
-        position: string()
+        name: string().allow(''),
+        position: string().allow(''),
     }),
     recommendations: string().allow(''),
     notedBy: string().allow(''),

@@ -1,5 +1,6 @@
 import { ClientAPI } from '../clients/client-api.model';
 import { Client } from '../clients/client.model';
+import { UserAssignedData } from '../system-setting/user_assigned-data';
 interface Transmitters {
   ['transmitter']: string;
   ['serial_number']: string;
@@ -33,4 +34,5 @@ export interface ComplaintAPI {
   ['date_time_of_hearing']: Date;
   ['regional_director']: string;
   ['is_done']: boolean;
+  ['regional_director_info']: UserAssignedData;
 }

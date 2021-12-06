@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon';
+import { User } from '../models/auth/user';
 
 export const dateWithPadding = (data: string): string => {
   const [year, month, day] = data.split('-');
@@ -24,3 +25,27 @@ export const cleanDate = (date: Date) : Date | null => {
     }
     return date;
 }
+
+export const formatName = (data: User): string => {
+  return `${data.name_first} ${data.name_last}`;
+};
+
+export const formatData = (val: any) => ({
+        ...val,
+        ['regional_director_info']: {
+            ...val['regional_director_info'],
+            ['name']: `${val['regional_director_info']?.name_first} ${val['regional_director_info']?.name_last}`
+        },
+        ['noted_by_info']: {
+            ...val['noted_by_info'],
+            ['name']: `${val['noted_by_info']?.name_first} ${val['noted_by_info']?.name_last}`
+        }
+    });
+
+export const formatData2 = (val: any) => ({
+        ...val,
+        ['regional_director_info']: {
+            ...val['regional_director_info'],
+            ['name']: `${val['regional_director_info']?.name_first} ${val['regional_director_info']?.name_last}`
+        },
+    })

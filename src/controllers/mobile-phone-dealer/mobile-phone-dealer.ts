@@ -9,7 +9,7 @@ import { modifyPdf, ModifyPDFOptions } from '../../shared/pdf-generate';
 import { PDFTemplate } from '../../shared/pdf-generate.enum';
 import { getPDFValues } from '../mobile-phone-dealer/mobile-phone-dealer-plot';
 import { RadioTransceiverAPI } from '../../models/radio-transceivers/radio-transceiver-api.model';
-import { cleanDate } from '../../shared/utility';
+import { cleanDate, formatData } from '../../shared/utility';
 
 const prisma = new PrismaClient()
 
@@ -135,9 +135,9 @@ export const updateData: RequestHandler = async (req, res, next) => {
     //     ) as c(id, model, serial_number, freq_range, power_output, freq_control)
     //     where c.id = rti.id;`);
 
-    const deleteSpares = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.spares_and_accessories WHERE mobile_phone_dealer_id = ${FORM_ID}`);
-    const deleteMobilePhones = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.mobile_phones WHERE mobile_phone_dealer_id = ${FORM_ID}`);
-    const deleteSIM = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.sim WHERE mobile_phone_dealer_id = ${FORM_ID}`);
+    const deleteSpares = prisma.$queryRaw<void>`DELETE FROM ${DATABASE_SCHEMA}.spares_and_accessories WHERE mobile_phone_dealer_id = ${FORM_ID}`;
+    const deleteMobilePhones = prisma.$queryRaw<void>`DELETE FROM ${DATABASE_SCHEMA}.mobile_phones WHERE mobile_phone_dealer_id = ${FORM_ID}`;
+    const deleteSIM = prisma.$queryRaw<void>`DELETE FROM ${DATABASE_SCHEMA}.sim WHERE mobile_phone_dealer_id = ${FORM_ID}`;
     const insertSpares = prisma.spares_and_accessories.createMany({
         data: cleanedValues.listOfStocksOfSparesAndAccessories.map((val) => ({
             particular: val.particular,
@@ -174,7 +174,7 @@ export const getList: RequestHandler = async (req, res, next) => {
     const { page, size, search } = req.query;
     let query = { take: +(size as string), skip: +(size as string) * (+(page as string) - 1) };
     if (search) { (query as any).where = { name: { contains: search }}};
-    const docs = await prisma.mobile_phone_dealers.findMany({
+    const docs = (await prisma.mobile_phone_dealers.findMany({
         include: {
             clients: {
                 select: {
@@ -185,11 +185,27 @@ export const getList: RequestHandler = async (req, res, next) => {
                     exactLocation: true,
                 }
             },
+                        regional_director_info: {
+                select: {
+                    name_first: true,
+                    name_last: true,
+                    position: true,
+                    user_id: true,
+                }
+            },
+            noted_by_info: {
+                select: {
+                    name_first: true,
+                    name_last: true,
+                    position: true,
+                    user_id: true,
+                }
+            },
             mobile_phones: true,
             spares_and_accessories: true,
             sim: true
         }
-    });
+    })).map(formatData);;
     const docCount = await prisma.mobile_phone_dealers.count();
 
     res.status(200).json({ data: docs, collectionSize: docCount });
@@ -207,9 +223,9 @@ export const deleteData: RequestHandler = async (req, res, next) => {
             id: +(id as string)
         },
     });
-    const deleteSpares = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.spares_and_accessories WHERE mobile_phone_dealer_id = ${id}`);
-    const deleteMobilePhones = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.mobile_phones WHERE mobile_phone_dealer_id = ${id}`);
-    const deleteSIM = prisma.$executeRaw(`DELETE FROM ${DATABASE_SCHEMA}.sim WHERE mobile_phone_dealer_id = ${id}`);
+    const deleteSpares = prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.spares_and_accessories WHERE mobile_phone_dealer_id = ${id}`);
+    const deleteMobilePhones = prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.mobile_phones WHERE mobile_phone_dealer_id = ${id}`);
+    const deleteSIM = prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.sim WHERE mobile_phone_dealer_id = ${id}`);
 
     // NOTE: This code block couldn't delete specified row. I'm dumb as heck
     // 
@@ -251,12 +267,28 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     exactLocation: true,
                 }
             },
+            regional_director_info: {
+                select: {
+                    name_first: true,
+                    name_last: true,
+                    position: true,
+                    user_id: true,
+                }
+            },
+            noted_by_info: {
+                select: {
+                    name_first: true,
+                    name_last: true,
+                    position: true,
+                    user_id: true,
+                }
+            },
             spares_and_accessories: true,
             mobile_phones: true,
             sim: true
         }
     });
-    const pdfValues = getPDFValues(doc);
+    const pdfValues = getPDFValues(formatData(doc));
     const options: ModifyPDFOptions = {
         isMultiplePage: true,
         startEndValuesPerPage: [

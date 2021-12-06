@@ -25,7 +25,7 @@ export const plots: PDFEntryValue[] = [
     { text: '', x: 386, y: 623, size: defaultSize }, // 17 radio regulation inspectors
     { text: '', x: 380, y: 702, size: defaultSize }, // 18 owner 
     { text: '', x: 103, y: 758, size: defaultSize }, // 19 recommendation
-    { text: '', x: 103, y: 851, size: defaultSize }, // 20 regional director
+    { text: '', x: 350, y: 851, size: defaultSize }, // 20 regional director
 ]; 
 
 export const getPDFValues = (val: any) => {
@@ -58,7 +58,7 @@ export const getPDFValues = (val: any) => {
     pdfPlots[17].text = value.radio_regulation_inspector;
     pdfPlots[18].text = value.owner_name;
     pdfPlots[19].text = value.recommendations;
-    pdfPlots[20].text = value.regional_director;
+    pdfPlots[20].text = value.regional_director_info.name;
 
     for (const iterator of Array.from(value.supervising_ece)) {
         if (ITERATION_ECE < LIMIT_ECE) {

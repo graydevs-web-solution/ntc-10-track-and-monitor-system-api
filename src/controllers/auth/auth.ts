@@ -20,7 +20,7 @@ import { userSchema } from '../../models/auth/user.joi';
 const prisma = new PrismaClient();
 const hashPassword = (password: string) => hash(password, 10);
 
-export const authenticateUser: RequestHandler = async (req: { body: AuthenticateUser }, res, next) => {
+export const authenticateUser: RequestHandler = async (req, res, next) => {
     try {
         const { username, password } = req.body;
         const { value , error } = authUserSchema.validate({ username, password });
@@ -42,6 +42,7 @@ export const authenticateUser: RequestHandler = async (req: { body: Authenticate
          if (!doc) {
              return res.status(400).json({ message: userNotFoundErrorMessage });
          }
+         console.log(doc)
     
          const isAuthorized = await compare(value.password, doc.password);
          if (!isAuthorized) {
@@ -149,7 +150,21 @@ export const getUsers: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ data: docs, collectionSize: docCount });
   } catch (error) {
-      log.error(error);
+    log.error(error);
     res.status(500).json({ message: `Couldn't get users at this time.` });
+  }
+}
+
+export const searchUser: RequestHandler = async (req, res, next) => {
+  try {
+    const { search } = req.query;
+    // const query = req.query
+    const docs = await prisma.$queryRawUnsafe(`SELECT * FROM ${DATABASE_SCHEMA}.users WHERE to_tsvector(name_first) @@ to_tsquery('${search}')`)
+    // const docCount = await prisma.clients.count();
+
+    res.status(200).json({ data: docs });
+  } catch (error) {
+    log.error(error);
+    res.status(500).json({ message: `Couldn't get clients at this time.` });
   }
 }
