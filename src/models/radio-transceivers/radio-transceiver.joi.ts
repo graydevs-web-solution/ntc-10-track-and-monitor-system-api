@@ -1,117 +1,117 @@
-import { object, number, string, date, array, boolean } from 'joi';
+import joi from 'joi';
 
-export const radioTransceiverSchema = object({
-    id: number().allow(null),
-    dateIssued: date().required().messages({
+export const radioTransceiverSchema = joi.object({
+    id: joi.number().allow(null),
+    dateIssued: joi.date().required().messages({
         'date.base': `Date should be a type of date`,
     }),
-    clientId: number().required(),
-    classType: string().allow(''),
-    natureOfService: string().allow(''),
-    workingHours: string().allow(''),
-    formType: string().allow(''),
-    callSign: string().allow(''),
-    motorNumber: string().allow(''),
-    plateNumber: string().allow(''),
-    grossTonnage: string().allow(''),
-    ppInfo: object({
-        ppNumber: string().allow(''),
-        dateIssued: date().allow(null),
+    clientId: joi.number().required(),
+    classType: joi.string().allow(''),
+    natureOfService: joi.string().allow(''),
+    workingHours: joi.string().allow(''),
+    formType: joi.string().allow(''),
+    callSign: joi.string().allow(''),
+    motorNumber: joi.string().allow(''),
+    plateNumber: joi.string().allow(''),
+    grossTonnage: joi.string().allow(''),
+    ppInfo: joi.object({
+        ppNumber: joi.string().allow(''),
+        dateIssued: joi.date().allow(null),
     }),
-    tpInfo: object({
-        tpNumber: string().allow(''),
-        expirationDate: date().allow(null),
+    tpInfo: joi.object({
+        tpNumber: joi.string().allow(''),
+        expirationDate: joi.date().allow(null),
     }),
-    cpInfo: object({
-        cpNumber: string().allow(''),
-        expirationDate: date().allow(null),
+    cpInfo: joi.object({
+        cpNumber: joi.string().allow(''),
+        expirationDate: joi.date().allow(null),
     }),
-    licInfo: object({
-        licNumber: string().allow(''),
-        expirationDate: date().allow(null),
+    licInfo: joi.object({
+        licNumber: joi.string().allow(''),
+        expirationDate: joi.date().allow(null),
     }),
-    pointsOfCommunication: string().allow(''),
-    operators: array().items(
-        object({
-            id: number().allow(null),
-            name: string().allow(''),
-            particularOfLicense: string().allow(''),
-            expirationDate: date().allow(null)
+    pointsOfCommunication: joi.string().allow(''),
+    operators: joi.array().items(
+        joi.object({
+            id: joi.number().allow(null),
+            name: joi.string().allow(''),
+            particularOfLicense: joi.string().allow(''),
+            expirationDate: joi.date().allow(null)
         })
     ),
-    radioTransceivers: array().items(
-        object({
-            id: number().allow(null),
-            model: string().allow(''),
-            serialNumber: string().allow(''),
-            freqRange: string().allow(''),
-            powerOutput: string().allow(''),
-            freqControl: string().allow(''),
+    radioTransceivers: joi.array().items(
+        joi.object({
+            id: joi.number().allow(null),
+            model: joi.string().allow(''),
+            serialNumber: joi.string().allow(''),
+            freqRange: joi.string().allow(''),
+            powerOutput: joi.string().allow(''),
+            freqControl: joi.string().allow(''),
         })
     ),
-    receivers: array().items(
-        object({
-            id: number().allow(null),
-            name: string().allow(''),
-            serialNumber: string().allow(''),
-            freqRange: string().allow(''),
-            powerOutput: string().allow(''),
-            freqControl: string().allow(''),
+    receivers: joi.array().items(
+        joi.object({
+            id: joi.number().allow(null),
+            name: joi.string().allow(''),
+            serialNumber: joi.string().allow(''),
+            freqRange: joi.string().allow(''),
+            powerOutput: joi.string().allow(''),
+            freqControl: joi.string().allow(''),
         })
     ),
-    otherEquipments: array().items(
-        object({
-            id: number().allow(null),
-            name: string().allow(''),
-            serialNumber: string().allow(''),
-            freqRange: string().allow(''),
-            powerOutput: string().allow(''),
-            freqControl: string().allow(''),
+    otherEquipments: joi.array().items(
+        joi.object({
+            id: joi.number().allow(null),
+            name: joi.string().allow(''),
+            serialNumber: joi.string().allow(''),
+            freqRange: joi.string().allow(''),
+            powerOutput: joi.string().allow(''),
+            freqControl: joi.string().allow(''),
         })
     ),
-    frequenciesInfo: object({
-        assignedFreq: string().allow(''),
-        crystalFreq: string().allow(''),
-        measuredFreq: string().allow(''),
-        ifReceiver: string().allow(''),
-        typeOfEmission: string().allow(''),
+    frequenciesInfo: joi.object({
+        assignedFreq: joi.string().allow(''),
+        crystalFreq: joi.string().allow(''),
+        measuredFreq: joi.string().allow(''),
+        ifReceiver: joi.string().allow(''),
+        typeOfEmission: joi.string().allow(''),
     }),
-    antennaSystemInfo: object({
-                type: string().allow(''),
-        elevationFromGmd: string().allow(''),
-        lengthOfRadiator: string().allow(''),
-        gain: string().allow(''),
-        directivity: string().allow(''),
-        powerSupply: string().allow(''),
-        battery: string().allow(''),
-        voltageAndType: string().allow(''),
-        capacity: string().allow(''),
-        ah: string().allow(''),
+    antennaSystemInfo: joi.object({
+                type: joi.string().allow(''),
+        elevationFromGmd: joi.string().allow(''),
+        lengthOfRadiator: joi.string().allow(''),
+        gain: joi.string().allow(''),
+        directivity: joi.string().allow(''),
+        powerSupply: joi.string().allow(''),
+        battery: joi.string().allow(''),
+        voltageAndType: joi.string().allow(''),
+        capacity: joi.string().allow(''),
+        ah: joi.string().allow(''),
     }),
-    illegalConstructionInfo: object({
-        constructionsOfRadioStationsWithoutConstructionPermit: boolean(),
-        illegalTransfer: boolean(),
+    illegalConstructionInfo: joi.object({
+        constructionsOfRadioStationsWithoutConstructionPermit: joi.boolean(),
+        illegalTransfer: joi.boolean(),
     }),
-    illegalOperationInfo: object({
-        operationWithoutRadioStationLicensePermit: boolean(),
-        operationWithoutLicenseRadioOperator: boolean(),
-        operationWithoutLogbook: boolean(),
-        operationOnLowerSideband: boolean(),
-        operationOnUnauthorizedHours: boolean(),
-        operatingOnUnauthorizedFrequency: boolean(),
-        offFrequency: boolean(),
-        stillInTheOldFrequencyGrouping: boolean(),
+    illegalOperationInfo: joi.object({
+        operationWithoutRadioStationLicensePermit: joi.boolean(),
+        operationWithoutLicenseRadioOperator: joi.boolean(),
+        operationWithoutLogbook: joi.boolean(),
+        operationOnLowerSideband: joi.boolean(),
+        operationOnUnauthorizedHours: joi.boolean(),
+        operatingOnUnauthorizedFrequency: joi.boolean(),
+        offFrequency: joi.boolean(),
+        stillInTheOldFrequencyGrouping: joi.boolean(),
     }),
-    illegalPossession: boolean(),
-    others: string().allow(''),
-    sundrayInformationAboutRS: object({
-        isRadioOperatorEntryLogbooK: string().allow(''),
-        isStationProduceUnwantedSignals: string().allow(''),
-        isRadioEquipmentOperativeOnInspection: string().allow(''),
+    illegalPossession: joi.boolean(),
+    others: joi.string().allow(''),
+    sundrayInformationAboutRS: joi.object({
+        isRadioOperatorEntryLogbooK: joi.string().allow(''),
+        isStationProduceUnwantedSignals: joi.string().allow(''),
+        isRadioEquipmentOperativeOnInspection: joi.string().allow(''),
     }),
-    authorizedRepresentative: string().allow(''),
-    radioRegulationInspector: string().allow(''),
-    recommendations: string().allow(''),
-    notedBy: string().allow(''),
-    regionalDirector: string().allow(''),
+    authorizedRepresentative: joi.string().allow(''),
+    radioRegulationInspector: joi.string().allow(''),
+    recommendations: joi.string().allow(''),
+    notedBy: joi.string().allow(''),
+    regionalDirector: joi.string().allow(''),
 });

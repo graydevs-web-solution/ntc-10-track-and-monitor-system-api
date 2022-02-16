@@ -16,7 +16,7 @@ const prisma = new PrismaClient()
 export const saveRadioTransceivers: RequestHandler = async (req, res, next) => {
   try {
     const { value, error } = radioTransceiverSchema.validate(req.body);
-    if (error) { log.error(error); return res.status(400).json({ message: `Validation error on radio transceiver.` }); }
+    if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on radio transceiver.` }); }
     const cleanedValues: RadioTransceiver = value;
     console.log(cleanedValues)
     const result = await prisma.radio_transceivers.create({
@@ -114,7 +114,7 @@ export const saveRadioTransceivers: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ data: result });
   } catch (error) {
-    log.error(error);
+    log.error(error as Error);
     res.status(500).json({ message: `Couldn't process client data at this time.` });
   }
 }
@@ -122,7 +122,7 @@ export const saveRadioTransceivers: RequestHandler = async (req, res, next) => {
 export const updateData: RequestHandler = async (req, res, next) => {
   try {
     const { value, error } = radioTransceiverSchema.validate(req.body);
-    if (error) { log.error(error); return res.status(400).json({ message: `Validation error on radio transceiver.` }); }
+    if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on radio transceiver.` }); }
     const cleanedValues: RadioTransceiver = value;
     const FORM_ID = cleanedValues.id;
     const updateMain = prisma.radio_transceivers.update({
@@ -269,7 +269,7 @@ export const updateData: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ message: 'Ok' });
   } catch (error) {
-    log.error(error);
+    log.error(error as Error);
     res.status(500).json({ message: `Couldn't process client data at this time.` });
   }
 }
@@ -315,7 +315,7 @@ export const getList: RequestHandler = async (req, res, next) => {
     const docCount = await prisma.radio_transceivers.count();
     res.status(200).json({ data: docs, collectionSize: docCount });
   } catch (error) {
-      log.error(error);
+      log.error(error as Error);
     res.status(500).json({ message: `Couldn't get radio transceivers at this time.` });
   }
 }
@@ -352,7 +352,7 @@ export const deleteData: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ message: 'Ok' });
   } catch (error) {
-    log.error(error);
+    log.error(error as Error);
     res.status(500).json({ message: `Couldn't get clients at this time.` });
   }
 }
@@ -406,7 +406,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
 
     res.end(pdf);
   } catch (error) {
-    log.error(error);
+    log.error(error as Error);
     res.status(500).json({ message: `Couldn't get clients at this time.` });
   }
 }
@@ -419,7 +419,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
 //     // const doc = await ClientModel.findOne({ cnId: id as string })
 
 //     // res.status(200).json({ data: doc });
-//   } catch (error) {
+//   } catch (error as Error) {
 //     res.status(500).json({ message: `Couldn't get clients at this time.` });
 //   }
 // }
@@ -435,8 +435,8 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
 
 
 //     res.status(200).json({ data: docs });
-//   } catch (error) {
-//       log.error(error);
+//   } catch (error as Error) {
+//       log.error(error as Error);
 //     res.status(500).json({ message: `Couldn't get clients at this time.` });
 //   }
 // }

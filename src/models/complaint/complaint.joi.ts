@@ -1,40 +1,40 @@
-import { object, number, string, date, array, boolean } from 'joi';
+import joi from 'joi';
 import { Complaint } from './complaint.model';
 
-export const complaintSchema = object<Complaint>({
-    id: number().allow(null),
-    date: date().required().messages({
+export const complaintSchema = joi.object<Complaint>({
+    id: joi.number().allow(null),
+    date: joi.date().required().messages({
         'date.base': `Date should be a type of date`,
     }),
-    clientId: number().required(),
-    clientName: string().allow(''),
-    complainantName: string(),
-    respondentName: string().allow(''),
-    docketNumber: string().allow(''),
-    dateOfInspection: date().required().messages({
+    clientId: joi.number().required(),
+    clientName: joi.string().allow(''),
+    complainantName: joi.string(),
+    respondentName: joi.string().allow(''),
+    docketNumber: joi.string().allow(''),
+    dateOfInspection: joi.date().required().messages({
         'date.base': `dateOfInspection should be a type of date`,
     }),
-    location: string(),
-    reason: string(),
-    transmitters: array().items(
-        object({
-            transmitter: string(),
-            serialNumber: string(),
+    location: joi.string(),
+    reason: joi.string(),
+    transmitters: joi.array().items(
+        joi.object({
+            transmitter: joi.string(),
+            serialNumber: joi.string(),
         })
     ),
-    violationInfo: object({
-        operationWithoutRSL: boolean(),
-        operationWithoutLRO: boolean(),
-        operationUnauthorizedFrequency: boolean(),
-        possessionTransmitterWithoutPP: boolean(),
-        noNTCPertinentPapers: boolean()
+    violationInfo: joi.object({
+        operationWithoutRSL: joi.boolean(),
+        operationWithoutLRO: joi.boolean(),
+        operationUnauthorizedFrequency: joi.boolean(),
+        possessionTransmitterWithoutPP: joi.boolean(),
+        noNTCPertinentPapers: joi.boolean()
     }),
-    dateOfHearing: date().allow(null),
-    timeOfHearing: object({
-        hour: number(),
-        minute: number(),
-        second: number(),
+    dateOfHearing: joi.date().allow(null),
+    timeOfHearing: joi.object({
+        hour: joi.number(),
+        minute: joi.number(),
+        second: joi.number(),
     }),
-    isDone: boolean(),
-    regionalDirector: string().allow(''),
+    isDone: joi.boolean(),
+    regionalDirector: joi.string().allow(''),
 });

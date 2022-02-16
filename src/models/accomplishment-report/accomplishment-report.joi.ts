@@ -1,21 +1,21 @@
-import { object, number, string, date, array, boolean } from 'joi';
+import joi from 'joi';
 import { AccomplishmentReport } from './accomplishment-report.model';
 
-export const accomplishmentReportSchema = object<AccomplishmentReport>({
-    id: number().allow(null),
-    month: number().required().messages({
+export const accomplishmentReportSchema = joi.object<AccomplishmentReport>({
+    id: joi.number().allow(null),
+    month: joi.number().required().messages({
         'number.base': `Month should be a type of number`,
     }),
-    year: number().required().messages({
+    year: joi.number().required().messages({
         'number.base': `Year should be a type of number`,
     }),
-    description: string().required().messages({
+    description: joi.string().required().messages({
         'string.base': `Description should be a type of string`,
     }),
-    numberOfAdminCase: number().allow(null),
-  numberOfShowCause: number().allow(null),
-  numberOfHearing: number().allow(null),
-  numberOfPendingComplaint: number().allow(null),
-  numberOfResolvedComplaint: number().allow(null),
-  attorney: string().allow(''),
+    numberOfAdminCase: joi.number().allow(null),
+  numberOfShowCause: joi.number().allow(null),
+  numberOfHearing: joi.number().allow(null),
+  numberOfPendingComplaint: joi.number().allow(null),
+  numberOfResolvedComplaint: joi.number().allow(null),
+  attorney: joi.string().allow(''),
 });

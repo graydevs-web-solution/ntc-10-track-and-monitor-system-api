@@ -1,11 +1,11 @@
-import { object, string } from 'joi';
+import joi from 'joi';
 import { UserAssignedData } from './user_assigned-data';
 
-export const regionalDirectorSchema = object<UserAssignedData>({
-    ['user_id']: string().required().messages({
+export const regionalDirectorSchema = joi.object<UserAssignedData>({
+    ['user_id']: joi.string().required().messages({
         'string.base': `user_id should be a type of string`,
     }),
-    name: string().allow(''),
-    position: string().allow(''),
-    message: string().allow(''),
+    name: joi.string().allow(''),
+    position: joi.string().allow(''),
+    message: joi.string().allow(''),
 });

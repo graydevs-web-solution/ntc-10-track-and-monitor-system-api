@@ -12,8 +12,8 @@ const prisma = new PrismaClient()
 export const saveClient: RequestHandler = async (req, res, next) => {
   try {
     const { value, error } = clientSchema.validate(req.body);
-    if (error) { log.error(error); return res.status(400).json({ message: `Validation error on client.` }); }
-    const clientData: Client = value;
+    if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on client.` }); }
+    const clientData: Client = value as Client;
     const { ownerName, businessName, ownerPosition, businessAddress, ...rest } = clientData;
     const result = await prisma.clients.create({
         data: {
@@ -28,7 +28,7 @@ export const saveClient: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ data: result });
   } catch (error) {
-    log.error(error);
+    log.error(error as Error);
     res.status(500).json({ message: `Couldn't process client data at this time.` });
   }
 }
@@ -43,7 +43,7 @@ export const getClients: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ data: docs, collectionSize: docCount });
   } catch (error) {
-      log.error(error);
+      log.error(error as Error);
     res.status(500).json({ message: `Couldn't get clients at this time.` });
   }
 }
@@ -70,7 +70,7 @@ export const searchClient: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ data: docs });
   } catch (error) {
-      log.error(error);
+      log.error(error as Error);
     res.status(500).json({ message: `Couldn't get clients at this time.` });
   }
 }

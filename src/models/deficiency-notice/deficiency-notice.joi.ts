@@ -1,32 +1,32 @@
-import { object, number, string, date, array, boolean } from 'joi';
+import joi from 'joi';
 import { DeficiencyNotice } from './deficiency-notice';
 
-export const deficiencyNoticeSchema = object<DeficiencyNotice>({
-    id: number().allow(null),
-    date: date().required().messages({
+export const deficiencyNoticeSchema = joi.object<DeficiencyNotice>({
+    id: joi.number().allow(null),
+    date: joi.date().required().messages({
         'date.base': `Date should be a type of date`,
     }),
-    clientId: number().required(),
-    clientName: string().allow(''),
-    respondentName: string().allow(''),
-    dateOfInspection: date().required().messages({
+    clientId: joi.number().required(),
+    clientName: joi.string().allow(''),
+    respondentName: joi.string().allow(''),
+    dateOfInspection: joi.date().required().messages({
         'date.base': `dateOfInspection should be a type of date`,
     }),
-    docketNumber: string().allow(''),
-    transmitters: array().items(
-        object({
-            transmitter: string(),
-            serialNumber: string(),
+    docketNumber: joi.string().allow(''),
+    transmitters: joi.array().items(
+        joi.object({
+            transmitter: joi.string(),
+            serialNumber: joi.string(),
         })
     ),
-    violationInfo: object({
-        operationWithoutRSL: boolean(),
-        operationWithoutLRO: boolean(),
-        operationUnauthorizedFrequency: boolean(),
-        possessionTransmitterWithoutPP: boolean(),
-        noNTCPertinentPapers: boolean()
+    violationInfo: joi.object({
+        operationWithoutRSL: joi.boolean(),
+        operationWithoutLRO: joi.boolean(),
+        operationUnauthorizedFrequency: joi.boolean(),
+        possessionTransmitterWithoutPP: joi.boolean(),
+        noNTCPertinentPapers: joi.boolean()
     }),
-    dateOfDeficiencyHearing: date().allow(null),
-    isDone: boolean(),
-    regionalDirector: string().allow(''),
+    dateOfDeficiencyHearing: joi.date().allow(null),
+    isDone: joi.boolean(),
+    regionalDirector: joi.string().allow(''),
 });

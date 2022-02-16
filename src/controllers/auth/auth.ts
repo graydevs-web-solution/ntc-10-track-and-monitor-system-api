@@ -28,7 +28,7 @@ export const authenticateUser: RequestHandler = async (req, res, next) => {
             'The email and/or password you entered did not match our records. Please double-check and try again.';
         const doc = await prisma.users.findFirst({
             where: {
-                user_name: value.username
+                user_name: (value as AuthenticateUser).username
             },
             select: {
                 password: true,
@@ -45,7 +45,7 @@ export const authenticateUser: RequestHandler = async (req, res, next) => {
          }
          console.log(doc)
     
-         const isAuthorized = await compare(value.password, doc.password);
+         const isAuthorized = await compare((value as AuthenticateUser).password, doc.password);
          if (!isAuthorized) {
              return res.status(400).json({ message: userNotFoundErrorMessage });
          }
@@ -61,7 +61,7 @@ export const authenticateUser: RequestHandler = async (req, res, next) => {
         const token = sign(data, process.env.JWT_TOKEN as string, jwtOption);
         res.status(200).json({token, expiresIn: expirationInSeconds});
     } catch (error) {
-        log.error(error);
+        log.error(error as Error);
         res.status(500).json({
             message: "Couldn't process the request at this time.",
         });
@@ -71,7 +71,7 @@ export const authenticateUser: RequestHandler = async (req, res, next) => {
 export const createUser: RequestHandler = async (req: { body: User }, res, next) => {
     try {
         const { value, error } = userSchema.validate(req.body);
-        const cleanedValue: User = value;
+        const cleanedValue: User = value as User;
 
         const hashedPassword = await hashPassword('ntc11223344'); 
         const data = {
@@ -90,7 +90,7 @@ export const createUser: RequestHandler = async (req: { body: User }, res, next)
 
          res.status(200).json({ result: `User created successfully!` });
     } catch (error) {
-            log.error(error)
+            log.error(error as Error)
             res.status(500).json({ message: `Couldn't process user data at this time.` });
     }
 }
@@ -98,8 +98,8 @@ export const createUser: RequestHandler = async (req: { body: User }, res, next)
 export const updateUser: RequestHandler = async (req: { body: User }, res, next) => {
     try {
         const { value, error } = userSchema.validate(req.body);
-        if (error) { log.error(error); return res.status(400).json({ message: `Validation error on user.` }); }
-        const cleanedValue: User = value;
+        if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on user.` }); }
+        const cleanedValue: User = value as User;
 
         const hashedPassword = await hashPassword(cleanedValue.password); 
 
@@ -124,7 +124,7 @@ export const updateUser: RequestHandler = async (req: { body: User }, res, next)
 export const updateUserPassword: RequestHandler = async (req: { body: User }, res, next) => {
     try {
         const { value, error } = userSchema.validate(req.body);
-        const cleanedValue: User = value;
+        const cleanedValue: User = value as User;
 
         const hashedPassword = await hashPassword(cleanedValue.password); 
 
@@ -153,7 +153,7 @@ export const getUsers: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ data: docs, collectionSize: docCount });
   } catch (error) {
-    log.error(error);
+    log.error(error as Error);
     res.status(500).json({ message: `Couldn't get users at this time.` });
   }
 }
@@ -167,7 +167,7 @@ export const searchUser: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ data: docs });
   } catch (error) {
-    log.error(error);
+    log.error(error as Error);
     res.status(500).json({ message: `Couldn't get clients at this time.` });
   }
 }
