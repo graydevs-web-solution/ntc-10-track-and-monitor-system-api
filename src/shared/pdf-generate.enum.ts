@@ -5,4 +5,5 @@ export enum PDFTemplate {
     radioDealer = 'radio_dealer',
     deficiencyNotice = 'deficiency_notice',
     complaint = 'complaint',
+    accomplishmentReport = 'accomplishment_report',
 }

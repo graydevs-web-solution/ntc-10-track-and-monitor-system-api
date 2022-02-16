@@ -39,7 +39,7 @@ export const getPDFValues = (val: any) => {
     pdfPlots[6].text = dateToString(value.date_of_inspection as Date);
     pdfPlots[7].text = `${value.respondent_name}, ${value.clients.business_address}, ${value.clients.exactLocation}`;
     pdfPlots[8].text = dateToString(value.date_of_deficiency_hearing as Date);
-    pdfPlots[9].text = value.regional_director_info.name;
+    pdfPlots[9].text = value.regional_director_info.name_first as string;
 
     const violations: string[] = [];
     if (value['vi_operation_without_rsl']) { violations.push(viol[0].name) };

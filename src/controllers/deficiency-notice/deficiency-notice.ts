@@ -190,6 +190,7 @@ export const deleteData: RequestHandler = async (req, res, next) => {
 export const generatePdf: RequestHandler = async (req, res, next) => {
   try {
     const { id } = req.query;
+    console.log(id)
     const doc = await prisma.deficiency_notice.findUnique({
         where: {
             id: +(id as string)
@@ -225,7 +226,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
     //         { start: 20, page: 1 },
     //     ]
     // };
-    const pdf = await modifyPdf(formatData2(pdfValues), PDFTemplate.deficiencyNotice);
+    const pdf = await modifyPdf(pdfValues, PDFTemplate.deficiencyNotice);
 
     res.writeHead(200, {
         'Content-Type': 'application/pdf',

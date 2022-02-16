@@ -36,7 +36,8 @@ export const authenticateUser: RequestHandler = async (req, res, next) => {
                 name_first: true,
                 name_last: true,
                 name_middle: true,
-                position: true
+                position: true,
+                user_id: true
             }
          });
          if (!doc) {
@@ -54,6 +55,7 @@ export const authenticateUser: RequestHandler = async (req, res, next) => {
              userName: doc.user_name,
              position: doc.position,
              expiresIn: expirationInSeconds,
+             user_id: doc.user_id
          };
          const jwtOption = { expiresIn: process.env.EXPIRATION_IN_HOURS_STRING };
         const token = sign(data, process.env.JWT_TOKEN as string, jwtOption);

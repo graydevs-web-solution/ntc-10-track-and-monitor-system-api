@@ -62,7 +62,10 @@ export const getClient: RequestHandler = async (req, res, next) => {
 export const searchClient: RequestHandler = async (req, res, next) => {
   try {
       const { search } = req.query;
-    const docs = await prisma.$queryRawUnsafe<Client[]>(`SELECT * FROM ${DATABASE_SCHEMA}.clients WHERE to_tsvector(business_name) @@ to_tsquery('${search}')`)
+      const query = `SELECT * FROM ${DATABASE_SCHEMA}.clients WHERE business_name LIKE '%${search}%'`;
+      console.log(query)
+    const docs = await prisma.$queryRawUnsafe<Client[]>(query);
+    
     // const docCount = await prisma.clients.count();
 
     res.status(200).json({ data: docs });

@@ -32,6 +32,7 @@ model users {
   regional_director_rd        radio_dealers[]         @relation("RegDirRD")
   regional_director_com       complaint[]             @relation("RegDirCom")
   regional_director_def       deficiency_notice[]     @relation("RegDirDef")
+  attorney                    accomplishment_report[] @relation("AttorneyAR")
 }
 
 model clients {
@@ -52,6 +53,20 @@ model clients {
   radio_dealers             radio_dealers[]
   deficiency_notice         deficiency_notice[]
   complaint                 complaint[]
+}
+
+model accomplishment_report {
+  id                          Int     @id @default(autoincrement())
+  month                       Int
+  year                        Int
+  description                 String? @db.VarChar(250)
+  number_of_admin_case        Int
+  number_of_show_case         Int
+  number_of_hearing           Int
+  number_of_pending_complaint Int
+  number_of_resolved          Int
+  attorney                    String  @db.Uuid
+  attorney_info               users?  @relation("AttorneyAR", fields: [attorney], references: [user_id])
 }
 
 model radio_transceiver_items {

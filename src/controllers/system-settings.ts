@@ -39,10 +39,38 @@ export const getRegionalDirector: RequestHandler = async (req, res, next) => {
   }
 }
 
-export const updateData: RequestHandler = async (req, res, next) => {
+export const getNotedBy: RequestHandler = async (req, res, next) => {
+  try {
+    const { page, size, search } = req.query;
+    let data = { name: ``, position: ``, user_id: `` };
+    let query = { take: +(size as string), skip: +(size as string) * (+(page as string) - 1) };
+    if (search) { (query as any).where = { name: { contains: search }}};
+    const doc = await prisma.system_settings.findFirst({
+        where: {
+            setting: 'noted_by'
+        },
+    });
+    if (!doc?.value) {
+        return res.status(200).json({ data });
+    }
+
+    const doc2 = await prisma.users.findFirst({
+        where: {
+            user_id: doc?.value
+        },
+    });
+    data = { user_id: `${doc2!.user_id}`, name: `${doc2!.name_first} ${doc2!.name_last}`, position: doc2!.position }
+    res.status(200).json({ data });
+  } catch (error) {
+      log.error(error);
+    res.status(500).json({ message: `Couldn't get noted by at this time.` });
+  }
+}
+
+export const updateRegionalDirector: RequestHandler = async (req, res, next) => {
   try {
     const { value, error } = regionalDirectorSchema.validate(req.body);
-    if (error) { log.error(error); return res.status(400).json({ message: `Validation error on mobile phone dealer.` }); }
+    if (error) { log.error(error); return res.status(400).json({ message: `Validation error on regional director.` }); }
     const cleanedValues: UserAssignedData = value;
     // console.log(`UPDATE ${DATABASE_SCHEMA}.system_settings SET value = "${cleanedValues.user_id}" WHERE setting = "regional_director"`)
     const updateRegionalDirector = prisma.$queryRawUnsafe<void>(`UPDATE ${DATABASE_SCHEMA}.system_settings SET value = '${cleanedValues.user_id}' WHERE setting = 'regional_director'`);
@@ -58,7 +86,30 @@ export const updateData: RequestHandler = async (req, res, next) => {
     res.status(200).json({ data });
   } catch (error) {
     log.error(error);
-    res.status(500).json({ message: `Couldn't process radio dealer data at this time.` });
+    res.status(500).json({ message: `Couldn't update regional director data at this time.` });
+  }
+}
+
+export const updateNotedBy: RequestHandler = async (req, res, next) => {
+  try {
+    const { value, error } = regionalDirectorSchema.validate(req.body);
+    if (error) { log.error(error); return res.status(400).json({ message: `Validation error on noted by.` }); }
+    const cleanedValues: UserAssignedData = value;
+    // console.log(`UPDATE ${DATABASE_SCHEMA}.system_settings SET value = "${cleanedValues.user_id}" WHERE setting = "regional_director"`)
+    const updateRegionalDirector = prisma.$queryRawUnsafe<void>(`UPDATE ${DATABASE_SCHEMA}.system_settings SET value = '${cleanedValues.user_id}' WHERE setting = 'noted_by'`);
+    await prisma.$transaction([updateRegionalDirector])
+
+    const doc2 = await prisma.users.findFirst({
+        where: {
+            user_id: cleanedValues.user_id
+        },
+    });
+    const data = { user_id: `${doc2!.user_id}`, name: `${doc2!.name_first} ${doc2!.name_last}`, position: doc2!.position }
+
+    res.status(200).json({ data });
+  } catch (error) {
+    log.error(error);
+    res.status(500).json({ message: `Couldn't update default noted by data at this time.` });
   }
 }
 

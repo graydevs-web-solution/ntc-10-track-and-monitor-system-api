@@ -58,7 +58,7 @@ export const getPDFValues = (val: any) => {
     pdfPlots[17].text = value.radio_regulation_inspector;
     pdfPlots[18].text = value.owner_name;
     pdfPlots[19].text = value.recommendations;
-    pdfPlots[20].text = value.regional_director_info.name;
+    pdfPlots[20].text = value.regional_director_info.name_first as string;
 
     for (const iterator of Array.from(value.supervising_ece)) {
         if (ITERATION_ECE < LIMIT_ECE) {
