@@ -61,6 +61,7 @@ export const authenticateUser: RequestHandler = async (req, res, next) => {
         const token = sign(data, process.env.JWT_TOKEN as string, jwtOption);
         res.status(200).json({token, expiresIn: expirationInSeconds});
     } catch (error) {
+        log.error(error);
         res.status(500).json({
             message: "Couldn't process the request at this time.",
         });
