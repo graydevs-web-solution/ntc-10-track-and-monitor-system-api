@@ -243,7 +243,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
     //         { start: 20, page: 1 },
     //     ]
     // };
-    const pdf = await modifyPdf(formatData2(pdfValues), PDFTemplate.complaint);
+    const pdf = await modifyPdf(pdfValues, PDFTemplate.complaint);
 
     res.writeHead(200, {
         'Content-Type': 'application/pdf',

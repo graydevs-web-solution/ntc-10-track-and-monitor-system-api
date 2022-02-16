@@ -136,8 +136,8 @@ export const getPDFValues = (value: any): PDFEntryValue[] => {
     pdfPlots[50].text = data.authorized_representative;
     pdfPlots[51].text = data.radio_requlation_inspector;
     pdfPlots[52].text = data.recommendations;
-    pdfPlots[53].text = data.noted_by_info.name;
-    pdfPlots[54].text = data.regional_director_info.name;
+    pdfPlots[53].text = data.noted_by_info.name_first as string;
+    pdfPlots[54].text = data.regional_director_info.name_first as string;
     pdfPlots[55].text = data.call_sign;
     pdfPlots[56].text = data.motor_number;
 

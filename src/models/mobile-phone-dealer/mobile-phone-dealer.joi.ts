@@ -41,5 +41,5 @@ export const mobilePhoneDealerSchema = object({
     recommendations: string().allow(''),
     notedBy: string().allow(''),
     regionalDirector: string().allow(''),
-    isApproved: boolean()
+    isApproved: boolean().allow(null)
 });

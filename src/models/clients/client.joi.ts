@@ -5,12 +5,12 @@ export const clientSchema = object<Client>({
     ownerName: string().required().messages({
         'string.base': `ownerName should be a type of string`,
     }),
-    ownerPosition: string().allow(''),
+    ownerPosition: string().required(),
     businessName: string().required().messages({
         'string.base': `businessName should be a type of string`,
     }),
-    businessAddress: string().allow(''),
-    cellphoneNumber: string(),
+    businessAddress: string().required(),
+    cellphoneNumber: string().required(),
     faxNumber: string().allow(''),
     exactLocation: string().allow(''),
     secDtiRegistrationNumber: string().allow(''),

@@ -5,7 +5,11 @@ export const router = Router();
 
 router.get('/regional-director', controllers.getRegionalDirector);
 
-router.post('/regional-director', controllers.updateData);
+router.get('/noted-by', controllers.getNotedBy);
+
+router.post('/regional-director', controllers.updateRegionalDirector);
+
+router.post('/noted-by', controllers.updateNotedBy);
 
 router.get('/form-counters', controllers.getAllFormCounters);
 
