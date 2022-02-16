@@ -15,7 +15,7 @@ const prisma = new PrismaClient()
 export const saveRadioDealer: RequestHandler = async (req, res, next) => {
   try {
     const { value, error } = radioDealerSchema.validate(req.body);
-    if (error) { log.error(error); return res.status(400).json({ message: `Validation error on radio dealer.` }); }
+    if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on radio dealer.` }); }
     const cleanedValues: RadioDealer = value;
     const result = await prisma.radio_dealers.create({
         data: {
@@ -58,7 +58,7 @@ export const saveRadioDealer: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ data: result });
   } catch (error) {
-    log.error(error);
+    log.error(error as Error);
     res.status(500).json({ message: `Couldn't process radio dealer data at this time.` });
   }
 }
@@ -66,7 +66,7 @@ export const saveRadioDealer: RequestHandler = async (req, res, next) => {
 export const updateData: RequestHandler = async (req, res, next) => {
   try {
     const { value, error } = radioDealerSchema.validate(req.body);
-    if (error) { log.error(error); return res.status(400).json({ message: `Validation error on mobile phone dealer.` }); }
+    if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on mobile phone dealer.` }); }
     const cleanedValues: RadioDealer = value;
     const FORM_ID = cleanedValues.id;
     const updateMain = prisma.radio_dealers.update({
@@ -158,7 +158,7 @@ export const updateData: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ message: 'Ok' });
   } catch (error) {
-    log.error(error);
+    log.error(error as Error);
     res.status(500).json({ message: `Couldn't process radio dealer data at this time.` });
   }
 }
@@ -195,7 +195,7 @@ export const getList: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ data: docs, collectionSize: docCount });
   } catch (error) {
-      log.error(error);
+      log.error(error as Error);
     res.status(500).json({ message: `Couldn't get radio dealers at this time.` });
   }
 }
@@ -230,7 +230,7 @@ export const deleteData: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ message: 'Ok' });
   } catch (error) {
-      log.error(error);
+      log.error(error as Error);
     res.status(500).json({ message: `Couldn't delete radio dealer data at this time.` });
   }
 }
@@ -275,7 +275,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
 
     res.end(pdf);
   } catch (error) {
-    log.error(error);
+    log.error(error as Error);
     res.status(500).json({ message: `Couldn't get clients at this time.` });
   }
 }
@@ -303,7 +303,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
 
 // //     res.status(200).json({ data: docs });
 // //   } catch (error) {
-// //       log.error(error);
+// //       log.error(error as Error);
 // //     res.status(500).json({ message: `Couldn't get clients at this time.` });
 // //   }
 // // }

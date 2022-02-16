@@ -16,7 +16,7 @@ const prisma = new PrismaClient()
 export const saveMobilePhoneDealer: RequestHandler = async (req, res, next) => {
   try {
     const { value, error } = mobilePhoneDealerSchema.validate(req.body);
-    if (error) { log.error(error); return res.status(400).json({ message: `Validation error on mobile phone dealer.` }); }
+    if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on mobile phone dealer.` }); }
     const cleanedValues: MobilePhoneDealer = value;
     const result = await prisma.mobile_phone_dealers.create({
         data: {
@@ -58,7 +58,7 @@ export const saveMobilePhoneDealer: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ data: result });
   } catch (error) {
-    log.error(error);
+    log.error(error as Error);
     res.status(500).json({ message: `Couldn't process mobile phone dealer data at this time.` });
   }
 }
@@ -66,7 +66,7 @@ export const saveMobilePhoneDealer: RequestHandler = async (req, res, next) => {
 export const updateData: RequestHandler = async (req, res, next) => {
   try {
     const { value, error } = mobilePhoneDealerSchema.validate(req.body);
-    if (error) { log.error(error); return res.status(400).json({ message: `Validation error on mobile phone dealer.` }); }
+    if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on mobile phone dealer.` }); }
     const cleanedValues: MobilePhoneDealer = value;
     const FORM_ID = cleanedValues.id;
     const updateMain = prisma.mobile_phone_dealers.update({
@@ -164,7 +164,7 @@ export const updateData: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ message: 'Ok' });
   } catch (error) {
-    log.error(error);
+    log.error(error as Error);
     res.status(500).json({ message: `Couldn't process client data at this time.` });
   }
 }
@@ -210,7 +210,7 @@ export const getList: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ data: docs, collectionSize: docCount });
   } catch (error) {
-      log.error(error);
+      log.error(error as Error);
     res.status(500).json({ message: `Couldn't get mobile phone dealers at this time.` });
   }
 }
@@ -245,7 +245,7 @@ export const deleteData: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ message: 'Ok' });
   } catch (error) {
-      log.error(error);
+      log.error(error as Error);
     res.status(500).json({ message: `Couldn't get clients at this time.` });
   }
 }
@@ -306,7 +306,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
 
     res.end(pdf);
   } catch (error) {
-    log.error(error);
+    log.error(error as Error);
     res.status(500).json({ message: `Couldn't get clients at this time.` });
   }
 }
@@ -334,7 +334,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
 
 // //     res.status(200).json({ data: docs });
 // //   } catch (error) {
-// //       log.error(error);
+// //       log.error(error as Error);
 // //     res.status(500).json({ message: `Couldn't get clients at this time.` });
 // //   }
 // // }

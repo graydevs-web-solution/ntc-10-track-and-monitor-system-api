@@ -17,9 +17,9 @@ const prisma = new PrismaClient()
 export const saveOne: RequestHandler = async (req, res, next) => {
   try {
     const { value, error } = accomplishmentReportSchema.validate(req.body);
-    if (error) { log.error(error); return res.status(400).json({ message: `Validation error on accomplishment.` }); }
+    if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on accomplishment.` }); }
     console.log('triggered')
-    const cleanedValues: AccomplishmentReport = value;
+    const cleanedValues: AccomplishmentReport = value as AccomplishmentReport;
     const dateFrom = DateTime.local(cleanedValues.year, cleanedValues.month).startOf('month').toJSDate();
     const dateTo = DateTime.local(cleanedValues.year, cleanedValues.month).endOf('month').toJSDate();
 
@@ -74,7 +74,7 @@ export const saveOne: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ data: result });
   } catch (error) {
-    log.error(error);
+    log.error(error as Error);
     res.status(500).json({ message: `Couldn't process deficiciency notice data at this time.` });
   }
 }
@@ -100,7 +100,7 @@ export const getList: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ data: docs, collectionSize: docCount });
   } catch (error) {
-      log.error(error);
+      log.error(error as Error);
     res.status(500).json({ message: `Couldn't get accomplishment report data at this time.` });
   }
 }
@@ -143,7 +143,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
 
     res.end(pdf);
   } catch (error) {
-    log.error(error);
+    log.error(error as Error);
     res.status(500).json({ message: `Couldn't get clients at this time.` });
   }
 }

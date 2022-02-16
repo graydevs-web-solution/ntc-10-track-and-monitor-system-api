@@ -1,44 +1,44 @@
-import { object, number, string, date, array, boolean } from 'joi';
+import joi from 'joi';
 
-export const radioDealerSchema = object({
-    id: number().allow(null),
-    dateInspected: date().required().messages({
+export const radioDealerSchema = joi.object({
+    id: joi.number().allow(null),
+    dateInspected: joi.date().required().messages({
         'date.base': `Date should be a type of date`,
     }),
-    clientId: number().required(),
-    clientName: string().allow(''),
-    permitNumber: string().allow(''),
-    permitExpiryDate: date().allow(null),
-    supervisingECE: array().items(
-        object({
-            name: string(),
-            licenseNumber: string(),
-            expiryDate: date(),
-            ptrNumber: string(),
-            dateIssued: date(),
+    clientId: joi.number().required(),
+    clientName: joi.string().allow(''),
+    permitNumber: joi.string().allow(''),
+    permitExpiryDate: joi.date().allow(null),
+    supervisingECE: joi.array().items(
+        joi.object({
+            name: joi.string(),
+            licenseNumber: joi.string(),
+            expiryDate: joi.date(),
+            ptrNumber: joi.string(),
+            dateIssued: joi.date(),
         })
     ),
-    radioTechnicians: array().items(
-        object({
-            name: string(),
-            particularsOfLicense: string(),
-            expiryDate: date(),
+    radioTechnicians: joi.array().items(
+        joi.object({
+            name: joi.string(),
+            particularsOfLicense: joi.string(),
+            expiryDate: joi.date(),
         })
     ),
-    diagnosticTestEquipmentAndMeasuringInstrumentInfo: object({
-        reflectometer: boolean(),
-        frequencyCounter: boolean(),
-        powerMeter: boolean(),
-        vtvmDigitalMultimeter: boolean(),
-        signalGenerator: boolean(),
-        oscilloscope: boolean(),
-        vomDigitalMultimeter: boolean(),
-        dummyLoadAntenna: boolean()
+    diagnosticTestEquipmentAndMeasuringInstrumentInfo: joi.object({
+        reflectometer: joi.boolean(),
+        frequencyCounter: joi.boolean(),
+        powerMeter: joi.boolean(),
+        vtvmDigitalMultimeter: joi.boolean(),
+        signalGenerator: joi.boolean(),
+        oscilloscope: joi.boolean(),
+        vomDigitalMultimeter: joi.boolean(),
+        dummyLoadAntenna: joi.boolean()
     }),
-    isLaboratoryRoomShielded: boolean(),
-    remarks: string().allow(''),
-    radioRegulationInspector: string().allow(''),
-    ownerName: string().allow(''),
-    recommendations: string().allow(''),
-    regionalDirector: string().allow(''),
+    isLaboratoryRoomShielded: joi.boolean(),
+    remarks: joi.string().allow(''),
+    radioRegulationInspector: joi.string().allow(''),
+    ownerName: joi.string().allow(''),
+    recommendations: joi.string().allow(''),
+    regionalDirector: joi.string().allow(''),
 });

@@ -34,7 +34,7 @@ export const getRegionalDirector: RequestHandler = async (req, res, next) => {
     data = { user_id: `${doc2!.user_id}`, name: `${doc2!.name_first} ${doc2!.name_last}`, position: doc2!.position }
     res.status(200).json({ data });
   } catch (error) {
-      log.error(error);
+      log.error(error as Error);
     res.status(500).json({ message: `Couldn't get regional director at this time.` });
   }
 }
@@ -62,7 +62,7 @@ export const getNotedBy: RequestHandler = async (req, res, next) => {
     data = { user_id: `${doc2!.user_id}`, name: `${doc2!.name_first} ${doc2!.name_last}`, position: doc2!.position }
     res.status(200).json({ data });
   } catch (error) {
-      log.error(error);
+      log.error(error as Error);
     res.status(500).json({ message: `Couldn't get noted by at this time.` });
   }
 }
@@ -70,8 +70,8 @@ export const getNotedBy: RequestHandler = async (req, res, next) => {
 export const updateRegionalDirector: RequestHandler = async (req, res, next) => {
   try {
     const { value, error } = regionalDirectorSchema.validate(req.body);
-    if (error) { log.error(error); return res.status(400).json({ message: `Validation error on regional director.` }); }
-    const cleanedValues: UserAssignedData = value;
+    if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on regional director.` }); }
+    const cleanedValues: UserAssignedData = value as UserAssignedData;
     // console.log(`UPDATE ${DATABASE_SCHEMA}.system_settings SET value = "${cleanedValues.user_id}" WHERE setting = "regional_director"`)
     const updateRegionalDirector = prisma.$queryRawUnsafe<void>(`UPDATE ${DATABASE_SCHEMA}.system_settings SET value = '${cleanedValues.user_id}' WHERE setting = 'regional_director'`);
     await prisma.$transaction([updateRegionalDirector])
@@ -85,7 +85,7 @@ export const updateRegionalDirector: RequestHandler = async (req, res, next) => 
 
     res.status(200).json({ data });
   } catch (error) {
-    log.error(error);
+    log.error(error as Error);
     res.status(500).json({ message: `Couldn't update regional director data at this time.` });
   }
 }
@@ -93,8 +93,8 @@ export const updateRegionalDirector: RequestHandler = async (req, res, next) => 
 export const updateNotedBy: RequestHandler = async (req, res, next) => {
   try {
     const { value, error } = regionalDirectorSchema.validate(req.body);
-    if (error) { log.error(error); return res.status(400).json({ message: `Validation error on noted by.` }); }
-    const cleanedValues: UserAssignedData = value;
+    if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on noted by.` }); }
+    const cleanedValues: UserAssignedData = value  as UserAssignedData;
     // console.log(`UPDATE ${DATABASE_SCHEMA}.system_settings SET value = "${cleanedValues.user_id}" WHERE setting = "regional_director"`)
     const updateRegionalDirector = prisma.$queryRawUnsafe<void>(`UPDATE ${DATABASE_SCHEMA}.system_settings SET value = '${cleanedValues.user_id}' WHERE setting = 'noted_by'`);
     await prisma.$transaction([updateRegionalDirector])
@@ -108,7 +108,7 @@ export const updateNotedBy: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ data });
   } catch (error) {
-    log.error(error);
+    log.error(error as Error);
     res.status(500).json({ message: `Couldn't update default noted by data at this time.` });
   }
 }
@@ -129,7 +129,7 @@ export const getAllFormCounters: RequestHandler = async (req, res, next) => {
     });
     res.status(200).json({ data: docs });
   } catch (error) {
-      log.error(error);
+      log.error(error as Error);
     res.status(500).json({ message: `Couldn't get regional director at this time.` });
   }
 }
@@ -143,7 +143,7 @@ export const updateADM: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ message: 'ADM Counter successfully saved!' });
   } catch (error) {
-    log.error(error);
+    log.error(error as Error);
     res.status(500).json({ message: `Couldn't process radio dealer data at this time.` });
   }
 }
@@ -157,7 +157,7 @@ export const updateROX: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ message: 'ROX Counter successfully saved!' });
   } catch (error) {
-    log.error(error);
+    log.error(error as Error);
     res.status(500).json({ message: `Couldn't process radio dealer data at this time.` });
   }
 }
@@ -165,7 +165,7 @@ export const updateROX: RequestHandler = async (req, res, next) => {
 // export const saveClient: RequestHandler = async (req, res, next) => {
 //   try {
 //     const { value, error } = clientSchema.validate(req.body);
-//     if (error) { log.error(error); return res.status(400).json({ message: `Validation error on client.` }); }
+//     if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on client.` }); }
 //     const clientData: Client = value;
 //     const { ownerName, businessName, ownerPosition, businessAddress, ...rest } = clientData;
 //     const result = await prisma.clients.create({
@@ -181,7 +181,7 @@ export const updateROX: RequestHandler = async (req, res, next) => {
 
 //     res.status(200).json({ data: result });
 //   } catch (error) {
-//     log.error(error);
+//     log.error(error as Error);
 //     res.status(500).json({ message: `Couldn't process client data at this time.` });
 //   }
 // }
@@ -196,7 +196,7 @@ export const updateROX: RequestHandler = async (req, res, next) => {
 
 //     res.status(200).json({ data: docs, collectionSize: docCount });
 //   } catch (error) {
-//       log.error(error);
+//       log.error(error as Error);
 //     res.status(500).json({ message: `Couldn't get clients at this time.` });
 //   }
 // }
@@ -222,7 +222,7 @@ export const updateROX: RequestHandler = async (req, res, next) => {
 
 //     res.status(200).json({ data: docs });
 //   } catch (error) {
-//       log.error(error);
+//       log.error(error as Error);
 //     res.status(500).json({ message: `Couldn't get clients at this time.` });
 //   }
 // }

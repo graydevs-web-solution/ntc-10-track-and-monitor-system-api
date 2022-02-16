@@ -15,7 +15,7 @@ const prisma = new PrismaClient()
 export const saveServiceCenter: RequestHandler = async (req, res, next) => {
   try {
     const { value, error } = serviceCenterReportSchema.validate(req.body);
-    if (error) { log.error(error); return res.status(400).json({ message: `Validation error on service center.` }); }
+    if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on service center.` }); }
     const cleanedValues: ServiceCenterReport = value;
     const result = await prisma.service_center_report.create({
         data: {
@@ -51,7 +51,7 @@ export const saveServiceCenter: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ data: result });
   } catch (error) {
-    log.error(error);
+    log.error(error as Error);
     res.status(500).json({ message: `Couldn't process service center data at this time.` });
   }
 }
@@ -59,7 +59,7 @@ export const saveServiceCenter: RequestHandler = async (req, res, next) => {
 export const updateData: RequestHandler = async (req, res, next) => {
   try {
     const { value, error } = serviceCenterReportSchema.validate(req.body);
-    if (error) { log.error(error); return res.status(400).json({ message: `Validation error on service center.` }); }
+    if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on service center.` }); }
     const cleanedValues: ServiceCenterReport = value;
     const FORM_ID = cleanedValues.id;
     const updateMain = prisma.service_center_report.update({
@@ -142,7 +142,7 @@ export const updateData: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ message: 'Ok' });
   } catch (error) {
-    log.error(error);
+    log.error(error as Error);
     res.status(500).json({ message: `Couldn't update service center data at this time.` });
   }
 }
@@ -187,7 +187,7 @@ export const getList: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ data: docs, collectionSize: docCount });
   } catch (error) {
-      log.error(error);
+      log.error(error as Error);
     res.status(500).json({ message: `Couldn't get service centers at this time.` });
   }
 }
@@ -222,7 +222,7 @@ export const deleteData: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({ message: 'Ok' });
   } catch (error) {
-      log.error(error);
+      log.error(error as Error);
     res.status(500).json({ message: `Couldn't get clients at this time.` });
   }
 }
@@ -282,7 +282,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
 
     res.end(pdf);
   } catch (error) {
-    log.error(error);
+    log.error(error as Error);
     res.status(500).json({ message: `Couldn't get clients at this time.` });
   }
 }
@@ -310,7 +310,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
 
 // //     res.status(200).json({ data: docs });
 // //   } catch (error) {
-// //       log.error(error);
+// //       log.error(error as Error);
 // //     res.status(500).json({ message: `Couldn't get clients at this time.` });
 // //   }
 // // }
