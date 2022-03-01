@@ -162,7 +162,10 @@ export const searchUser: RequestHandler = async (req, res, next) => {
   try {
     const { search } = req.query;
     // const query = req.query
-    const docs = await prisma.$queryRawUnsafe(`SELECT * FROM ${DATABASE_SCHEMA}.users WHERE to_tsvector(name_first) @@ to_tsquery('${search}')`)
+    const docs = await prisma.$queryRawUnsafe(`SELECT * FROM ${DATABASE_SCHEMA}.users WHERE 
+    name_first ILIKE '%${search}%' OR 
+    name_middle ILIKE '%${search}%' OR 
+    name_last ILIKE '%${search}%'`)
     // const docCount = await prisma.clients.count();
 
     res.status(200).json({ data: docs });
