@@ -78,7 +78,6 @@ export const getPDFValues = (value: any): PDFEntryValue[] => {
     const PLOT_OTHERS = { x: 76, y: 423, size: defaultSize };
     const SPACING = 12;
     const data: RadioTransceiverAPI = value;
-    console.log(data)
     let ITERATION_OPERATORS = 0;
     let ITERATION_TRANSMITTER = 0;
     let ITERATION_RECEIVERS = 0;

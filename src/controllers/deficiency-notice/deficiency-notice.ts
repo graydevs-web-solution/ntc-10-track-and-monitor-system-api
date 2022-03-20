@@ -201,7 +201,6 @@ export const deleteData: RequestHandler = async (req, res, next) => {
 export const generatePdf: RequestHandler = async (req, res, next) => {
   try {
     const { id } = req.query;
-    console.log(id)
     const doc = await prisma.deficiency_notice.findUnique({
         where: {
             id: +(id as string)
@@ -227,7 +226,6 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
             deficiency_notice_transmitter: true,
         }
     });
-    console.log(doc)
     const pdfValues = getPDFValues(doc);
     // const options: ModifyPDFOptions = {
     //     isMultiplePage: true,

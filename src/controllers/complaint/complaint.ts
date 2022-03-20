@@ -245,7 +245,6 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
             complaint_transmitter: true,
         }
     });
-    console.log(doc)
     const pdfValues = getPDFValues(doc);
     // const options: ModifyPDFOptions = {
     //     isMultiplePage: true,

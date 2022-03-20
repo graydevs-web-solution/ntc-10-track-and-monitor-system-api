@@ -18,7 +18,6 @@ export const saveRadioTransceivers: RequestHandler = async (req, res, next) => {
     const { value, error } = radioTransceiverSchema.validate(req.body);
     if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on radio transceiver.` }); }
     const cleanedValues: RadioTransceiver = value;
-    console.log(cleanedValues)
     const result = await prisma.radio_transceivers.create({
         data: {
             client_id: cleanedValues.clientId,
