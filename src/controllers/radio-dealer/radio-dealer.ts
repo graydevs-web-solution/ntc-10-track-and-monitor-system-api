@@ -53,6 +53,7 @@ export const saveRadioDealer: RequestHandler = async (req, res, next) => {
             owner_name: cleanedValues.ownerName,
             recommendations: cleanedValues.recommendations,
             regional_director: cleanedValues.regionalDirector,
+            regional_director_approved: cleanedValues.regionalDirectorApproved,
         }
     })
 
@@ -108,6 +109,7 @@ export const updateData: RequestHandler = async (req, res, next) => {
             owner_name: cleanedValues.ownerName,
             recommendations: cleanedValues.recommendations,
             regional_director: cleanedValues.regionalDirector,
+            regional_director_approved: cleanedValues.regionalDirectorApproved,
         }
     })
 

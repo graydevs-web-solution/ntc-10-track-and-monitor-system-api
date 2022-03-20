@@ -73,7 +73,9 @@ export const saveRadioTransceivers: RequestHandler = async (req, res, next) => {
             radio_requlation_inspector: cleanedValues.radioRegulationInspector,
             recommendations: cleanedValues.recommendations,
             noted_by: cleanedValues.notedBy,
+            noted_by_approved: cleanedValues.notedByApproved,
             regional_director: cleanedValues.regionalDirector,
+            regional_director_approved: cleanedValues.regionalDirectorApproved,
             date_issued: cleanedValues.dateIssued ? (cleanedValues.dateIssued as Date).toISOString() : null,
             radio_transceiver_items: {
                 create: cleanedValues.radioTransceivers.map((val) => ({
@@ -182,7 +184,9 @@ export const updateData: RequestHandler = async (req, res, next) => {
             radio_requlation_inspector: cleanedValues.radioRegulationInspector,
             recommendations: cleanedValues.recommendations,
             noted_by: cleanedValues.notedBy,
+            noted_by_approved: cleanedValues.notedByApproved,
             regional_director: cleanedValues.regionalDirector,
+            regional_director_approved: cleanedValues.regionalDirectorApproved,
             date_issued: cleanedValues.dateIssued ? cleanedValues.dateIssued as Date : null,
         }
     })

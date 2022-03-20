@@ -30,8 +30,10 @@ export interface DeficiencyNoticeAPI {
   ['clients']: ClientAPI;
   ['respondent_name']: string;
   ['date_of_inspection']: Date | string;
-  ['docket_number']: string;
-  ['vi_operation_without_rsl']: keyof typeof plotOptions;
+  ['docket_number_description']: string;
+  ['docket_number_start']: number;
+  ['docket_number_end']: number;
+  ['vi_operation_without_rsl']: boolean;
   ['vi_operation_without_lro']: boolean;
   ['vi_operation_unauthorized_frequency']: boolean;
   ['vi_possession_transmitter_without_pp']: boolean;
@@ -40,5 +42,6 @@ export interface DeficiencyNoticeAPI {
   ['date_of_deficiency_hearing']: Date;
   ['is_done']: boolean;
   ['regional_director']: string;
+  ['regional_director_approved']: boolean;
   ['regional_director_info']: UserAssignedData;
 }

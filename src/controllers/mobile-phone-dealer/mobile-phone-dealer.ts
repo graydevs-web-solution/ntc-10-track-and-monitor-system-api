@@ -51,8 +51,9 @@ export const saveMobilePhoneDealer: RequestHandler = async (req, res, next) => {
             owner_position: cleanedValues.ownerInfo.position,
             recommendations: cleanedValues.recommendations,
             noted_by: cleanedValues.notedBy,
+            noted_by_approved: cleanedValues.notedByApproved,
             regional_director: cleanedValues.regionalDirector,
-            is_approved: cleanedValues.isApproved
+            regional_director_approved: cleanedValues.regionalDirectorApproved,
         }
     })
 
@@ -105,8 +106,9 @@ export const updateData: RequestHandler = async (req, res, next) => {
             owner_position: cleanedValues.ownerInfo.position,
             recommendations: cleanedValues.recommendations,
             noted_by: cleanedValues.notedBy,
+            noted_by_approved: cleanedValues.notedByApproved,
             regional_director: cleanedValues.regionalDirector,
-            is_approved: cleanedValues.isApproved
+            regional_director_approved: cleanedValues.regionalDirectorApproved,
         }
     })
 

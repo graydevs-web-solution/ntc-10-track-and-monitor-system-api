@@ -36,8 +36,9 @@ export interface MobilePhoneDealerAPI {
   ['owner_position']: string;
   ['recommendations']: string;
   ['noted_by']: string;
+  ['noted_by_approved']: boolean;
   ['regional_director']: string;
-  ['is_approved']: boolean;
-    ['noted_by_info']: UserAssignedData;
+  ['regional_director_approved']: boolean;
+  ['noted_by_info']: UserAssignedData;
   ['regional_director_info']: UserAssignedData;
 }

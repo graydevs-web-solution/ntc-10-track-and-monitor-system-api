@@ -23,7 +23,9 @@ export const saveOne: RequestHandler = async (req, res, next) => {
             client_id: cleanedValues.clientId as number,
             respondent_name: cleanedValues.respondentName,
             date_of_inspection: cleanDate(cleanedValues.dateOfInspection as Date),
-            docket_number: cleanedValues.docketNumber,
+            docket_number_description: cleanedValues.docketNumberDescription,
+            docket_number_start: cleanedValues.docketNumberStart,
+            docket_number_end: cleanedValues.docketNumberEnd,
             deficiency_notice_transmitter: {
                 create: cleanedValues.transmitters.map((val) => ({
                     transmitter: val.transmitter,
@@ -37,11 +39,21 @@ export const saveOne: RequestHandler = async (req, res, next) => {
             vi_no_ntc_pertinent_papers: cleanedValues.violationInfo.noNTCPertinentPapers,
             date_of_deficiency_hearing: cleanDate(cleanedValues.dateOfDeficiencyHearing as Date),
             regional_director: cleanedValues.regionalDirector,
+            regional_director_approved: cleanedValues.regionalDirectorApproved,
             is_done: cleanedValues.isDone
         }
-    })
+    });
+    const nextCounter = `${cleanedValues.docketNumberEnd + 1}`;
+    const roxResult = await prisma.system_settings.update({
+        where: {
+            setting: 'rox_counter'
+        },
+        data: {
+            value: nextCounter
+        }
+    });
 
-    res.status(200).json({ data: result });
+    res.status(200).json({ data: { deficiencyNotice: result, setting: { setting: 'rox_counter', value: nextCounter } } });
   } catch (error) {
     log.error(error as Error);
     res.status(500).json({ message: `Couldn't process deficiciency notice data at this time.` });
@@ -63,7 +75,6 @@ export const updateData: RequestHandler = async (req, res, next) => {
             client_id: cleanedValues.clientId as number,
             respondent_name: cleanedValues.respondentName,
             date_of_inspection: cleanDate(cleanedValues.dateOfInspection as Date),
-            docket_number: cleanedValues.docketNumber,
             vi_operation_without_rsl: cleanedValues.violationInfo.operationWithoutRSL,
             vi_operation_without_lro: cleanedValues.violationInfo.operationWithoutLRO,
             vi_operation_unauthorized_frequency: cleanedValues.violationInfo.operationUnauthorizedFrequency,
@@ -71,6 +82,7 @@ export const updateData: RequestHandler = async (req, res, next) => {
             vi_no_ntc_pertinent_papers: cleanedValues.violationInfo.noNTCPertinentPapers,
             date_of_deficiency_hearing: cleanDate(cleanedValues.dateOfDeficiencyHearing as Date),
             regional_director: cleanedValues.regionalDirector,
+            regional_director_approved: cleanedValues.regionalDirectorApproved,
             is_done: cleanedValues.isDone
         }
     })
@@ -133,7 +145,7 @@ export const getList: RequestHandler = async (req, res, next) => {
                     exactLocation: true,
                 }
             },
-                        regional_director_info: {
+            regional_director_info: {
                 select: {
                     name_first: true,
                     name_last: true,
@@ -145,7 +157,6 @@ export const getList: RequestHandler = async (req, res, next) => {
         }
     });
     const docCount = await prisma.deficiency_notice.count();
-
     res.status(200).json({ data: docs, collectionSize: docCount });
   } catch (error) {
       log.error(error as Error);
