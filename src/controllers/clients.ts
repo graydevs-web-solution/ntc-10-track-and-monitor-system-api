@@ -63,7 +63,6 @@ export const searchClient: RequestHandler = async (req, res, next) => {
   try {
       const { search } = req.query;
       const query = `SELECT * FROM ${DATABASE_SCHEMA}.clients WHERE business_name ILIKE '%${search}%' or owner_name ILIKE '%${search}%'`;
-      console.log(query)
     const docs = await prisma.$queryRawUnsafe<Client[]>(query);
     
     // const docCount = await prisma.clients.count();

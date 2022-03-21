@@ -187,12 +187,13 @@ export const getList: RequestHandler = async (req, res, next) => {
 export const deleteData: RequestHandler = async (req, res, next) => {
   try {
       const { id } = req.query;
-    const deleteMain = prisma.deficiency_notice.delete({
+    const deleteMain = prisma.complaint.delete({
         where: {
             id: +(id as string)
         },
     });
-    const deleteTransmitter = prisma.$queryRaw<void>`DELETE FROM ${DATABASE_SCHEMA}.complaint_transmitter WHERE complaint_id = ${id}`;
+    const query = `DELETE FROM ${DATABASE_SCHEMA}.complaint_transmitter WHERE complaint_id = ${id}`;
+    const deleteTransmitter = prisma.$queryRawUnsafe<void>(query);
 
     // NOTE: This code block couldn't delete specified row. I'm dumb as heck
     // 
