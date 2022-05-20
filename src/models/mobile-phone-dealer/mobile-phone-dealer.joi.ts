@@ -41,5 +41,7 @@ export const mobilePhoneDealerSchema = joi.object({
     recommendations: joi.string().allow(''),
     notedBy: joi.string().allow(''),
     regionalDirector: joi.string().allow(''),
-    isApproved: joi.boolean().allow(null)
+    isApproved: joi.boolean().allow(null),
+    regionalDirectorApproved: joi.boolean().allow(null),
+    notedByApproved: joi.boolean().allow(null)
 });

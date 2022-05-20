@@ -36,7 +36,9 @@ export const saveOne: RequestHandler = async (req, res, next) => {
             complainant_name: cleanedValues.complainantName,
             client_id: cleanedValues.clientId as number,
             respondent_name: cleanedValues.respondentName,
-            docket_number: cleanedValues.docketNumber,
+            docket_number_description: cleanedValues.docketNumberDescription,
+            docket_number_start: cleanedValues.docketNumberStart,
+            docket_number_end: cleanedValues.docketNumberEnd,
             date_of_inspection: cleanDate(cleanedValues.dateOfInspection as Date),
             location: cleanedValues.location,
             reason: cleanedValues.reason,
@@ -53,11 +55,21 @@ export const saveOne: RequestHandler = async (req, res, next) => {
             vi_no_ntc_pertinent_papers: cleanedValues.violationInfo.noNTCPertinentPapers,
             date_time_of_hearing: cleanDate(new Date(getHearingDate(cleanedValues.dateOfHearing as Date, cleanedValues.timeOfHearing))),
             regional_director: cleanedValues.regionalDirector,
+            regional_director_approved: cleanedValues.regionalDirectorApproved,
             is_done: cleanedValues.isDone
         }
-    })
+    });
+    const nextCounter = `${cleanedValues.docketNumberEnd + 1}`;
+    const admResult = await prisma.system_settings.update({
+        where: {
+            setting: 'adm_counter'
+        },
+        data: {
+            value: nextCounter
+        }
+    });
 
-    res.status(200).json({ data: result });
+    res.status(200).json({ data: { complaint: result, setting: { setting: 'adm_counter', value: nextCounter } } });
   } catch (error) {
     log.error(error as Error);
     res.status(500).json({ message: `Couldn't process complaint data at this time.` });
@@ -80,7 +92,6 @@ export const updateData: RequestHandler = async (req, res, next) => {
             client_id: cleanedValues.clientId as number,
             respondent_name: cleanedValues.respondentName,
             date_of_inspection: cleanDate(cleanedValues.dateOfInspection as Date),
-            docket_number: cleanedValues.docketNumber,
             location: cleanedValues.location,
             reason: cleanedValues.reason,
             vi_operation_without_rsl: cleanedValues.violationInfo.operationWithoutRSL,
@@ -90,6 +101,7 @@ export const updateData: RequestHandler = async (req, res, next) => {
             vi_no_ntc_pertinent_papers: cleanedValues.violationInfo.noNTCPertinentPapers,
             date_time_of_hearing: cleanDate(new Date(getHearingDate(cleanedValues.dateOfHearing as Date, cleanedValues.timeOfHearing))),
             regional_director: cleanedValues.regionalDirector,
+            regional_director_approved: cleanedValues.regionalDirectorApproved,
             is_done: cleanedValues.isDone
         }
     })
@@ -175,12 +187,13 @@ export const getList: RequestHandler = async (req, res, next) => {
 export const deleteData: RequestHandler = async (req, res, next) => {
   try {
       const { id } = req.query;
-    const deleteMain = prisma.deficiency_notice.delete({
+    const deleteMain = prisma.complaint.delete({
         where: {
             id: +(id as string)
         },
     });
-    const deleteTransmitter = prisma.$queryRaw<void>`DELETE FROM ${DATABASE_SCHEMA}.complaint_transmitter WHERE complaint_id = ${id}`;
+    const query = `DELETE FROM ${DATABASE_SCHEMA}.complaint_transmitter WHERE complaint_id = ${id}`;
+    const deleteTransmitter = prisma.$queryRawUnsafe<void>(query);
 
     // NOTE: This code block couldn't delete specified row. I'm dumb as heck
     // 
@@ -233,7 +246,6 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
             complaint_transmitter: true,
         }
     });
-    console.log(doc)
     const pdfValues = getPDFValues(doc);
     // const options: ModifyPDFOptions = {
     //     isMultiplePage: true,

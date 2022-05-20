@@ -18,7 +18,6 @@ export const saveOne: RequestHandler = async (req, res, next) => {
   try {
     const { value, error } = accomplishmentReportSchema.validate(req.body);
     if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on accomplishment.` }); }
-    console.log('triggered')
     const cleanedValues: AccomplishmentReport = value as AccomplishmentReport;
     const dateFrom = DateTime.local(cleanedValues.year, cleanedValues.month).startOf('month').toJSDate();
     const dateTo = DateTime.local(cleanedValues.year, cleanedValues.month).endOf('month').toJSDate();
@@ -57,7 +56,6 @@ export const saveOne: RequestHandler = async (req, res, next) => {
             is_done: true
         }
     });
-    console.log(cleanedValues)
     const result = await prisma.accomplishment_report.create({
         data: {
             month: cleanedValues.month,
@@ -108,7 +106,6 @@ export const getList: RequestHandler = async (req, res, next) => {
 export const generatePdf: RequestHandler = async (req, res, next) => {
   try {
     const { id } = req.query;
-    console.log(id)
     const doc = await prisma.accomplishment_report.findUnique({
         where: {
             id: +(id as string)
@@ -124,7 +121,6 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
             },
         }
     });
-    console.log(doc)
     const pdfValues = getPDFValues(doc);
     // const options: ModifyPDFOptions = {
     //     isMultiplePage: true,

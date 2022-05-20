@@ -9,7 +9,7 @@ datasource db {
 
 model system_settings {
   id      Int    @unique @default(autoincrement())
-  setting String
+  setting String @unique
   value   String
 }
 
@@ -167,6 +167,8 @@ model radio_transceivers {
   radio_requlation_inspector                   String?                       @db.VarChar(250)
   noted_by                                     String                        @db.Uuid
   regional_director                            String                        @db.Uuid
+  noted_by_approved                            Boolean?
+  regional_director_approved                   Boolean?
   clients                                      clients?                      @relation(fields: [client_id], references: [id])
   regional_director_info                       users?                        @relation("RegDirRT", fields: [regional_director], references: [user_id])
   noted_by_info                                users?                        @relation("NotedByRT", fields: [noted_by], references: [user_id])
@@ -216,7 +218,8 @@ model mobile_phone_dealers {
   recommendations                          String?                  @db.VarChar(250)
   noted_by                                 String?                  @db.Uuid
   regional_director                        String?                  @db.Uuid
-  is_approved                              Boolean?
+  noted_by_approved                        Boolean?
+  regional_director_approved               Boolean?
   clients                                  clients?                 @relation(fields: [client_id], references: [id])
   regional_director_info                   users?                   @relation("RegDirMP", fields: [regional_director], references: [user_id])
   noted_by_info                            users?                   @relation("NotedByMP", fields: [noted_by], references: [user_id])
@@ -257,7 +260,8 @@ model service_center_report {
   recommendations                          String?                              @db.VarChar(250)
   noted_by                                 String?                              @db.Uuid
   regional_director                        String?                              @db.Uuid
-  is_approved                              Boolean?
+  noted_by_approved                        Boolean?
+  regional_director_approved               Boolean?
   clients                                  clients?                             @relation(fields: [client_id], references: [id])
   regional_director_info                   users?                               @relation("RegDirSC", fields: [regional_director], references: [user_id])
   noted_by_info                            users?                               @relation("NotedBySC", fields: [noted_by], references: [user_id])
@@ -305,6 +309,7 @@ model radio_dealers {
   owner_name                    String?             @db.VarChar(250)
   recommendations               String?             @db.VarChar(250)
   regional_director             String?             @db.Uuid
+  regional_director_approved    Boolean?
   clients                       clients?            @relation(fields: [client_id], references: [id])
   regional_director_info        users?              @relation("RegDirRD", fields: [regional_director], references: [user_id])
   supervising_ece               supervising_ece[]
@@ -325,7 +330,9 @@ model deficiency_notice {
   client_id                            Int?
   respondent_name                      String?                         @db.VarChar(250)
   date_of_inspection                   DateTime?                       @db.Timestamptz(6)
-  docket_number                        String?                         @db.VarChar(250)
+  docket_number_description                        String?                         @db.VarChar(250)
+  docket_number_start                  Int?
+  docket_number_end                  Int?                           
   vi_operation_without_rsl             Boolean?
   vi_operation_without_lro             Boolean?
   vi_operation_unauthorized_frequency  Boolean?
@@ -334,6 +341,7 @@ model deficiency_notice {
   date_of_deficiency_hearing           DateTime?                       @db.Timestamptz(6)
   is_done                              Boolean?
   regional_director                    String?                         @db.Uuid
+  regional_director_approved           Boolean?
   clients                              clients?                        @relation(fields: [client_id], references: [id])
   regional_director_info               users?                          @relation("RegDirDef", fields: [regional_director], references: [user_id])
   deficiency_notice_transmitter        deficiency_notice_transmitter[]
@@ -353,7 +361,9 @@ model complaint {
   client_id                            Int?
   complainant_name                     String?                 @db.VarChar(250)
   respondent_name                      String?                 @db.VarChar(250)
-  docket_number                        String?                 @db.VarChar(250)
+  docket_number_description                        String?                         @db.VarChar(250)
+  docket_number_start                  Int?
+  docket_number_end                  Int?    
   date_of_inspection                   DateTime?               @db.Timestamptz(6)
   location                             String?                 @db.VarChar(250)
   reason                               String?                 @db.VarChar(250)
@@ -365,6 +375,7 @@ model complaint {
   date_time_of_hearing                 DateTime?               @db.Timestamptz(6)
   is_done                              Boolean?
   regional_director                    String?                 @db.Uuid
+  regional_director_approved           Boolean?
   clients                              clients?                @relation(fields: [client_id], references: [id])
   regional_director_info               users?                  @relation("RegDirCom", fields: [regional_director], references: [user_id])
   complaint_transmitter                complaint_transmitter[]

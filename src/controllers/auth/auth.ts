@@ -43,7 +43,6 @@ export const authenticateUser: RequestHandler = async (req, res, next) => {
          if (!doc) {
              return res.status(400).json({ message: userNotFoundErrorMessage });
          }
-         console.log(doc)
     
          const isAuthorized = await compare((value as AuthenticateUser).password, doc.password);
          if (!isAuthorized) {
@@ -83,7 +82,6 @@ export const createUser: RequestHandler = async (req: { body: User }, res, next)
                 position: cleanedValue.position,
                 password: hashedPassword
         };
-        console.log(data)
         const result = await prisma.users.create({
             data
         });
