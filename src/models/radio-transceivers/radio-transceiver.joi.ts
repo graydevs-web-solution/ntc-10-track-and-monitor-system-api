@@ -5,6 +5,7 @@ export const radioTransceiverSchema = joi.object({
     dateIssued: joi.date().required().messages({
         'date.base': `Date should be a type of date`,
     }),
+    clientName: joi.string().allow(''),
     clientId: joi.number().required(),
     classType: joi.string().allow(''),
     natureOfService: joi.string().allow(''),
@@ -113,7 +114,9 @@ export const radioTransceiverSchema = joi.object({
     radioRegulationInspector: joi.string().allow(''),
     recommendations: joi.string().allow(''),
     notedBy: joi.string().allow(''),
+    notedByInfo: joi.object().allow(),
     regionalDirector: joi.string().allow(''),
+    regionalDirectorInfo: joi.object().allow(),
     notedByApproved: joi.boolean().allow(null),
     regionalDirectorApproved: joi.boolean().allow(null)
 });
