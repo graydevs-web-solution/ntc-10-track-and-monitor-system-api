@@ -254,10 +254,9 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
 export const approvalStatus: RequestHandler = async (req, res, next) => {
   try {
     const data: Approval = req.body;
-    console.log(data.radioTransceiver)
-    const { value, error } = deficiencyNoticeSchema.validate(data.serviceCenter);
+    const { value, error } = deficiencyNoticeSchema.validate(data.deficiencyNotice);
     if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on mobile phone dealer.` }); }
-    const cleanedValues: DeficiencyNotice = value;
+    const cleanedValues: DeficiencyNotice = value as DeficiencyNotice;
     const FORM_ID = cleanedValues.id;
 
     let directorInfo: users | null;

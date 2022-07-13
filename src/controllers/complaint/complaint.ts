@@ -275,9 +275,9 @@ export const approvalStatus: RequestHandler = async (req, res, next) => {
   try {
     const data: Approval = req.body;
     console.log(data.radioTransceiver)
-    const { value, error } = complaintSchema.validate(data.serviceCenter);
+    const { value, error } = complaintSchema.validate(data.complaint);
     if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on mobile phone dealer.` }); }
-    const cleanedValues: Complaint = value;
+    const cleanedValues: Complaint = value as Complaint;
     const FORM_ID = cleanedValues.id;
 
     let directorInfo: users | null;
