@@ -13,6 +13,8 @@ router.delete('/', controllers.deleteData);
 
 router.get('/pdf', controllers.generatePdf);
 
+router.post('approval', controllers.approvalStatus);
+
 // router.get('/one', getClient);
 
 // router.get('/search', searchClient);
