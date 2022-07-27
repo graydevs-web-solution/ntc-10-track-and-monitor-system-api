@@ -37,6 +37,6 @@ export interface Complaint {
   timeOfHearing: TimeInfo;
   regionalDirector: string;
   regionalDirectorInfo?: UserAssignedData;
-  regionalDirectorApproved: boolean;
+  regionalDirectorApproved: string;
   isDone: boolean;
 }

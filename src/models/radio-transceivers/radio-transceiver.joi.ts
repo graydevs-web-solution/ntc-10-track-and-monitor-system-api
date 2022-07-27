@@ -117,6 +117,6 @@ export const radioTransceiverSchema = joi.object({
     notedByInfo: joi.object().allow(),
     regionalDirector: joi.string().allow(''),
     regionalDirectorInfo: joi.object().allow(),
-    notedByApproved: joi.boolean().allow(null),
-    regionalDirectorApproved: joi.boolean().allow(null)
+    notedByApproved: joi.string().allow(null).allow(''),
+    regionalDirectorApproved: joi.string().allow(null).allow('')
 });

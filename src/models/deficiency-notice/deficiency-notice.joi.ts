@@ -31,5 +31,5 @@ export const deficiencyNoticeSchema = joi.object<DeficiencyNotice>({
     dateOfDeficiencyHearing: joi.date().allow(null),
     isDone: joi.boolean(),
     regionalDirector: joi.string().allow(''),
-    regionalDirectorApproved: joi.boolean().allow(null),
+    regionalDirectorApproved: joi.string().allow(null),
 });

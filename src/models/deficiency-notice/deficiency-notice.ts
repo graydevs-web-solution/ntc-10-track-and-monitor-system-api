@@ -29,5 +29,5 @@ export interface DeficiencyNotice {
   isDone: boolean;
   regionalDirector: string;
   regionalDirectorInfo?: UserAssignedData;
-  regionalDirectorApproved: boolean;
+  regionalDirectorApproved: string;
 }

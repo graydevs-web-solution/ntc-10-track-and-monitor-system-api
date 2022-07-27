@@ -42,6 +42,6 @@ export interface DeficiencyNoticeAPI {
   ['date_of_deficiency_hearing']: Date;
   ['is_done']: boolean;
   ['regional_director']: string;
-  ['regional_director_approved']: boolean;
+  ['regional_director_approved']: string;
   ['regional_director_info']: UserAssignedData;
 }

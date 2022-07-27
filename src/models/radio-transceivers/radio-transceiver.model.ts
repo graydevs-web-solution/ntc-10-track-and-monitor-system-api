@@ -118,7 +118,7 @@ export interface RadioTransceiver {
   radioRegulationInspector: string;
   recommendations: string;
   notedBy: string;
-  notedByApproved: boolean;
+  notedByApproved: string;
   regionalDirector: string;
-  regionalDirectorApproved: boolean;
+  regionalDirectorApproved: string;
 }

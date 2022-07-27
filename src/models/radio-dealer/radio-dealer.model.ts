@@ -40,5 +40,5 @@ export interface RadioDealer {
   ownerName: string;
   recommendations: string;
   regionalDirector: string;
-  regionalDirectorApproved: boolean;
+  regionalDirectorApproved: string;
 }

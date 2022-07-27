@@ -41,7 +41,7 @@ export interface MobilePhoneDealer {
   ownerInfo: OwnerInfo;
   recommendations: string;
   notedBy: string;
-  notedByApproved: boolean;
+  notedByApproved: string;
   regionalDirector: string;
-  regionalDirectorApproved: boolean;
+  regionalDirectorApproved: string;
 }

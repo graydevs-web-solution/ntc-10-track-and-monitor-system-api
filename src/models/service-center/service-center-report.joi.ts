@@ -34,7 +34,7 @@ export const serviceCenterReportSchema = joi.object({
     }),
     recommendations: joi.string().allow(''),
     notedBy: joi.string().allow(''),
-    notedByApproved: joi.boolean().allow(null),
     regionalDirector: joi.string().allow(''),
-    regionalDirectorApproved: joi.boolean().allow(null),
+    notedByApproved: joi.string().allow(null).allow(''),
+    regionalDirectorApproved: joi.string().allow(null).allow(''),
 });

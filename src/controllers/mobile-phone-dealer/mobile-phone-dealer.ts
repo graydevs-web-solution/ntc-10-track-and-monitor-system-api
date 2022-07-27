@@ -326,8 +326,6 @@ export const approvalStatus: RequestHandler = async (req, res, next) => {
 
     let directorInfo: users | null;
     let notedByInfo: users | null;
-    let approvalStatus: boolean = data.approvalStatus === 'approve';
-
     
     if (data.position !== UserTypes.director && data.position !== UserTypes.chiefEngineer) {
         return res.status(400).json({ message: `Unauthorized access.` });
@@ -379,8 +377,8 @@ export const approvalStatus: RequestHandler = async (req, res, next) => {
             // noted_by: cleanedValues.notedBy,
             // regional_director: cleanedValues.regionalDirector,
             ...prevData,
-            noted_by_approved: data.position === UserTypes.chiefEngineer ? approvalStatus : prevData?.noted_by_approved,
-            regional_director_approved: data.position === UserTypes.director ? approvalStatus : prevData?.regional_director_approved,
+            noted_by_approved: data.position === UserTypes.chiefEngineer ? data.approvalStatus : prevData?.noted_by_approved,
+            regional_director_approved: data.position === UserTypes.director ? data.approvalStatus : prevData?.regional_director_approved,
         }
     })
 

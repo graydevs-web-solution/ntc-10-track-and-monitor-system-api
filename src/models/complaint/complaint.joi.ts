@@ -39,5 +39,5 @@ export const complaintSchema = joi.object<Complaint>({
     }),
     isDone: joi.boolean(),
     regionalDirector: joi.string().allow(''),
-    regionalDirectorApproved: joi.boolean().allow(null),
+    regionalDirectorApproved: joi.string().allow(null),
 });
