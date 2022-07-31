@@ -41,5 +41,6 @@ export const radioDealerSchema = joi.object({
     ownerName: joi.string().allow(''),
     recommendations: joi.string().allow(''),
     regionalDirector: joi.string().allow(''),
+    regionalDirectorInfo: joi.object().allow(),
     regionalDirectorApproved: joi.string().allow(null)
 });

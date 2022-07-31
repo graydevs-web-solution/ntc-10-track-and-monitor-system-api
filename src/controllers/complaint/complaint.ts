@@ -274,7 +274,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
 export const approvalStatus: RequestHandler = async (req, res, next) => {
   try {
     const data: Approval = req.body;
-    console.log(data.radioTransceiver)
+    console.log(data.complaint)
     const { value, error } = complaintSchema.validate(data.complaint);
     if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on mobile phone dealer.` }); }
     const cleanedValues: Complaint = value as Complaint;
