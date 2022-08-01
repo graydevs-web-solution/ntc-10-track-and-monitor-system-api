@@ -385,6 +385,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     name_last: true,
                     position: true,
                     user_id: true,
+                    signature: true
                 }
             },
             noted_by_info: {
@@ -393,6 +394,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     name_last: true,
                     position: true,
                     user_id: true,
+                    signature: true
                 }
             },
             radio_transceiver_items: true,
@@ -402,7 +404,17 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
         }
     });
 
-    const pdf = await modifyPdf(getPDFValues(formatData(doc)), PDFTemplate.radioTransceiver);
+    const pdf = await modifyPdf({ 
+        entries: getPDFValues(formatData(doc)), 
+        pdfTemplate: PDFTemplate.radioTransceiver,
+        signatures: [
+            {
+                image: doc?.regional_director_info?.signature as string,
+                x: 300,
+                y: 300
+            }
+        ] 
+    });
 
     res.writeHead(200, {
         'Content-Type': 'application/pdf',
@@ -419,7 +431,6 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
 export const approvalStatus: RequestHandler = async (req, res, next) => {
   try {
     const data: Approval = req.body;
-    console.log(data.radioTransceiver)
     const { value, error } = radioTransceiverSchema.validate(data.radioTransceiver);
     if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on radio transceiver.` }); }
     const cleanedValues: RadioTransceiver = value;

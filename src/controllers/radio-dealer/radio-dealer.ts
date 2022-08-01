@@ -270,7 +270,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
             supervising_ece: true
         }
     });
-    const pdf = await modifyPdf(getPDFValues(formatData2(doc)), PDFTemplate.radioDealer);
+    const pdf = await modifyPdf({ entries: getPDFValues(formatData2(doc)), pdfTemplate: PDFTemplate.radioDealer });
 
     res.writeHead(200, {
         'Content-Type': 'application/pdf',

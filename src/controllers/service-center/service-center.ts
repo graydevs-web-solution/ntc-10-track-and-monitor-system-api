@@ -278,7 +278,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
             { start: 21, page: 1 },
         ]
     };
-    const pdf = await modifyPdf(pdfValues, PDFTemplate.serviceCenter, options);
+    const pdf = await modifyPdf({ entries: pdfValues, pdfTemplate: PDFTemplate.serviceCenter }, options);
 
     res.writeHead(200, {
         'Content-Type': 'application/pdf',

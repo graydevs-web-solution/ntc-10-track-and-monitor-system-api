@@ -8,4 +8,5 @@ export interface User {
     position: string;
     token?:string;
     reset_token_expiration_date?: Date;
+    signature?: string;
 }

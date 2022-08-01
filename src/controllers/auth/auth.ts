@@ -156,7 +156,53 @@ export const getUsers: RequestHandler = async (req, res, next) => {
   }
 }
 
-export const searchUser: RequestHandler = async (req, res, next) => {
+export const getSignature: RequestHandler = async (req, res) => {
+    try {
+        const { value , error } = userSchema.validate(req.body);
+
+        const userNotFoundErrorMessage =
+            'Error on get signature';
+        const doc = await prisma.users.findFirst({
+            where: {
+                user_id: (value as User).user_id
+            },
+         });
+
+         if (!doc) {
+             return res.status(400).json({ message: userNotFoundErrorMessage });
+         }
+    
+        res.status(200).json(doc);
+    } catch (error) {
+        log.error(error as Error);
+        res.status(500).json({ message: `Couldn't get clients at this time.` });
+    }
+}
+
+export const saveSignature: RequestHandler = async (req, res) => {
+    try {
+        const { value , error } = userSchema.validate(req.body);
+
+        const userNotFoundErrorMessage =
+            'error on save signature.';
+
+        const result = await prisma.users.update({
+            where: {
+                user_id: value?.user_id
+            },
+            data: {
+                signature: value?.signature
+            }
+        });
+    
+        res.status(200).json({ message: 'Ok' });
+    } catch (error) {
+        log.error(error as Error);
+        res.status(500).json({ message: `Couldn't get clients at this time.` });
+    }
+}
+
+export const searchUser: RequestHandler = async (req, res) => {
   try {
     const { search } = req.query;
     // const query = req.query
