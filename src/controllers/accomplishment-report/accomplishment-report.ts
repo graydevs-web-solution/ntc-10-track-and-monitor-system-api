@@ -4,7 +4,7 @@ import { v4 as uuid } from 'uuid';
 import { DeficiencyNotice } from '../../models/deficiency-notice/deficiency-notice';
 import log from '../../logger/index';
 import { DATABASE_SCHEMA } from '../../config/database';
-import { modifyPdf, ModifyPDFOptions } from '../../shared/pdf-generate';
+import { modifyPdf, SignaturePlotDataRaw } from '../../shared/pdf-generate';
 import { PDFTemplate } from '../../shared/pdf-generate.enum';
 import { getPDFValues } from '../accomplishment-report/accomplishment-report-plot';
 import { cleanDate, formatData2 } from '../../shared/utility';
@@ -62,10 +62,10 @@ export const saveOne: RequestHandler = async (req, res, next) => {
             year: cleanedValues.year,
             description: cleanedValues.description,
             number_of_admin_case: resComplaintNumber,
-            number_of_hearing: resDefNot,
-            number_of_pending_complaint: resDateHearingComplaint,
-            number_of_resolved: resComplaintPending,
-            number_of_show_case: resComplaintResolved,
+            number_of_hearing: resDateHearingComplaint,
+            number_of_pending_complaint: resComplaintPending,
+            number_of_resolved: resComplaintResolved,
+            number_of_show_case: resDefNot,
             attorney: cleanedValues.attorney as string
         }
     })
@@ -116,11 +116,23 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     name_first: true,
                     name_last: true,
                     name_middle: true,
-                    position: true
+                    position: true,
+                    signature: true
                 }
             },
         }
     });
+        const attorneySignature =             
+            {
+                image: doc?.attorney_info?.signature as string,
+                x: 80,
+                y: 430
+            };
+    let signatures: SignaturePlotDataRaw[] = [];
+    if (doc?.attorney_info?.signature) {
+        signatures = [ ...signatures, attorneySignature];
+    }
+
     const pdfValues = getPDFValues(doc);
     // const options: ModifyPDFOptions = {
     //     isMultiplePage: true,
@@ -130,7 +142,11 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
     //         { start: 20, page: 1 },
     //     ]
     // };
-    const pdf = await modifyPdf({ entries: pdfValues, pdfTemplate: PDFTemplate.accomplishmentReport });
+    const pdf = await modifyPdf({ 
+        entries: pdfValues,
+        pdfTemplate: PDFTemplate.accomplishmentReport,
+        signatures
+    });
 
     res.writeHead(200, {
         'Content-Type': 'application/pdf',
