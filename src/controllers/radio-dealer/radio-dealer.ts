@@ -3,7 +3,7 @@ import { PrismaClient, users } from '@prisma/client'
 import { v4 as uuid } from 'uuid';
 import log from '../../logger/index';
 import { DATABASE_SCHEMA } from '../../config/database';
-import { modifyPdf } from '../../shared/pdf-generate';
+import { modifyPdf, SignaturePlotDataRaw } from '../../shared/pdf-generate';
 import { PDFTemplate } from '../../shared/pdf-generate.enum';
 import { getPDFValues } from '.././radio-dealer/radio-dealer-plot';
 import { radioDealerSchema } from '../../models/radio-dealer/radio-dealer.joi';
@@ -264,13 +264,29 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     name_last: true,
                     position: true,
                     user_id: true,
+                    signature: true
                 }
             },
             radio_technicians: true,
             supervising_ece: true
         }
     });
-    const pdf = await modifyPdf({ entries: getPDFValues(formatData2(doc)), pdfTemplate: PDFTemplate.radioDealer });
+        const regionalDirectorSignature =             
+            {
+                image: doc?.regional_director_info?.signature as string,
+                x: 380,
+                y: 880
+            };
+    let signatures: SignaturePlotDataRaw[] = [];
+    if (doc?.regional_director_approved && doc?.regional_director_info?.signature) {
+        signatures = [ ...signatures, regionalDirectorSignature];
+    }
+
+    const pdf = await modifyPdf({ 
+        entries: getPDFValues(formatData2(doc)), 
+        pdfTemplate: PDFTemplate.radioDealer,
+        signatures
+    });
 
     res.writeHead(200, {
         'Content-Type': 'application/pdf',

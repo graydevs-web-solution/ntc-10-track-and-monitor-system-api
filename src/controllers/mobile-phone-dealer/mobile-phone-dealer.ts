@@ -5,7 +5,7 @@ import { MobilePhoneDealer } from '../../models/mobile-phone-dealer/mobile-phone
 import { mobilePhoneDealerSchema } from '../../models/mobile-phone-dealer/mobile-phone-dealer.joi';
 import log from '../../logger/index';
 import { DATABASE_SCHEMA } from '../../config/database';
-import { modifyPdf, ModifyPDFOptions } from '../../shared/pdf-generate';
+import { modifyPdf, ModifyPDFOptions, SignaturePlotDataRaw } from '../../shared/pdf-generate';
 import { PDFTemplate } from '../../shared/pdf-generate.enum';
 import { getPDFValues } from '../mobile-phone-dealer/mobile-phone-dealer-plot';
 import { RadioTransceiverAPI } from '../../models/radio-transceivers/radio-transceiver-api.model';
@@ -277,6 +277,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     name_last: true,
                     position: true,
                     user_id: true,
+                    signature: true
                 }
             },
             noted_by_info: {
@@ -285,6 +286,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     name_last: true,
                     position: true,
                     user_id: true,
+                    signature: true
                 }
             },
             spares_and_accessories: true,
@@ -292,6 +294,24 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
             sim: true
         }
     });
+const regionalDirectorSignature =             
+            {
+                image: doc?.regional_director_info?.signature as string,
+                x: 380,
+                y: 480
+            };
+    const chiefSignature = {
+        image: doc?.noted_by_info?.signature as string,
+        x: 100,
+        y: 475
+    }
+    let signatures: SignaturePlotDataRaw[] = [];
+    if (doc?.regional_director_approved && doc?.regional_director_info?.signature) {
+        signatures = [ ...signatures, regionalDirectorSignature];
+    }
+    if (doc?.noted_by_approved && doc?.noted_by_info?.signature) {
+        signatures = [ ...signatures, chiefSignature];
+    }
     const pdfValues = getPDFValues(formatData(doc));
     const options: ModifyPDFOptions = {
         isMultiplePage: true,
@@ -299,9 +319,16 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
             { start: 0, end: 11, page: 1 },
             { start: 12, end: 18, page: 2 },
             { start: 20, page: 1 },
+        ],
+        customSignatureLocation: [
+            { page: 2}
         ]
     };
-    const pdf = await modifyPdf({ entries: pdfValues, pdfTemplate: PDFTemplate.mobilePhoneDealer }, options);
+    const pdf = await modifyPdf({ 
+        entries: pdfValues, 
+        pdfTemplate: PDFTemplate.mobilePhoneDealer, 
+        signatures 
+    }, options);
 
     res.writeHead(200, {
         'Content-Type': 'application/pdf',
@@ -365,17 +392,6 @@ export const approvalStatus: RequestHandler = async (req, res, next) => {
             id: FORM_ID
         },
         data: {
-            // date_inspected: cleanedValues.dateInspected,
-            // client_id: cleanedValues.clientId as number,
-            // permit_number: cleanedValues.permitNumber,
-            // permit_expiry_date: cleanedValues.permitExpiryDate,
-            // sundry_one: cleanedValues.sundryOfInformation.one,
-            // sundry_two: cleanedValues.sundryOfInformation.two,
-            // remarks_deficiencies_discrepancies_noted: cleanedValues.remarksDeficienciesDiscrepanciesNoted,
-            // inspected_by: cleanedValues.inspectedBy
-            // recommendations: cleanedValues.recommendations,
-            // noted_by: cleanedValues.notedBy,
-            // regional_director: cleanedValues.regionalDirector,
             ...prevData,
             noted_by_approved: data.position === UserTypes.chiefEngineer ? data.approvalStatus : prevData?.noted_by_approved,
             regional_director_approved: data.position === UserTypes.director ? data.approvalStatus : prevData?.regional_director_approved,

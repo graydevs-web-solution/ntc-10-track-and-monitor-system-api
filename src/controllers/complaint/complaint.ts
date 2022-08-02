@@ -5,7 +5,7 @@ import { Complaint } from '../../models/complaint/complaint.model';
 import { complaintSchema } from '../../models/complaint/complaint.joi';
 import log from '../../logger/index';
 import { DATABASE_SCHEMA } from '../../config/database';
-import { modifyPdf, ModifyPDFOptions } from '../../shared/pdf-generate';
+import { modifyPdf, ModifyPDFOptions, SignaturePlotDataRaw } from '../../shared/pdf-generate';
 import { PDFTemplate } from '../../shared/pdf-generate.enum';
 import { getPDFValues } from '../complaint/complaint-plot';
 import { cleanDate, formatData2 } from '../../shared/utility';
@@ -243,11 +243,22 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     name_last: true,
                     position: true,
                     user_id: true,
+                    signature: true
                 }
             },
             complaint_transmitter: true,
         }
     });
+                const regionalDirectorSignature =             
+            {
+                image: doc?.regional_director_info?.signature as string,
+                x: 70,
+                y: 820
+            };
+    let signatures: SignaturePlotDataRaw[] = [];
+    if (doc?.regional_director_approved && doc?.regional_director_info?.signature) {
+        signatures = [ ...signatures, regionalDirectorSignature];
+    }
     const pdfValues = getPDFValues(doc);
     // const options: ModifyPDFOptions = {
     //     isMultiplePage: true,
@@ -257,7 +268,11 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
     //         { start: 20, page: 1 },
     //     ]
     // };
-    const pdf = await modifyPdf({ entries: pdfValues, pdfTemplate: PDFTemplate.complaint });
+    const pdf = await modifyPdf({ 
+        entries: pdfValues, 
+        pdfTemplate: PDFTemplate.complaint,
+        signatures
+    });
 
     res.writeHead(200, {
         'Content-Type': 'application/pdf',

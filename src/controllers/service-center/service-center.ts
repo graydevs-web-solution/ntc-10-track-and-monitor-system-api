@@ -3,7 +3,7 @@ import { PrismaClient, users } from '@prisma/client'
 import { v4 as uuid } from 'uuid';
 import log from '../../logger/index';
 import { DATABASE_SCHEMA } from '../../config/database';
-import { modifyPdf, ModifyPDFOptions } from '../../shared/pdf-generate';
+import { modifyPdf, ModifyPDFOptions, SignaturePlotDataRaw } from '../../shared/pdf-generate';
 import { PDFTemplate } from '../../shared/pdf-generate.enum';
 import { getPDFValues } from '../service-center/service-center-plot';
 import { serviceCenterReportSchema } from '../../models/service-center/service-center-report.joi';
@@ -255,6 +255,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     name_last: true,
                     position: true,
                     user_id: true,
+                    signature: true
                 }
             },
             noted_by_info: {
@@ -263,12 +264,33 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     name_last: true,
                     position: true,
                     user_id: true,
+                    signature: true
                 }
             },
             employed_electronics_technicians: true,
             list_of_service_or_test_equipments: true
         }
     });
+
+    const regionalDirectorSignature =             
+            {
+                image: doc?.regional_director_info?.signature as string,
+                x: 380,
+                y: 480
+            };
+    const chiefSignature = {
+        image: doc?.noted_by_info?.signature as string,
+        x: 100,
+        y: 475
+    }
+    let signatures: SignaturePlotDataRaw[] = [];
+    if (doc?.regional_director_approved && doc?.regional_director_info?.signature) {
+        signatures = [ ...signatures, regionalDirectorSignature];
+    }
+    if (doc?.noted_by_approved && doc?.noted_by_info?.signature) {
+        signatures = [ ...signatures, chiefSignature];
+    }
+
     const pdfValues = getPDFValues(formatData(doc));
     const options: ModifyPDFOptions = {
         isMultiplePage: true,
@@ -276,9 +298,16 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
             { start: 0, end: 12, page: 1 },
             { start: 13, end: 19, page: 2 },
             { start: 21, page: 1 },
+        ],
+        customSignatureLocation: [
+            { page: 2}
         ]
     };
-    const pdf = await modifyPdf({ entries: pdfValues, pdfTemplate: PDFTemplate.serviceCenter }, options);
+    const pdf = await modifyPdf({ 
+        entries: pdfValues, 
+        pdfTemplate: PDFTemplate.serviceCenter,
+        signatures 
+    }, options);
 
     res.writeHead(200, {
         'Content-Type': 'application/pdf',

@@ -20,10 +20,14 @@ interface SignaturePlotData {
     y: number,
 }
 
-interface SignaturePlotDataRaw {
+export interface SignaturePlotDataRaw {
     image: string,
     x: number,
     y: number
+}
+
+export interface CustomSignatureLcoation {
+    page: number,
 }
 
 interface StartEnd {
@@ -34,6 +38,7 @@ interface StartEnd {
 export interface ModifyPDFOptions {
     isMultiplePage?: boolean;
     startEndValuesPerPage?:  StartEnd[];
+    customSignatureLocation?: CustomSignatureLcoation[];
 }
 
 const drawText = (page: PDFPage, data: PDFEntryValue, height: number): void => {
@@ -111,6 +116,17 @@ export const modifyPdf = (dataVal: PDFData, options?: ModifyPDFOptions): Promise
 
                     for (const iterator of valueSlice) {
                         drawText(currentPage, iterator, height);
+                    }
+
+                    if (dataVal.signatures?.length && options?.customSignatureLocation?.length) {
+                        const isCustomLocation = dataVal.pdfTemplate === PDFTemplate.mobilePhoneDealer || dataVal.pdfTemplate === PDFTemplate.serviceCenter;
+                        if (isCustomLocation) {
+                            const signatures = await embedImages(pdfDoc, dataVal.signatures as Array<SignaturePlotDataRaw>);
+                            createImage(pages[1], signatures);
+                        } else {
+                            const signatures = await embedImages(pdfDoc, dataVal.signatures as Array<SignaturePlotDataRaw>);
+                            createImage(currentPage, signatures);
+                        }
                     }
                 }
             } else {
