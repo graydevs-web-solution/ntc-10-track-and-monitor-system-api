@@ -1,15 +1,17 @@
 import { RequestHandler, response } from 'express';
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, users } from '@prisma/client'
 import { v4 as uuid } from 'uuid';
 import { MobilePhoneDealer } from '../../models/mobile-phone-dealer/mobile-phone-dealer.model';
 import { mobilePhoneDealerSchema } from '../../models/mobile-phone-dealer/mobile-phone-dealer.joi';
 import log from '../../logger/index';
 import { DATABASE_SCHEMA } from '../../config/database';
-import { modifyPdf, ModifyPDFOptions } from '../../shared/pdf-generate';
+import { modifyPdf, ModifyPDFOptions, SignaturePlotDataRaw } from '../../shared/pdf-generate';
 import { PDFTemplate } from '../../shared/pdf-generate.enum';
 import { getPDFValues } from '../mobile-phone-dealer/mobile-phone-dealer-plot';
 import { RadioTransceiverAPI } from '../../models/radio-transceivers/radio-transceiver-api.model';
 import { cleanDate, formatData } from '../../shared/utility';
+import { Approval } from 'src/models/approval-status.model';
+import { UserTypes } from '../auth/auth.enum';
 
 const prisma = new PrismaClient()
 
@@ -51,8 +53,9 @@ export const saveMobilePhoneDealer: RequestHandler = async (req, res, next) => {
             owner_position: cleanedValues.ownerInfo.position,
             recommendations: cleanedValues.recommendations,
             noted_by: cleanedValues.notedBy,
+            noted_by_approved: cleanedValues.notedByApproved,
             regional_director: cleanedValues.regionalDirector,
-            is_approved: cleanedValues.isApproved
+            regional_director_approved: cleanedValues.regionalDirectorApproved,
         }
     })
 
@@ -105,8 +108,9 @@ export const updateData: RequestHandler = async (req, res, next) => {
             owner_position: cleanedValues.ownerInfo.position,
             recommendations: cleanedValues.recommendations,
             noted_by: cleanedValues.notedBy,
+            noted_by_approved: cleanedValues.notedByApproved,
             regional_director: cleanedValues.regionalDirector,
-            is_approved: cleanedValues.isApproved
+            regional_director_approved: cleanedValues.regionalDirectorApproved,
         }
     })
 
@@ -273,6 +277,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     name_last: true,
                     position: true,
                     user_id: true,
+                    signature: true
                 }
             },
             noted_by_info: {
@@ -281,6 +286,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     name_last: true,
                     position: true,
                     user_id: true,
+                    signature: true
                 }
             },
             spares_and_accessories: true,
@@ -288,6 +294,24 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
             sim: true
         }
     });
+const regionalDirectorSignature =             
+            {
+                image: doc?.regional_director_info?.signature as string,
+                x: 380,
+                y: 480
+            };
+    const chiefSignature = {
+        image: doc?.noted_by_info?.signature as string,
+        x: 100,
+        y: 475
+    }
+    let signatures: SignaturePlotDataRaw[] = [];
+    if (doc?.regional_director_approved && doc?.regional_director_info?.signature) {
+        signatures = [ ...signatures, regionalDirectorSignature];
+    }
+    if (doc?.noted_by_approved && doc?.noted_by_info?.signature) {
+        signatures = [ ...signatures, chiefSignature];
+    }
     const pdfValues = getPDFValues(formatData(doc));
     const options: ModifyPDFOptions = {
         isMultiplePage: true,
@@ -295,9 +319,16 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
             { start: 0, end: 11, page: 1 },
             { start: 12, end: 18, page: 2 },
             { start: 20, page: 1 },
+        ],
+        customSignatureLocation: [
+            { page: 2}
         ]
     };
-    const pdf = await modifyPdf(pdfValues, PDFTemplate.mobilePhoneDealer, options);
+    const pdf = await modifyPdf({ 
+        entries: pdfValues, 
+        pdfTemplate: PDFTemplate.mobilePhoneDealer, 
+        signatures 
+    }, options);
 
     res.writeHead(200, {
         'Content-Type': 'application/pdf',
@@ -308,6 +339,69 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
   } catch (error) {
     log.error(error as Error);
     res.status(500).json({ message: `Couldn't get clients at this time.` });
+  }
+}
+
+export const approvalStatus: RequestHandler = async (req, res, next) => {
+  try {
+    const data: Approval = req.body;
+    console.log(data.mobilePhoneDealer)
+    const { value, error } = mobilePhoneDealerSchema.validate(data.mobilePhoneDealer);
+    if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on mobile phone dealer.` }); }
+    const cleanedValues: MobilePhoneDealer = value;
+    const FORM_ID = cleanedValues.id; 
+
+    let directorInfo: users | null;
+    let notedByInfo: users | null;
+    
+    if (data.position !== UserTypes.director && data.position !== UserTypes.chiefEngineer) {
+        return res.status(400).json({ message: `Unauthorized access.` });
+    }
+
+    const prevData = await prisma.mobile_phone_dealers.findFirst({
+        where: {
+            id: FORM_ID
+        }
+    });
+
+    if (data.position === UserTypes.director) {
+        directorInfo = await prisma.users.findFirst({
+            where: {
+                user_id: data.userID
+            }
+        });
+
+        if (!directorInfo || data.position !== directorInfo.position || data.userID !== prevData?.regional_director) {
+            return res.status(400).json({ message: `Unauthorized access.` });
+        }
+    }
+    if (data.position === UserTypes.chiefEngineer) {
+        notedByInfo = await prisma.users.findFirst({
+            where: {
+                user_id: data.userID
+            }
+        });
+
+        if (!notedByInfo || data.position !== notedByInfo.position || data.userID !== prevData?.noted_by) {
+            return res.status(400).json({ message: `Unauthorized access.` });
+        }
+    }
+
+    const updateMain = await prisma.mobile_phone_dealers.update({
+        where: {
+            id: FORM_ID
+        },
+        data: {
+            ...prevData,
+            noted_by_approved: data.position === UserTypes.chiefEngineer ? data.approvalStatus : prevData?.noted_by_approved,
+            regional_director_approved: data.position === UserTypes.director ? data.approvalStatus : prevData?.regional_director_approved,
+        }
+    })
+
+    res.status(200).json({ message: 'Ok' });
+  } catch (error) {
+    log.error(error as Error);
+    res.status(500).json({ message: `Couldn't process client data at this time.` });
   }
 }
 

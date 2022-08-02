@@ -1,14 +1,16 @@
 import { RequestHandler } from 'express';
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, users } from '@prisma/client'
 import { v4 as uuid } from 'uuid';
 import log from '../../logger/index';
 import { DATABASE_SCHEMA } from '../../config/database';
-import { modifyPdf } from '../../shared/pdf-generate';
+import { modifyPdf, SignaturePlotDataRaw } from '../../shared/pdf-generate';
 import { PDFTemplate } from '../../shared/pdf-generate.enum';
 import { getPDFValues } from '.././radio-dealer/radio-dealer-plot';
 import { radioDealerSchema } from '../../models/radio-dealer/radio-dealer.joi';
 import { RadioDealer } from '../../models/radio-dealer/radio-dealer.model';
 import { cleanDate, dateToString, formatData, formatData2 } from '../../shared/utility';
+import { Approval } from 'src/models/approval-status.model';
+import { UserTypes } from '../auth/auth.enum';
 
 const prisma = new PrismaClient()
 
@@ -53,6 +55,7 @@ export const saveRadioDealer: RequestHandler = async (req, res, next) => {
             owner_name: cleanedValues.ownerName,
             recommendations: cleanedValues.recommendations,
             regional_director: cleanedValues.regionalDirector,
+            regional_director_approved: cleanedValues.regionalDirectorApproved,
         }
     })
 
@@ -108,6 +111,7 @@ export const updateData: RequestHandler = async (req, res, next) => {
             owner_name: cleanedValues.ownerName,
             recommendations: cleanedValues.recommendations,
             regional_director: cleanedValues.regionalDirector,
+            regional_director_approved: cleanedValues.regionalDirectorApproved,
         }
     })
 
@@ -260,13 +264,29 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     name_last: true,
                     position: true,
                     user_id: true,
+                    signature: true
                 }
             },
             radio_technicians: true,
             supervising_ece: true
         }
     });
-    const pdf = await modifyPdf(getPDFValues(formatData2(doc)), PDFTemplate.radioDealer);
+        const regionalDirectorSignature =             
+            {
+                image: doc?.regional_director_info?.signature as string,
+                x: 380,
+                y: 880
+            };
+    let signatures: SignaturePlotDataRaw[] = [];
+    if (doc?.regional_director_approved && doc?.regional_director_info?.signature) {
+        signatures = [ ...signatures, regionalDirectorSignature];
+    }
+
+    const pdf = await modifyPdf({ 
+        entries: getPDFValues(formatData2(doc)), 
+        pdfTemplate: PDFTemplate.radioDealer,
+        signatures
+    });
 
     res.writeHead(200, {
         'Content-Type': 'application/pdf',
@@ -277,6 +297,70 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
   } catch (error) {
     log.error(error as Error);
     res.status(500).json({ message: `Couldn't get clients at this time.` });
+  }
+}
+
+export const approvalStatus: RequestHandler = async (req, res, next) => {
+  try {
+    const data: Approval = req.body;
+    console.log(data.radioDealer)
+    const { value, error } = radioDealerSchema.validate(data.radioDealer);
+    if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on mobile phone dealer.` }); }
+    const cleanedValues: RadioDealer = value;
+    const FORM_ID = cleanedValues.id;
+
+    let directorInfo: users | null;
+    let notedByInfo: users | null;
+
+    
+    if (data.position !== UserTypes.director && data.position !== UserTypes.chiefEngineer) {
+        return res.status(400).json({ message: `Unauthorized access.` });
+    }
+
+    const prevData = await prisma.radio_dealers.findFirst({
+        where: {
+            id: FORM_ID
+        }
+    });
+
+    if (data.position === UserTypes.director) {
+        directorInfo = await prisma.users.findFirst({
+            where: {
+                user_id: data.userID
+            }
+        });
+
+        if (!directorInfo || data.position !== directorInfo.position || data.userID !== prevData?.regional_director) {
+            return res.status(400).json({ message: `Unauthorized access.` });
+        }
+    }
+
+    const updateMain = await prisma.radio_dealers.update({
+        where: {
+            id: FORM_ID
+        },
+        data: {
+            // date_inspected: cleanedValues.dateInspected,
+            // client_id: cleanedValues.clientId as number,
+            // permit_number: cleanedValues.permitNumber,
+            // permit_expiry_date: cleanedValues.permitExpiryDate,
+            // sundry_one: cleanedValues.sundryOfInformation.one,
+            // sundry_two: cleanedValues.sundryOfInformation.two,
+            // remarks_deficiencies_discrepancies_noted: cleanedValues.remarksDeficienciesDiscrepanciesNoted,
+            // inspected_by: cleanedValues.inspectedBy
+            // recommendations: cleanedValues.recommendations,
+            // noted_by: cleanedValues.notedBy,
+            // regional_director: cleanedValues.regionalDirector,
+            // noted_by_approved: data.position === UserTypes.chiefEngineer ? approvalStatus : prevData?.noted_by_approved,
+            ...prevData,
+            regional_director_approved: data.position === UserTypes.director ? data.approvalStatus : prevData?.regional_director_approved,
+        }
+    })
+
+    res.status(200).json({ message: 'Ok' });
+  } catch (error) {
+    log.error(error as Error);
+    res.status(500).json({ message: `Couldn't process client data at this time.` });
   }
 }
 

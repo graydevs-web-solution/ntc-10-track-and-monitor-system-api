@@ -10,7 +10,9 @@ export const complaintSchema = joi.object<Complaint>({
     clientName: joi.string().allow(''),
     complainantName: joi.string(),
     respondentName: joi.string().allow(''),
-    docketNumber: joi.string().allow(''),
+    docketNumberDescription: joi.string().required(),
+    docketNumberStart: joi.number().required(),
+    docketNumberEnd: joi.number().required(),
     dateOfInspection: joi.date().required().messages({
         'date.base': `dateOfInspection should be a type of date`,
     }),
@@ -37,4 +39,6 @@ export const complaintSchema = joi.object<Complaint>({
     }),
     isDone: joi.boolean(),
     regionalDirector: joi.string().allow(''),
+    regionalDirectorInfo: joi.object().allow(),
+    regionalDirectorApproved: joi.string().allow(null),
 });

@@ -50,5 +50,6 @@ export interface RadioDealerAPI {
   ['owner_name']: string;
   ['recommendations']: string;
   ['regional_director']: string;
+  ['regional_director_approved']: string;
   ['regional_director_info']: UserAssignedData;
 }

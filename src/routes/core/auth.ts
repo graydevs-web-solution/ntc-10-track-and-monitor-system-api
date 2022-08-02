@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticateUser, createUser, getUsers, updateUser, updateUserPassword, searchUser } from '../../controllers/auth/auth';
+import { authenticateUser, createUser, getUsers, updateUser, updateUserPassword, searchUser, getSignature, saveSignature } from '../../controllers/auth/auth';
 
 export const router = Router();
 
@@ -14,3 +14,7 @@ router.get('/update-user-password', updateUserPassword);
 router.get('/users', getUsers);
 
 router.get('/search', searchUser);
+
+router.post('/signature', getSignature);
+
+router.post('/update-signature', saveSignature);

@@ -1,15 +1,17 @@
 import { RequestHandler, response } from 'express';
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, users } from '@prisma/client'
 import { v4 as uuid } from 'uuid';
 import { Complaint } from '../../models/complaint/complaint.model';
 import { complaintSchema } from '../../models/complaint/complaint.joi';
 import log from '../../logger/index';
 import { DATABASE_SCHEMA } from '../../config/database';
-import { modifyPdf, ModifyPDFOptions } from '../../shared/pdf-generate';
+import { modifyPdf, ModifyPDFOptions, SignaturePlotDataRaw } from '../../shared/pdf-generate';
 import { PDFTemplate } from '../../shared/pdf-generate.enum';
 import { getPDFValues } from '../complaint/complaint-plot';
 import { cleanDate, formatData2 } from '../../shared/utility';
 import { DateTime } from 'luxon';
+import { Approval } from 'src/models/approval-status.model';
+import { UserTypes } from '../auth/auth.enum';
 
 const prisma = new PrismaClient();
 
@@ -36,7 +38,9 @@ export const saveOne: RequestHandler = async (req, res, next) => {
             complainant_name: cleanedValues.complainantName,
             client_id: cleanedValues.clientId as number,
             respondent_name: cleanedValues.respondentName,
-            docket_number: cleanedValues.docketNumber,
+            docket_number_description: cleanedValues.docketNumberDescription,
+            docket_number_start: cleanedValues.docketNumberStart,
+            docket_number_end: cleanedValues.docketNumberEnd,
             date_of_inspection: cleanDate(cleanedValues.dateOfInspection as Date),
             location: cleanedValues.location,
             reason: cleanedValues.reason,
@@ -53,11 +57,21 @@ export const saveOne: RequestHandler = async (req, res, next) => {
             vi_no_ntc_pertinent_papers: cleanedValues.violationInfo.noNTCPertinentPapers,
             date_time_of_hearing: cleanDate(new Date(getHearingDate(cleanedValues.dateOfHearing as Date, cleanedValues.timeOfHearing))),
             regional_director: cleanedValues.regionalDirector,
+            regional_director_approved: cleanedValues.regionalDirectorApproved,
             is_done: cleanedValues.isDone
         }
-    })
+    });
+    const nextCounter = `${cleanedValues.docketNumberEnd + 1}`;
+    const admResult = await prisma.system_settings.update({
+        where: {
+            setting: 'adm_counter'
+        },
+        data: {
+            value: nextCounter
+        }
+    });
 
-    res.status(200).json({ data: result });
+    res.status(200).json({ data: { complaint: result, setting: { setting: 'adm_counter', value: nextCounter } } });
   } catch (error) {
     log.error(error as Error);
     res.status(500).json({ message: `Couldn't process complaint data at this time.` });
@@ -80,7 +94,6 @@ export const updateData: RequestHandler = async (req, res, next) => {
             client_id: cleanedValues.clientId as number,
             respondent_name: cleanedValues.respondentName,
             date_of_inspection: cleanDate(cleanedValues.dateOfInspection as Date),
-            docket_number: cleanedValues.docketNumber,
             location: cleanedValues.location,
             reason: cleanedValues.reason,
             vi_operation_without_rsl: cleanedValues.violationInfo.operationWithoutRSL,
@@ -90,6 +103,7 @@ export const updateData: RequestHandler = async (req, res, next) => {
             vi_no_ntc_pertinent_papers: cleanedValues.violationInfo.noNTCPertinentPapers,
             date_time_of_hearing: cleanDate(new Date(getHearingDate(cleanedValues.dateOfHearing as Date, cleanedValues.timeOfHearing))),
             regional_director: cleanedValues.regionalDirector,
+            regional_director_approved: cleanedValues.regionalDirectorApproved,
             is_done: cleanedValues.isDone
         }
     })
@@ -175,12 +189,13 @@ export const getList: RequestHandler = async (req, res, next) => {
 export const deleteData: RequestHandler = async (req, res, next) => {
   try {
       const { id } = req.query;
-    const deleteMain = prisma.deficiency_notice.delete({
+    const deleteMain = prisma.complaint.delete({
         where: {
             id: +(id as string)
         },
     });
-    const deleteTransmitter = prisma.$queryRaw<void>`DELETE FROM ${DATABASE_SCHEMA}.complaint_transmitter WHERE complaint_id = ${id}`;
+    const query = `DELETE FROM ${DATABASE_SCHEMA}.complaint_transmitter WHERE complaint_id = ${id}`;
+    const deleteTransmitter = prisma.$queryRawUnsafe<void>(query);
 
     // NOTE: This code block couldn't delete specified row. I'm dumb as heck
     // 
@@ -228,12 +243,22 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     name_last: true,
                     position: true,
                     user_id: true,
+                    signature: true
                 }
             },
             complaint_transmitter: true,
         }
     });
-    console.log(doc)
+                const regionalDirectorSignature =             
+            {
+                image: doc?.regional_director_info?.signature as string,
+                x: 70,
+                y: 820
+            };
+    let signatures: SignaturePlotDataRaw[] = [];
+    if (doc?.regional_director_approved && doc?.regional_director_info?.signature) {
+        signatures = [ ...signatures, regionalDirectorSignature];
+    }
     const pdfValues = getPDFValues(doc);
     // const options: ModifyPDFOptions = {
     //     isMultiplePage: true,
@@ -243,7 +268,11 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
     //         { start: 20, page: 1 },
     //     ]
     // };
-    const pdf = await modifyPdf(pdfValues, PDFTemplate.complaint);
+    const pdf = await modifyPdf({ 
+        entries: pdfValues, 
+        pdfTemplate: PDFTemplate.complaint,
+        signatures
+    });
 
     res.writeHead(200, {
         'Content-Type': 'application/pdf',
@@ -254,6 +283,69 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
   } catch (error) {
     log.error(error as Error);
     res.status(500).json({ message: `Couldn't generate complaint pdf at this time.` });
+  }
+}
+
+export const approvalStatus: RequestHandler = async (req, res, next) => {
+  try {
+    const data: Approval = req.body;
+    console.log(data.complaint)
+    const { value, error } = complaintSchema.validate(data.complaint);
+    if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on mobile phone dealer.` }); }
+    const cleanedValues: Complaint = value as Complaint;
+    const FORM_ID = cleanedValues.id;
+
+    let directorInfo: users | null;
+
+
+    if (data.position !== UserTypes.director && data.position !== UserTypes.chiefEngineer) {
+        return res.status(400).json({ message: `Unauthorized access.` });
+    }
+
+    const prevData = await prisma.complaint.findFirst({
+        where: {
+            id: FORM_ID
+        }
+    });
+
+    if (data.position === UserTypes.director) {
+        directorInfo = await prisma.users.findFirst({
+            where: {
+                user_id: data.userID
+            }
+        });
+
+        if (!directorInfo || data.position !== directorInfo.position || data.userID !== prevData?.regional_director) {
+            return res.status(400).json({ message: `Unauthorized access.` });
+        }
+    }
+
+    const updateMain = await prisma.complaint.update({
+        where: {
+            id: FORM_ID
+        },
+        data: {
+            // date_inspected: cleanedValues.dateInspected,
+            // client_id: cleanedValues.clientId as number,
+            // permit_number: cleanedValues.permitNumber,
+            // permit_expiry_date: cleanedValues.permitExpiryDate,
+            // sundry_one: cleanedValues.sundryOfInformation.one,
+            // sundry_two: cleanedValues.sundryOfInformation.two,
+            // remarks_deficiencies_discrepancies_noted: cleanedValues.remarksDeficienciesDiscrepanciesNoted,
+            // inspected_by: cleanedValues.inspectedBy
+            // recommendations: cleanedValues.recommendations,
+            // noted_by: cleanedValues.notedBy,
+            // regional_director: cleanedValues.regionalDirector,
+            // noted_by_approved: data.position === UserTypes.chiefEngineer ? approvalStatus : prevData?.noted_by_approved,
+            ...prevData,
+            regional_director_approved: data.position === UserTypes.director ? data.approvalStatus : prevData?.regional_director_approved,
+        }
+    })
+
+    res.status(200).json({ message: 'Ok' });
+  } catch (error) {
+    log.error(error as Error);
+    res.status(500).json({ message: `Couldn't process client data at this time.` });
   }
 }
 

@@ -30,7 +30,7 @@ export const getPDFValues = (val: any) => {
     const value: DeficiencyNoticeAPI = val;
     let ITERATION_VIOLATION = 0;
     let ITERATION_TRANSMITTERS = 0;
-    pdfPlots[0].text = value.docket_number;
+    pdfPlots[0].text = value.docket_number_description;
     pdfPlots[1].text = dateToString(value.date as Date);
     pdfPlots[2].text = value.respondent_name;
     pdfPlots[3].text = value.clients.business_name;

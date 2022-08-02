@@ -16,6 +16,8 @@ export default function() {
 
     routes(app);
 
+    // sample
+
     return app;
 }
 

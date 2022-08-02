@@ -1,15 +1,17 @@
 import { RequestHandler, response } from 'express';
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, users } from '@prisma/client'
 import { v4 as uuid } from 'uuid';
 import { RadioTransceiver } from '../../models/radio-transceivers/radio-transceiver.model';
 import { radioTransceiverSchema } from '../../models/radio-transceivers/radio-transceiver.joi';
 import log from '../../logger/index';
 import { DATABASE_SCHEMA } from '../../config/database';
-import { modifyPdf } from '../../shared/pdf-generate';
+import { modifyPdf, SignaturePlotDataRaw } from '../../shared/pdf-generate';
 import { PDFTemplate } from '../../shared/pdf-generate.enum';
 import { getPDFValues } from './radio-transceiver-plots';
 import { RadioTransceiverAPI } from '../../models/radio-transceivers/radio-transceiver-api.model';
 import { formatData } from '../../shared/utility';
+import { Approval } from 'src/models/approval-status.model';
+import { UserTypes } from '../auth/auth.enum';
 
 const prisma = new PrismaClient()
 
@@ -18,7 +20,6 @@ export const saveRadioTransceivers: RequestHandler = async (req, res, next) => {
     const { value, error } = radioTransceiverSchema.validate(req.body);
     if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on radio transceiver.` }); }
     const cleanedValues: RadioTransceiver = value;
-    console.log(cleanedValues)
     const result = await prisma.radio_transceivers.create({
         data: {
             client_id: cleanedValues.clientId,
@@ -73,7 +74,9 @@ export const saveRadioTransceivers: RequestHandler = async (req, res, next) => {
             radio_requlation_inspector: cleanedValues.radioRegulationInspector,
             recommendations: cleanedValues.recommendations,
             noted_by: cleanedValues.notedBy,
+            noted_by_approved: cleanedValues.notedByApproved,
             regional_director: cleanedValues.regionalDirector,
+            regional_director_approved: cleanedValues.regionalDirectorApproved,
             date_issued: cleanedValues.dateIssued ? (cleanedValues.dateIssued as Date).toISOString() : null,
             radio_transceiver_items: {
                 create: cleanedValues.radioTransceivers.map((val) => ({
@@ -182,7 +185,9 @@ export const updateData: RequestHandler = async (req, res, next) => {
             radio_requlation_inspector: cleanedValues.radioRegulationInspector,
             recommendations: cleanedValues.recommendations,
             noted_by: cleanedValues.notedBy,
+            noted_by_approved: cleanedValues.notedByApproved,
             regional_director: cleanedValues.regionalDirector,
+            regional_director_approved: cleanedValues.regionalDirectorApproved,
             date_issued: cleanedValues.dateIssued ? cleanedValues.dateIssued as Date : null,
         }
     })
@@ -380,6 +385,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     name_last: true,
                     position: true,
                     user_id: true,
+                    signature: true
                 }
             },
             noted_by_info: {
@@ -388,6 +394,7 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     name_last: true,
                     position: true,
                     user_id: true,
+                    signature: true
                 }
             },
             radio_transceiver_items: true,
@@ -397,7 +404,30 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
         }
     });
 
-    const pdf = await modifyPdf(getPDFValues(formatData(doc)), PDFTemplate.radioTransceiver);
+    const regionalDirectorSignature =             
+            {
+                image: doc?.regional_director_info?.signature as string,
+                x: 380,
+                y: 880
+            };
+    const chiefSignature = {
+        image: doc?.noted_by_info?.signature as string,
+        x: 100,
+        y: 875
+    }
+    let signatures: SignaturePlotDataRaw[] = [];
+    if (doc?.regional_director_approved && doc?.regional_director_info?.signature) {
+        signatures = [ ...signatures, regionalDirectorSignature];
+    }
+    if (doc?.noted_by_approved && doc?.noted_by_info?.signature) {
+        signatures = [ ...signatures, chiefSignature];
+    }
+
+    const pdf = await modifyPdf({ 
+        entries: getPDFValues(formatData(doc)), 
+        pdfTemplate: PDFTemplate.radioTransceiver,
+        signatures
+    });
 
     res.writeHead(200, {
         'Content-Type': 'application/pdf',
@@ -408,6 +438,69 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
   } catch (error) {
     log.error(error as Error);
     res.status(500).json({ message: `Couldn't get clients at this time.` });
+  }
+}
+
+export const approvalStatus: RequestHandler = async (req, res, next) => {
+  try {
+    const data: Approval = req.body;
+    const { value, error } = radioTransceiverSchema.validate(data.radioTransceiver);
+    if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on radio transceiver.` }); }
+    const cleanedValues: RadioTransceiver = value;
+    const FORM_ID = cleanedValues.id;
+
+    let directorInfo: users | null;
+    let notedByInfo: users | null;
+
+    
+    if (data.position !== UserTypes.director && data.position !== UserTypes.chiefEngineer) {
+        return res.status(400).json({ message: `Unauthorized access.` });
+    }
+
+    const prevData = await prisma.radio_transceivers.findFirst({
+        where: {
+            id: FORM_ID
+        }
+    });
+
+    if (data.position === UserTypes.director) {
+        directorInfo = await prisma.users.findFirst({
+            where: {
+                user_id: data.userID
+            }
+        });
+
+        if (!directorInfo || data.position !== directorInfo.position || data.userID !== prevData?.regional_director) {
+            return res.status(400).json({ message: `Unauthorized access.` });
+        }
+    }
+    if (data.position === UserTypes.chiefEngineer) {
+        notedByInfo = await prisma.users.findFirst({
+            where: {
+                user_id: data.userID
+            }
+        });
+
+        if (!notedByInfo || data.position !== notedByInfo.position || data.userID !== prevData?.noted_by) {
+            return res.status(400).json({ message: `Unauthorized access.` });
+        }
+    }
+
+    const updateMain = await prisma.radio_transceivers.update({
+        where: {
+            id: FORM_ID
+        },
+        data: {
+            ...prevData,
+            noted_by_approved: data.position === UserTypes.chiefEngineer ? data.approvalStatus : prevData?.noted_by_approved,
+            regional_director_approved: data.position === UserTypes.director ? data.approvalStatus : prevData?.regional_director_approved,
+        }
+    })
+
+    res.status(200).json({ message: 'Ok' });
+  } catch (error) {
+    log.error(error as Error);
+    res.status(500).json({ message: `Couldn't process client data at this time.` });
   }
 }
 

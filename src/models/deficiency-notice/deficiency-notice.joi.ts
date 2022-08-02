@@ -12,7 +12,9 @@ export const deficiencyNoticeSchema = joi.object<DeficiencyNotice>({
     dateOfInspection: joi.date().required().messages({
         'date.base': `dateOfInspection should be a type of date`,
     }),
-    docketNumber: joi.string().allow(''),
+    docketNumberDescription: joi.string().required(),
+    docketNumberStart: joi.number().required(),
+    docketNumberEnd: joi.number().required(),
     transmitters: joi.array().items(
         joi.object({
             transmitter: joi.string(),
@@ -29,4 +31,6 @@ export const deficiencyNoticeSchema = joi.object<DeficiencyNotice>({
     dateOfDeficiencyHearing: joi.date().allow(null),
     isDone: joi.boolean(),
     regionalDirector: joi.string().allow(''),
+    regionalDirectorInfo: joi.object().allow(),
+    regionalDirectorApproved: joi.string().allow(null).allow('')
 });

@@ -35,8 +35,9 @@ export interface ServiceCenterReportAPI {
   ['owner_position']: string;
   ['recommendations']: string;
   ['noted_by']: string;
+  ['noted_by_approved']: string;
   ['regional_director']: string;
-  ['is_approved']: boolean;
+  ['regional_director_approved']: string;
   ['noted_by_info']: UserAssignedData;
   ['regional_director_info']: UserAssignedData;
 }

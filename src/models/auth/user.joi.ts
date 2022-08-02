@@ -8,4 +8,5 @@ export const userSchema = joi.object<User>({
     position: joi.string().required(),
     user_name: joi.string().alphanum().min(4).max(16).required().trim(),
     password: joi.string(),
+    signature: joi.string().allow(''),
 });

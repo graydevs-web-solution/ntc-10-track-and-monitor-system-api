@@ -4,7 +4,7 @@ import { v4 as uuid } from 'uuid';
 import { DeficiencyNotice } from '../../models/deficiency-notice/deficiency-notice';
 import log from '../../logger/index';
 import { DATABASE_SCHEMA } from '../../config/database';
-import { modifyPdf, ModifyPDFOptions } from '../../shared/pdf-generate';
+import { modifyPdf, SignaturePlotDataRaw } from '../../shared/pdf-generate';
 import { PDFTemplate } from '../../shared/pdf-generate.enum';
 import { getPDFValues } from '../accomplishment-report/accomplishment-report-plot';
 import { cleanDate, formatData2 } from '../../shared/utility';
@@ -18,7 +18,6 @@ export const saveOne: RequestHandler = async (req, res, next) => {
   try {
     const { value, error } = accomplishmentReportSchema.validate(req.body);
     if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on accomplishment.` }); }
-    console.log('triggered')
     const cleanedValues: AccomplishmentReport = value as AccomplishmentReport;
     const dateFrom = DateTime.local(cleanedValues.year, cleanedValues.month).startOf('month').toJSDate();
     const dateTo = DateTime.local(cleanedValues.year, cleanedValues.month).endOf('month').toJSDate();
@@ -57,17 +56,16 @@ export const saveOne: RequestHandler = async (req, res, next) => {
             is_done: true
         }
     });
-    console.log(cleanedValues)
     const result = await prisma.accomplishment_report.create({
         data: {
             month: cleanedValues.month,
             year: cleanedValues.year,
             description: cleanedValues.description,
             number_of_admin_case: resComplaintNumber,
-            number_of_hearing: resDefNot,
-            number_of_pending_complaint: resDateHearingComplaint,
-            number_of_resolved: resComplaintPending,
-            number_of_show_case: resComplaintResolved,
+            number_of_hearing: resDateHearingComplaint,
+            number_of_pending_complaint: resComplaintPending,
+            number_of_resolved: resComplaintResolved,
+            number_of_show_case: resDefNot,
             attorney: cleanedValues.attorney as string
         }
     })
@@ -108,7 +106,6 @@ export const getList: RequestHandler = async (req, res, next) => {
 export const generatePdf: RequestHandler = async (req, res, next) => {
   try {
     const { id } = req.query;
-    console.log(id)
     const doc = await prisma.accomplishment_report.findUnique({
         where: {
             id: +(id as string)
@@ -119,12 +116,23 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     name_first: true,
                     name_last: true,
                     name_middle: true,
-                    position: true
+                    position: true,
+                    signature: true
                 }
             },
         }
     });
-    console.log(doc)
+        const attorneySignature =             
+            {
+                image: doc?.attorney_info?.signature as string,
+                x: 80,
+                y: 430
+            };
+    let signatures: SignaturePlotDataRaw[] = [];
+    if (doc?.attorney_info?.signature) {
+        signatures = [ ...signatures, attorneySignature];
+    }
+
     const pdfValues = getPDFValues(doc);
     // const options: ModifyPDFOptions = {
     //     isMultiplePage: true,
@@ -134,7 +142,11 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
     //         { start: 20, page: 1 },
     //     ]
     // };
-    const pdf = await modifyPdf(pdfValues, PDFTemplate.accomplishmentReport);
+    const pdf = await modifyPdf({ 
+        entries: pdfValues,
+        pdfTemplate: PDFTemplate.accomplishmentReport,
+        signatures
+    });
 
     res.writeHead(200, {
         'Content-Type': 'application/pdf',

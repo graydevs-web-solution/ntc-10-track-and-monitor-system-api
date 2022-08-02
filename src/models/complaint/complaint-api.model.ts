@@ -21,7 +21,9 @@ export interface ComplaintAPI {
   ['client_id']: number | Client;
   ['clients']: ClientAPI;
   ['respondent_name']: string;
-  ['docket_number']: string;
+  ['docket_number_description']: string;
+  ['docket_number_start']: number;
+  ['docket_number_end']: number;
   ['date_of_inspection']: Date | string;
   ['location']: string;
   ['reason']: string;
@@ -35,4 +37,5 @@ export interface ComplaintAPI {
   ['regional_director']: string;
   ['is_done']: boolean;
   ['regional_director_info']: UserAssignedData;
+  ['regional_director_approved']: string;
 }

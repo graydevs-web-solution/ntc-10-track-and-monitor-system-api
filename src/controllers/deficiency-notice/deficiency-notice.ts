@@ -1,14 +1,16 @@
 import { RequestHandler, response } from 'express';
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, users } from '@prisma/client'
 import { v4 as uuid } from 'uuid';
 import { DeficiencyNotice } from '../../models/deficiency-notice/deficiency-notice';
 import { deficiencyNoticeSchema } from '../../models/deficiency-notice/deficiency-notice.joi';
 import log from '../../logger/index';
 import { DATABASE_SCHEMA } from '../../config/database';
-import { modifyPdf, ModifyPDFOptions } from '../../shared/pdf-generate';
+import { modifyPdf, ModifyPDFOptions, SignaturePlotDataRaw } from '../../shared/pdf-generate';
 import { PDFTemplate } from '../../shared/pdf-generate.enum';
 import { getPDFValues } from '../deficiency-notice/deficiency-notice-plot';
 import { cleanDate, formatData2 } from '../../shared/utility';
+import { Approval } from 'src/models/approval-status.model';
+import { UserTypes } from '../auth/auth.enum';
 
 const prisma = new PrismaClient()
 
@@ -23,7 +25,9 @@ export const saveOne: RequestHandler = async (req, res, next) => {
             client_id: cleanedValues.clientId as number,
             respondent_name: cleanedValues.respondentName,
             date_of_inspection: cleanDate(cleanedValues.dateOfInspection as Date),
-            docket_number: cleanedValues.docketNumber,
+            docket_number_description: cleanedValues.docketNumberDescription,
+            docket_number_start: cleanedValues.docketNumberStart,
+            docket_number_end: cleanedValues.docketNumberEnd,
             deficiency_notice_transmitter: {
                 create: cleanedValues.transmitters.map((val) => ({
                     transmitter: val.transmitter,
@@ -37,11 +41,21 @@ export const saveOne: RequestHandler = async (req, res, next) => {
             vi_no_ntc_pertinent_papers: cleanedValues.violationInfo.noNTCPertinentPapers,
             date_of_deficiency_hearing: cleanDate(cleanedValues.dateOfDeficiencyHearing as Date),
             regional_director: cleanedValues.regionalDirector,
+            regional_director_approved: cleanedValues.regionalDirectorApproved,
             is_done: cleanedValues.isDone
         }
-    })
+    });
+    const nextCounter = `${cleanedValues.docketNumberEnd + 1}`;
+    const roxResult = await prisma.system_settings.update({
+        where: {
+            setting: 'rox_counter'
+        },
+        data: {
+            value: nextCounter
+        }
+    });
 
-    res.status(200).json({ data: result });
+    res.status(200).json({ data: { deficiencyNotice: result, setting: { setting: 'rox_counter', value: nextCounter } } });
   } catch (error) {
     log.error(error as Error);
     res.status(500).json({ message: `Couldn't process deficiciency notice data at this time.` });
@@ -63,7 +77,6 @@ export const updateData: RequestHandler = async (req, res, next) => {
             client_id: cleanedValues.clientId as number,
             respondent_name: cleanedValues.respondentName,
             date_of_inspection: cleanDate(cleanedValues.dateOfInspection as Date),
-            docket_number: cleanedValues.docketNumber,
             vi_operation_without_rsl: cleanedValues.violationInfo.operationWithoutRSL,
             vi_operation_without_lro: cleanedValues.violationInfo.operationWithoutLRO,
             vi_operation_unauthorized_frequency: cleanedValues.violationInfo.operationUnauthorizedFrequency,
@@ -71,6 +84,7 @@ export const updateData: RequestHandler = async (req, res, next) => {
             vi_no_ntc_pertinent_papers: cleanedValues.violationInfo.noNTCPertinentPapers,
             date_of_deficiency_hearing: cleanDate(cleanedValues.dateOfDeficiencyHearing as Date),
             regional_director: cleanedValues.regionalDirector,
+            regional_director_approved: cleanedValues.regionalDirectorApproved,
             is_done: cleanedValues.isDone
         }
     })
@@ -133,7 +147,7 @@ export const getList: RequestHandler = async (req, res, next) => {
                     exactLocation: true,
                 }
             },
-                        regional_director_info: {
+            regional_director_info: {
                 select: {
                     name_first: true,
                     name_last: true,
@@ -145,7 +159,6 @@ export const getList: RequestHandler = async (req, res, next) => {
         }
     });
     const docCount = await prisma.deficiency_notice.count();
-
     res.status(200).json({ data: docs, collectionSize: docCount });
   } catch (error) {
       log.error(error as Error);
@@ -190,7 +203,6 @@ export const deleteData: RequestHandler = async (req, res, next) => {
 export const generatePdf: RequestHandler = async (req, res, next) => {
   try {
     const { id } = req.query;
-    console.log(id)
     const doc = await prisma.deficiency_notice.findUnique({
         where: {
             id: +(id as string)
@@ -211,12 +223,22 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     name_last: true,
                     position: true,
                     user_id: true,
+                    signature: true
                 }
             },
             deficiency_notice_transmitter: true,
         }
     });
-    console.log(doc)
+            const regionalDirectorSignature =             
+            {
+                image: doc?.regional_director_info?.signature as string,
+                x: 70,
+                y: 820
+            };
+    let signatures: SignaturePlotDataRaw[] = [];
+    if (doc?.regional_director_approved && doc?.regional_director_info?.signature) {
+        signatures = [ ...signatures, regionalDirectorSignature];
+    }
     const pdfValues = getPDFValues(doc);
     // const options: ModifyPDFOptions = {
     //     isMultiplePage: true,
@@ -226,7 +248,11 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
     //         { start: 20, page: 1 },
     //     ]
     // };
-    const pdf = await modifyPdf(pdfValues, PDFTemplate.deficiencyNotice);
+    const pdf = await modifyPdf({ 
+        entries: pdfValues, 
+        pdfTemplate: PDFTemplate.deficiencyNotice,
+        signatures
+    });
 
     res.writeHead(200, {
         'Content-Type': 'application/pdf',
@@ -237,6 +263,68 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
   } catch (error) {
     log.error(error as Error);
     res.status(500).json({ message: `Couldn't get clients at this time.` });
+  }
+}
+
+export const approvalStatus: RequestHandler = async (req, res, next) => {
+  try {
+    const data: Approval = req.body;
+    console.log(data.deficiencyNotice);
+    const { value, error } = deficiencyNoticeSchema.validate(data.deficiencyNotice);
+    if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on mobile phone dealer.` }); }
+    const cleanedValues: DeficiencyNotice = value as DeficiencyNotice;
+    const FORM_ID = cleanedValues.id;
+
+    let directorInfo: users | null;
+
+    if (data.position !== UserTypes.director && data.position !== UserTypes.chiefEngineer) {
+        return res.status(400).json({ message: `Unauthorized access.` });
+    }
+
+    const prevData = await prisma.deficiency_notice.findFirst({
+        where: {
+            id: FORM_ID
+        }
+    });
+
+    if (data.position === UserTypes.director) {
+        directorInfo = await prisma.users.findFirst({
+            where: {
+                user_id: data.userID
+            }
+        });
+
+        if (!directorInfo || data.position !== directorInfo.position || data.userID !== prevData?.regional_director) {
+            return res.status(400).json({ message: `Unauthorized access.` });
+        }
+    }
+
+    const updateMain = await prisma.deficiency_notice.update({
+        where: {
+            id: FORM_ID
+        },
+        data: {
+            // date_inspected: cleanedValues.dateInspected,
+            // client_id: cleanedValues.clientId as number,
+            // permit_number: cleanedValues.permitNumber,
+            // permit_expiry_date: cleanedValues.permitExpiryDate,
+            // sundry_one: cleanedValues.sundryOfInformation.one,
+            // sundry_two: cleanedValues.sundryOfInformation.two,
+            // remarks_deficiencies_discrepancies_noted: cleanedValues.remarksDeficienciesDiscrepanciesNoted,
+            // inspected_by: cleanedValues.inspectedBy
+            // recommendations: cleanedValues.recommendations,
+            // noted_by: cleanedValues.notedBy,
+            // regional_director: cleanedValues.regionalDirector,
+            // noted_by_approved: data.position === UserTypes.chiefEngineer ? approvalStatus : prevData?.noted_by_approved,
+            ...prevData,
+            regional_director_approved: data.position === UserTypes.director ? data.approvalStatus : prevData?.regional_director_approved,
+        }
+    })
+
+    res.status(200).json({ message: 'Ok' });
+  } catch (error) {
+    log.error(error as Error);
+    res.status(500).json({ message: `Couldn't process client data at this time.` });
   }
 }
 

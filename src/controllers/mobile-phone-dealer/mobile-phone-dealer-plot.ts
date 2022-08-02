@@ -58,7 +58,7 @@ export const getPDFValues = (val: any) => {
     pdfPlots[14].text = value.owner_name;
     pdfPlots[15].text = value.owner_position;
     pdfPlots[16].text = value.recommendations
-    pdfPlots[17].text = value.is_approved ? 'APPROVED' : 'DISAPPROVED';
+    pdfPlots[17].text = value.regional_director_approved ? 'APPROVED' : 'DISAPPROVED';
     pdfPlots[18].text = value.noted_by_info.name_first as string;
     pdfPlots[19].text = value.regional_director_info.name_first as string;
 
