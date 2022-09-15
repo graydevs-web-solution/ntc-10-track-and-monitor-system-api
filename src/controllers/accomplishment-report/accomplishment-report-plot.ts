@@ -25,8 +25,8 @@ export const getPDFValues = (val: any) => {
     pdfPlots[3].text = value.number_of_hearing.toString();
     pdfPlots[4].text = value.number_of_pending_complaint.toString();
     pdfPlots[5].text = value.number_of_resolved.toString();
-    pdfPlots[6].text = value.attorney_info.name_first as string;
-    pdfPlots[7].text = value.attorney_info.position;
+    pdfPlots[6].text = `${value.attorney_info.name_first} ${value.attorney_info.name_last}`;
+    pdfPlots[7].text = value.attorney_info.designation;
 
     return pdfPlots;
 };

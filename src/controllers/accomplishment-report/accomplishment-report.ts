@@ -89,7 +89,8 @@ export const getList: RequestHandler = async (req, res, next) => {
                     name_first: true,
                     name_last: true,
                     name_middle: true,
-                    position: true
+                    position: true,
+                    designation: true
                 }
             },
         }
@@ -117,7 +118,8 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     name_last: true,
                     name_middle: true,
                     position: true,
-                    signature: true
+                    signature: true,
+                    designation: true
                 }
             },
         }

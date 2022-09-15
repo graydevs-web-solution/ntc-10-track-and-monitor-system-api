@@ -52,4 +52,7 @@ export interface RadioDealerAPI {
   ['regional_director']: string;
   ['regional_director_approved']: string;
   ['regional_director_info']: UserAssignedData;
+  ['noted_by']: string;
+  ['noted_by_approved']: string;
+  ['noted_by_info']: UserAssignedData;
 }
