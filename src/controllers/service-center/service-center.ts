@@ -38,9 +38,9 @@ export const saveServiceCenter: RequestHandler = async (req, res, next) => {
                    qualifications: val.qualifications,
                 }))
             },
-            sundry_one: cleanedValues.sundryOfInformation.one,
-            sundry_two: cleanedValues.sundryOfInformation.two,
-            sundry_three: cleanedValues.sundryOfInformation.three,
+            sundry_one: cleanedValues.sundryOfInformation.oneCb,
+            sundry_two: cleanedValues.sundryOfInformation.twoCb,
+            sundry_three: cleanedValues.sundryOfInformation.threeCb,
             remarks_deficiencies_discrepancies_noted: cleanedValues.remarksDeficienciesDiscrepanciesNoted,
             inspected_by: cleanedValues.inspectedBy,
             owner_name: cleanedValues.ownerInfo.name,
@@ -63,6 +63,7 @@ export const saveServiceCenter: RequestHandler = async (req, res, next) => {
 export const updateData: RequestHandler = async (req, res, next) => {
   try {
     const { value, error } = serviceCenterReportSchema.validate(req.body);
+    console.log(req.body)
     if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on service center.` }); }
     const cleanedValues: ServiceCenterReport = value;
     const FORM_ID = cleanedValues.id;
@@ -87,9 +88,9 @@ export const updateData: RequestHandler = async (req, res, next) => {
                    qualifications: val.qualifications,
                 }))
             },
-            sundry_one: cleanedValues.sundryOfInformation.one,
-            sundry_two: cleanedValues.sundryOfInformation.two,
-            sundry_three: cleanedValues.sundryOfInformation.three,
+            sundry_one: cleanedValues.sundryOfInformation.oneCb,
+            sundry_two: cleanedValues.sundryOfInformation.twoCb,
+            sundry_three: cleanedValues.sundryOfInformation.threeCb,
             remarks_deficiencies_discrepancies_noted: cleanedValues.remarksDeficienciesDiscrepanciesNoted,
             inspected_by: cleanedValues.inspectedBy,
             owner_name: cleanedValues.ownerInfo.name,
@@ -127,8 +128,8 @@ export const updateData: RequestHandler = async (req, res, next) => {
     //     ) as c(id, model, serial_number, freq_range, power_output, freq_control)
     //     where c.id = rti.id;`);
 
-    const deleteServiceOrTestEquipment = prisma.$queryRaw<void>`DELETE FROM ${DATABASE_SCHEMA}.list_of_service_or_test_equipments WHERE service_center_report_id = ${FORM_ID}`;
-    const deleteTechnicians = prisma.$queryRaw<void>`DELETE FROM ${DATABASE_SCHEMA}.employed_electronics_technicians WHERE service_center_report_id = ${FORM_ID}`;
+    const deleteServiceOrTestEquipment = prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.list_of_service_or_test_equipments WHERE service_center_report_id = ${FORM_ID}`);
+    const deleteTechnicians = prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.employed_electronics_technicians WHERE service_center_report_id = ${FORM_ID}`);
     const insertServiceOrTestEquipment = prisma.list_of_service_or_test_equipments.createMany({
         data: cleanedValues.listOfServiceOrTestEquipments.map((val) => ({
             particular: val.particular,
@@ -206,8 +207,8 @@ export const deleteData: RequestHandler = async (req, res, next) => {
         },
     });
 
-    const deleteServiceOrTestEquipment = prisma.$queryRaw<void>`DELETE FROM ${DATABASE_SCHEMA}.list_of_service_or_test_equipments WHERE service_center_report_id = ${id}`;
-    const deleteTechnicians = prisma.$queryRaw<void>`DELETE FROM ${DATABASE_SCHEMA}.employed_electronics_technicians WHERE service_center_report_id = ${id}`;
+    const deleteServiceOrTestEquipment = prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.list_of_service_or_test_equipments WHERE service_center_report_id = ${id}`);
+    const deleteTechnicians = prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.employed_electronics_technicians WHERE service_center_report_id = ${id}`);
 
     // NOTE: This code block couldn't delete specified row. I'm dumb as heck
     // 

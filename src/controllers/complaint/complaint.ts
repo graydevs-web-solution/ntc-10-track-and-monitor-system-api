@@ -133,7 +133,7 @@ export const updateData: RequestHandler = async (req, res, next) => {
     //     ) as c(id, model, serial_number, freq_range, power_output, freq_control)
     //     where c.id = rti.id;`);
 
-    const deleteTransmitter = prisma.$queryRaw<void>`DELETE FROM ${DATABASE_SCHEMA}.complaint_transmitter WHERE complaint_id = ${FORM_ID}`;
+    const deleteTransmitter = prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.complaint_transmitter WHERE complaint_id = ${FORM_ID}`);
     const insertTransmitter = prisma.complaint_transmitter.createMany({
         data: cleanedValues.transmitters.map((val) => ({
                     transmitter: val.transmitter,

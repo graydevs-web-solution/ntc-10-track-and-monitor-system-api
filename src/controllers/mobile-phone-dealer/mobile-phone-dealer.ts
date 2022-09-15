@@ -45,8 +45,8 @@ export const saveMobilePhoneDealer: RequestHandler = async (req, res, next) => {
                    mobile_phone_company: val.mobilePhoneCompany,
                 }))
             },
-            sundry_one: cleanedValues.sundryOfInformation.one,
-            sundry_two: cleanedValues.sundryOfInformation.two,
+            sundry_one: cleanedValues.sundryOfInformation.oneCb,
+            sundry_two: cleanedValues.sundryOfInformation.twoCb,
             remarks_deficiencies_discrepancies_noted: cleanedValues.remarksDeficienciesDiscrepanciesNoted,
             inspected_by: cleanedValues.inspectedBy,
             owner_name: cleanedValues.ownerInfo.name,
@@ -72,36 +72,32 @@ export const updateData: RequestHandler = async (req, res, next) => {
     if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on mobile phone dealer.` }); }
     const cleanedValues: MobilePhoneDealer = value;
     const FORM_ID = cleanedValues.id;
-    const updateMain = prisma.mobile_phone_dealers.update({
-        where: {
-            id: FORM_ID
-        },
-        data: {
-            date_inspected: cleanedValues.dateInspected ? (cleanedValues.dateInspected as Date).toISOString() : null,
+    const data =  {
+            date_inspected: cleanedValues.dateInspected ? cleanedValues.dateInspected as Date : null,
             client_id: cleanedValues.clientId as number,
             permit_number: cleanedValues.permitNumber,
             permit_expiry_date: cleanDate(cleanedValues.permitExpiryDate as Date),
-            spares_and_accessories: {
-                create: cleanedValues.listOfStocksOfSparesAndAccessories.map((val) => ({
-                   particular: val.particular,
-                   number_of_units: val.numberOfUnits
-                }))
-            },
-            mobile_phones: {
-                create: cleanedValues.listOfStocksOfMobilePhone.map((val) => ({
-                   model: val.model,
-                   imei_number: val.imeiNumber,
-                   source: val.source
-                }))
-            },
-            sim: {
-                create: cleanedValues.listOfStocksOfSubscriberIdentificationModule.map((val) => ({
-                   sim_number: val.simNumber,
-                   mobile_phone_company: val.mobilePhoneCompany,
-                }))
-            },
-            sundry_one: cleanedValues.sundryOfInformation.one,
-            sundry_two: cleanedValues.sundryOfInformation.two,
+            // spares_and_accessories: {
+            //     create: cleanedValues.listOfStocksOfSparesAndAccessories.map((val) => ({
+            //        particular: val.particular,
+            //        number_of_units: val.numberOfUnits
+            //     }))
+            // },
+            // mobile_phones: {
+            //     create: cleanedValues.listOfStocksOfMobilePhone.map((val) => ({
+            //        model: val.model,
+            //        imei_number: val.imeiNumber,
+            //        source: val.source
+            //     }))
+            // },
+            // sim: {
+            //     create: cleanedValues.listOfStocksOfSubscriberIdentificationModule.map((val) => ({
+            //        sim_number: val.simNumber,
+            //        mobile_phone_company: val.mobilePhoneCompany,
+            //     }))
+            // },
+            sundry_one: cleanedValues.sundryOfInformation.oneCb,
+            sundry_two: cleanedValues.sundryOfInformation.twoCb,
             remarks_deficiencies_discrepancies_noted: cleanedValues.remarksDeficienciesDiscrepanciesNoted,
             inspected_by: cleanedValues.inspectedBy,
             owner_name: cleanedValues.ownerInfo.name,
@@ -112,6 +108,12 @@ export const updateData: RequestHandler = async (req, res, next) => {
             regional_director: cleanedValues.regionalDirector,
             regional_director_approved: cleanedValues.regionalDirectorApproved,
         }
+    console.log({data})
+    const updateMain = prisma.mobile_phone_dealers.update({
+        where: {
+            id: FORM_ID
+        },
+        data
     })
 
     // NOTE! This code block should have used for updating operators and radio transceiver list but because of 
@@ -139,9 +141,9 @@ export const updateData: RequestHandler = async (req, res, next) => {
     //     ) as c(id, model, serial_number, freq_range, power_output, freq_control)
     //     where c.id = rti.id;`);
 
-    const deleteSpares = prisma.$queryRaw<void>`DELETE FROM ${DATABASE_SCHEMA}.spares_and_accessories WHERE mobile_phone_dealer_id = ${FORM_ID}`;
-    const deleteMobilePhones = prisma.$queryRaw<void>`DELETE FROM ${DATABASE_SCHEMA}.mobile_phones WHERE mobile_phone_dealer_id = ${FORM_ID}`;
-    const deleteSIM = prisma.$queryRaw<void>`DELETE FROM ${DATABASE_SCHEMA}.sim WHERE mobile_phone_dealer_id = ${FORM_ID}`;
+    const deleteSpares = prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.spares_and_accessories WHERE mobile_phone_dealer_id = ${FORM_ID}`);
+    const deleteMobilePhones =  prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.mobile_phones WHERE mobile_phone_dealer_id = ${FORM_ID}`);
+    const deleteSIM = prisma.$queryRawUnsafe<void>(`DELETE FROM ${DATABASE_SCHEMA}.sim WHERE mobile_phone_dealer_id = ${FORM_ID}`);
     const insertSpares = prisma.spares_and_accessories.createMany({
         data: cleanedValues.listOfStocksOfSparesAndAccessories.map((val) => ({
             particular: val.particular,
@@ -164,7 +166,7 @@ export const updateData: RequestHandler = async (req, res, next) => {
             mobile_phone_dealer_id: FORM_ID
         }))
     });
-    await prisma.$transaction([updateMain, deleteSpares, deleteMobilePhones, deleteSIM, insertSpares, insertMobilePhones, insertSIM])
+    await prisma.$transaction([deleteSpares, deleteMobilePhones, deleteSIM, insertSpares, insertMobilePhones, insertSIM, updateMain])
 
     res.status(200).json({ message: 'Ok' });
   } catch (error) {

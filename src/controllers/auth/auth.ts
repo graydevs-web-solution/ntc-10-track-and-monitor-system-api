@@ -80,7 +80,8 @@ export const createUser: RequestHandler = async (req: { body: User }, res, next)
                 name_last: cleanedValue.name_last,
                 user_name: cleanedValue.user_name,
                 position: cleanedValue.position,
-                password: hashedPassword
+                password: hashedPassword,
+                designation: cleanedValue.designation
         };
         const result = await prisma.users.create({
             data
@@ -97,24 +98,27 @@ export const updateUser: RequestHandler = async (req: { body: User }, res, next)
     try {
         const { value, error } = userSchema.validate(req.body);
         if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on user.` }); }
+        console.log("proceed")
         const cleanedValue: User = value as User;
 
-        const hashedPassword = await hashPassword(cleanedValue.password); 
+        const user_id = cleanedValue.user_id; 
 
         const result = await prisma.users.update({
             where: {
-                user_id: hashedPassword
+                user_id: user_id
             },
             data: {
                 name_first: cleanedValue.name_first,
                 name_middle: cleanedValue.name_middle as string,
                 name_last: cleanedValue.name_last,
                 position: cleanedValue.position,
+                designation: cleanedValue.designation
             }
         });
 
          res.status(200).json({ result: `User updated successfully!` });
     } catch (error) {
+        console.log(error)
         res.status(500).json({ message: `Couldn't process complaint data at this time.` });
     }
 }

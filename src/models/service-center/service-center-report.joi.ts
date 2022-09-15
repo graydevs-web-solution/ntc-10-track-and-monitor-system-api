@@ -22,9 +22,9 @@ export const serviceCenterReportSchema = joi.object({
         })
     ),
     sundryOfInformation: joi.object({
-        one: joi.string().allow(''),
-        two: joi.string().allow(''),
-        three: joi.string().allow(''),
+        oneCb: joi.string().allow(''),
+        twoCb: joi.string().allow(''),
+        threeCb: joi.string().allow(''),
     }),
     remarksDeficienciesDiscrepanciesNoted: joi.string().allow(''),
     inspectedBy: joi.string().allow(''),
@@ -35,8 +35,8 @@ export const serviceCenterReportSchema = joi.object({
     recommendations: joi.string().allow(''),
     notedBy: joi.string().allow(''),
     notedByInfo: joi.object().allow(),
+    notedByApproved: joi.string().allow(null).allow(''),
     regionalDirector: joi.string().allow(''),
     regionalDirectorInfo: joi.object().allow(),
-    notedByApproved: joi.string().allow(null).allow(''),
     regionalDirectorApproved: joi.string().allow(null).allow(''),
 });

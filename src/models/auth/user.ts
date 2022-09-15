@@ -6,6 +6,7 @@ export interface User {
     user_name: string;
     password: string;
     position: string;
+    designation: string;
     token?:string;
     reset_token_expiration_date?: Date;
     signature?: string;

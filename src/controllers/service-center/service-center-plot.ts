@@ -58,8 +58,8 @@ export const getPDFValues = (val: any) => {
     pdfPlots[16].text = value.owner_position;
     pdfPlots[17].text = value.recommendations
     pdfPlots[18].text = value.regional_director_approved ? 'APPROVED' : 'DISAPPROVED';
-    pdfPlots[19].text = value.noted_by_info.name_first as string;
-    pdfPlots[20].text = value.regional_director_info.name_first as string;
+    pdfPlots[19].text = `${value.noted_by_info.name_first} ${value.noted_by_info.name_last}`;
+    pdfPlots[20].text = `${value.regional_director_info.name_first} ${value.regional_director_info.name_last}`;
 
     for (const iterator of Array.from(value.list_of_service_or_test_equipments)) {
         if (ITERATION_SERVICE < LIMIT_SERVICE) {

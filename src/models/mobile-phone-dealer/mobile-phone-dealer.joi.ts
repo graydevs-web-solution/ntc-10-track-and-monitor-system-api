@@ -29,8 +29,8 @@ export const mobilePhoneDealerSchema = joi.object({
         })
     ),
     sundryOfInformation: joi.object({
-        one: joi.string().allow(''),
-        two: joi.string().allow('')
+        oneCb: joi.string().allow(''),
+        twoCb: joi.string().allow('')
     }),
     remarksDeficienciesDiscrepanciesNoted: joi.string().allow(''),
     inspectedBy: joi.string().allow(''),

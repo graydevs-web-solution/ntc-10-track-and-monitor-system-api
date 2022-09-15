@@ -18,6 +18,7 @@ export const saveRadioDealer: RequestHandler = async (req, res, next) => {
   try {
     const { value, error } = radioDealerSchema.validate(req.body);
     if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on radio dealer.` }); }
+    console.log(value)
     const cleanedValues: RadioDealer = value;
     const result = await prisma.radio_dealers.create({
         data: {
@@ -54,6 +55,8 @@ export const saveRadioDealer: RequestHandler = async (req, res, next) => {
             radio_regulation_inspector: cleanedValues.radioRegulationInspector,
             owner_name: cleanedValues.ownerName,
             recommendations: cleanedValues.recommendations,
+            noted_by: cleanedValues.notedBy,
+            noted_by_approved: cleanedValues.notedByApproved,
             regional_director: cleanedValues.regionalDirector,
             regional_director_approved: cleanedValues.regionalDirectorApproved,
         }
@@ -110,6 +113,8 @@ export const updateData: RequestHandler = async (req, res, next) => {
             radio_regulation_inspector: cleanedValues.radioRegulationInspector,
             owner_name: cleanedValues.ownerName,
             recommendations: cleanedValues.recommendations,
+            noted_by: cleanedValues.notedBy,
+            noted_by_approved: cleanedValues.notedByApproved,
             regional_director: cleanedValues.regionalDirector,
             regional_director_approved: cleanedValues.regionalDirectorApproved,
         }
@@ -191,10 +196,18 @@ export const getList: RequestHandler = async (req, res, next) => {
                     user_id: true,
                 }
             },
+            noted_by_info: {
+                select: {
+                    name_first: true,
+                    name_last: true,
+                    position: true,
+                    user_id: true,
+                }
+            },
             radio_technicians: true,
             supervising_ece: true,
         }
-    })).map(formatData2);
+    })).map(formatData);
     const docCount = await prisma.radio_dealers.count();
 
     res.status(200).json({ data: docs, collectionSize: docCount });
@@ -258,7 +271,16 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                     faxNumber: true,
                 }
             },
-                        regional_director_info: {
+            regional_director_info: {
+                select: {
+                    name_first: true,
+                    name_last: true,
+                    position: true,
+                    user_id: true,
+                    signature: true
+                }
+            },
+            noted_by_info: {
                 select: {
                     name_first: true,
                     name_last: true,
@@ -277,9 +299,17 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
                 x: 380,
                 y: 880
             };
+        const chiefSignature = {
+        image: doc?.noted_by_info?.signature as string,
+        x: 100,
+        y: 875
+    }    
     let signatures: SignaturePlotDataRaw[] = [];
     if (doc?.regional_director_approved && doc?.regional_director_info?.signature) {
-        signatures = [ ...signatures, regionalDirectorSignature];
+        signatures = [ ...signatures, regionalDirectorSignature, chiefSignature];
+    }
+    if (doc?.noted_by_approved && doc?.noted_by_info?.signature) {
+        signatures = [ ...signatures, chiefSignature];
     }
 
     const pdf = await modifyPdf({ 
@@ -334,6 +364,17 @@ export const approvalStatus: RequestHandler = async (req, res, next) => {
             return res.status(400).json({ message: `Unauthorized access.` });
         }
     }
+    if (data.position === UserTypes.chiefEngineer) {
+        notedByInfo = await prisma.users.findFirst({
+            where: {
+                user_id: data.userID
+            }
+        });
+
+        if (!notedByInfo || data.position !== notedByInfo.position || data.userID !== prevData?.noted_by) {
+            return res.status(400).json({ message: `Unauthorized access.` });
+        }
+    }
 
     const updateMain = await prisma.radio_dealers.update({
         where: {
@@ -353,6 +394,7 @@ export const approvalStatus: RequestHandler = async (req, res, next) => {
             // regional_director: cleanedValues.regionalDirector,
             // noted_by_approved: data.position === UserTypes.chiefEngineer ? approvalStatus : prevData?.noted_by_approved,
             ...prevData,
+            noted_by_approved: data.position === UserTypes.chiefEngineer ? data.approvalStatus : prevData?.noted_by_approved,
             regional_director_approved: data.position === UserTypes.director ? data.approvalStatus : prevData?.regional_director_approved,
         }
     })

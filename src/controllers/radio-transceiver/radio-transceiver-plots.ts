@@ -59,7 +59,7 @@ export const plots: PDFEntryValue[] = [
     { text: '', x: 72, y: 819, size: defaultSize }, // 50 authorized representatives
     { text: '', x: 303, y: 817, size: defaultSize }, // 51 radio regulation inspector
     { text: '', x: 174, y: 850, size: defaultSize }, // 52 recommendations
-    { text: '', x: 82, y: 874, size: defaultSize }, // 53 noted by
+    { text: '', x: 82, y: 874, size: defaultSize }, // 53 noted by 
     { text: '', x: 391, y: 876, size: defaultSize }, // 54 approver
     { text: '', x: 120, y: 194, size: defaultSize }, // 55 call sign
     { text: '', x: 120, y: 205, size: defaultSize }, // 56 motor number
@@ -135,8 +135,8 @@ export const getPDFValues = (value: any): PDFEntryValue[] => {
     pdfPlots[50].text = data.authorized_representative;
     pdfPlots[51].text = data.radio_requlation_inspector;
     pdfPlots[52].text = data.recommendations;
-    pdfPlots[53].text = data.noted_by_info.name_first as string;
-    pdfPlots[54].text = data.regional_director_info.name_first as string;
+    pdfPlots[53].text = `${data.noted_by_info.name_first} ${data.noted_by_info.name_last}`;
+    pdfPlots[54].text = `${data.regional_director_info.name_first} ${data.regional_director_info.name_last}`;
     pdfPlots[55].text = data.call_sign;
     pdfPlots[56].text = data.motor_number;
 

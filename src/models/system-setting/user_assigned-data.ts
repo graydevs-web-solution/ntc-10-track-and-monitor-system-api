@@ -5,5 +5,6 @@ export interface UserAssignedData {
   name_last?: string;
   name?: string;
   position: string;
+  designation: string;
   message?: string;
 }

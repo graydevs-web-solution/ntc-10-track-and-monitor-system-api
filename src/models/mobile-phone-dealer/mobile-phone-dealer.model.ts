@@ -16,8 +16,8 @@ interface SIM {
 }
 
 interface SundryOfInformation {
-  one: string;
-  two: string;
+  oneCb: string;
+  twoCb: string;
 }
 
 interface OwnerInfo {
