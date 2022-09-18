@@ -111,7 +111,7 @@ export const modifyPdf = (dataVal: PDFData, options?: ModifyPDFOptions): Promise
                     const currentPage = pages[iterator.page - 1];
                     const { width, height } = currentPage.getSize();
                     const arrayLastIndex = iterator.end ? iterator.end + 1 : null;
-                    const valueSlice = arrayLastIndex ? dataVal.entries.slice(iterator.start, arrayLastIndex + 1) :
+                    const valueSlice = arrayLastIndex ? dataVal.entries.slice(iterator.start, arrayLastIndex) :
                         dataVal.entries.slice(iterator.start);
 
                     for (const iterator of valueSlice) {

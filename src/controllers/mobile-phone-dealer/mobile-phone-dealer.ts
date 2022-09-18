@@ -319,7 +319,7 @@ const regionalDirectorSignature =
         isMultiplePage: true,
         startEndValuesPerPage: [
             { start: 0, end: 11, page: 1 },
-            { start: 12, end: 18, page: 2 },
+            { start: 12, end: 19, page: 2 },
             { start: 20, page: 1 },
         ],
         customSignatureLocation: [

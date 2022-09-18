@@ -292,12 +292,13 @@ export const generatePdf: RequestHandler = async (req, res, next) => {
         signatures = [ ...signatures, chiefSignature];
     }
 
+
     const pdfValues = getPDFValues(formatData(doc));
     const options: ModifyPDFOptions = {
         isMultiplePage: true,
         startEndValuesPerPage: [
             { start: 0, end: 12, page: 1 },
-            { start: 13, end: 19, page: 2 },
+            { start: 13, end: 20, page: 2 },
             { start: 21, page: 1 },
         ],
         customSignatureLocation: [

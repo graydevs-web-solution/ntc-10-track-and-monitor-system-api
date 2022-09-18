@@ -60,7 +60,7 @@ export const getPDFValues = (val: any) => {
     pdfPlots[16].text = value.recommendations
     pdfPlots[17].text = value.regional_director_approved ? 'APPROVED' : 'DISAPPROVED';
     pdfPlots[18].text = `${value.noted_by_info.name_first} ${value.noted_by_info.name_last}`;
-    pdfPlots[20].text = `${value.regional_director_info.name_first} ${value.regional_director_info.name_last}`;
+    pdfPlots[19].text = `${value.regional_director_info.name_first} ${value.regional_director_info.name_last}`;
 
     for (const iterator of Array.from(value.spares_and_accessories)) {
         if (ITERATION_SPARES < LIMIT_SPARES) {

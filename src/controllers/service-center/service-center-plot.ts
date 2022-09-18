@@ -52,6 +52,7 @@ export const getPDFValues = (val: any) => {
     pdfPlots[10].text = value.sundry_one;
     pdfPlots[11].text = value.sundry_two;
     pdfPlots[12].text = value.sundry_three;
+    
     pdfPlots[13].text = value.remarks_deficiencies_discrepancies_noted
     pdfPlots[14].text = value.inspected_by;
     pdfPlots[15].text = value.owner_name;
