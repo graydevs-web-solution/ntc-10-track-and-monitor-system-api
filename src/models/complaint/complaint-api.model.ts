@@ -17,6 +17,7 @@ interface ViolationInfo {
 export interface ComplaintAPI {
   ['id']?: number;
   ['date']: Date | string;
+  ['deficiency_notice_id']: number;
   ['complainant_name']: string;
   ['client_id']: number | Client;
   ['clients']: ClientAPI;

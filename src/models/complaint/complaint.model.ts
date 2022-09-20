@@ -21,6 +21,7 @@ interface TimeInfo {
 export interface Complaint {
   id?: number;
   date: Date | string;
+  deficiencyNoticeId: number;
   complainantName: string;
   clientId: number | Client;
   clientName?: string;

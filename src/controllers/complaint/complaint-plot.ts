@@ -21,7 +21,7 @@ export const plots: PDFEntryValue[] = [
 
 export const getPDFValues = (val: any) => {
     const pdfPlots = [...plots];
-    const PLOT_VIOLATION = { x: 111, y: 370, size: defaultSize };
+    const PLOT_VIOLATION = { x: 111, y: 540, size: defaultSize };
     const PLOT_TRANSMITTERS = { x: 399, y: 370, size: defaultSize };
     const LIMIT_VIOLATION = 5;
     const LIMIT_TRANSMITTERS = 20;

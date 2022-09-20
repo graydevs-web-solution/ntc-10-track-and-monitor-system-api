@@ -8,6 +8,7 @@ export const complaintSchema = joi.object<Complaint>({
     }),
     clientId: joi.number().required(),
     clientName: joi.string().allow(''),
+    deficiencyNoticeId: joi.number(),
     complainantName: joi.string(),
     respondentName: joi.string().allow(''),
     docketNumberDescription: joi.string().required(),

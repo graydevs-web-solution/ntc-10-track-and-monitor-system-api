@@ -32,13 +32,20 @@ export const saveOne: RequestHandler = async (req, res, next) => {
     if (error) { log.error(error as Error); return res.status(400).json({ message: `Validation error on complaint.` }); }
     const cleanedValues: Complaint = value as Complaint;
 
+    const existingDeficiencyNoticeCount = await prisma.complaint.count({
+        where: {
+            deficiency_notice_id: cleanedValues.deficiencyNoticeId
+        }
+    });
+
     const result = await prisma.complaint.create({
         data: {
             date: cleanedValues.date ? (cleanedValues.date as Date).toISOString() : null,
+            deficiency_notice_id: cleanedValues.deficiencyNoticeId,
             complainant_name: cleanedValues.complainantName,
             client_id: cleanedValues.clientId as number,
             respondent_name: cleanedValues.respondentName,
-            docket_number_description: cleanedValues.docketNumberDescription,
+            docket_number_description: `${cleanedValues.docketNumberDescription}-${existingDeficiencyNoticeCount + 1}`,
             docket_number_start: cleanedValues.docketNumberStart,
             docket_number_end: cleanedValues.docketNumberEnd,
             date_of_inspection: cleanDate(cleanedValues.dateOfInspection as Date),

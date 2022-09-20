@@ -20,7 +20,7 @@ model users {
   name_last                   String                  @db.VarChar(250)
   user_name                   String                  @db.VarChar(20)
   position                    String                  @db.VarChar(250)
-  designation                 String?                  @db.VarChar(250)
+  designation                 String?                 @db.VarChar(250)
   password                    String
   signature                   String?
   token                       String?
@@ -351,6 +351,7 @@ model deficiency_notice {
   clients                              clients?                        @relation(fields: [client_id], references: [id])
   regional_director_info               users?                          @relation("RegDirDef", fields: [regional_director], references: [user_id])
   deficiency_notice_transmitter        deficiency_notice_transmitter[]
+  complaint                            complaint[]
 }
 
 model complaint_transmitter {
@@ -365,6 +366,7 @@ model complaint {
   id                                   Int                     @id @default(autoincrement())
   date                                 DateTime?               @db.Timestamptz(6)
   client_id                            Int?
+  deficiency_notice_id                 Int?
   complainant_name                     String?                 @db.VarChar(250)
   respondent_name                      String?                 @db.VarChar(250)
   docket_number_description            String?                 @db.VarChar(250)
@@ -382,6 +384,7 @@ model complaint {
   is_done                              Boolean?
   regional_director                    String?                 @db.Uuid
   regional_director_approved           String?
+  deficiency_notice_data               deficiency_notice?      @relation(fields: [deficiency_notice_id], references: [id])
   clients                              clients?                @relation(fields: [client_id], references: [id])
   regional_director_info               users?                  @relation("RegDirCom", fields: [regional_director], references: [user_id])
   complaint_transmitter                complaint_transmitter[]
