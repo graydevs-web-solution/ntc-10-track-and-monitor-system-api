@@ -1,6 +1,6 @@
 {
   "name": "monitoring-system-api",
-  "version": "1.0.0",
+  "version": "1.10.0",
   "description": "Monitoring system for NTC Region 10",
   "main": "index.js",
   "scripts": {
