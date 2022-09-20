@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "build": "npm run clean && tsc -p . && npm run copy-files && npm run copy-prisma-seed",
+    "install-build": "npm install && npm run clean && tsc -p . && npm run copy-files && npm run copy-prisma-seed",
     "clean": "rimraf dist/",
     "copy-prisma-seed": "copyfiles -u 1 prisma/seed.ts dist/prisma",
     "copy-files": "copyfiles -u 1 src/pdf/*.pdf dist/"
